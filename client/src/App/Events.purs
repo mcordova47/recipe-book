@@ -30,20 +30,20 @@ foldp (SelectRecipe recipe) (State state) =
 foldp FetchRecipes state =
   { state
   , effects:
-    [ do
-        res <- attempt $ get "http://localhost:8000/api/recipes/"
-        let recipes = bimap show _.response res >>= decodeJson
-        pure $ Just $ ReceiveRecipes recipes
-    ]
+      [ do
+          res <- attempt $ get "http://localhost:8000/api/recipes/"
+          let recipes = bimap show _.response res >>= decodeJson
+          pure $ Just $ ReceiveRecipes recipes
+      ]
   }
 foldp (ReceiveRecipes resp) (State state) =
   case resp of
-  Right recipeList ->
-    let recipes = fromFoldable $ map toTuple $ recipeList
-    in
-    noEffects $ State state { recipes = Success recipes }
-  Left _ ->
-    noEffects $ State state
+    Right recipeList ->
+      let recipes = fromFoldable $ map toTuple $ recipeList
+      in
+      noEffects $ State state { recipes = Success recipes }
+    Left _ ->
+      noEffects $ State state
 
 toTuple :: RecipeComponent -> Tuple FoodId RecipeComponent
 toTuple rc@(RecipeComp id _) = Tuple id rc
