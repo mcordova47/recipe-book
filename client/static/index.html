@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Recipe Book</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <style>
+
+      body {
+        font-family: Roboto, sans-serif;
+        color: #212121;
+        margin: 0;
+      }
+
+      .header {
+        background-color: #ffc107;
+      }
+
+      .header__title {
+        font-size: 2em;
+        padding: 10px;
+        color: #fff1c3;
+      }
+
+      .category-list,
+      .recipe-main-view {
+        width: 90%;
+        margin: auto;
+      }
+
+      .ingredient-view__recipe-link {
+        cursor: pointer;
+        color: blue;
+      }
+
+      .recipe-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-gap: 20px;
+      }
+
+      .recipe-view {
+        padding: 15px;
+        box-shadow: 0px 1px 3px 1px #00000042;
+        border-radius: 2px;
+      }
+
+      .recipe-view__title {
+        font-weight: bold;
+        padding-bottom: 10px;
+      }
+
+      .recipe-view__directions {
+        color: #7b7b7b;
+        font-size: 0.9em;
+        max-height: 3.6em;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        overflow: hidden;
+      }
+
+      .recipe-view__cost {
+        color: #7b7b7b;
+        font-size: 0.75em;
+        margin-top: 10px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="/dist/bundle.js"></script>
+  </body>
+</html>
