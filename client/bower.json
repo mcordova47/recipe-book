@@ -11,7 +11,8 @@
     "purescript-pux": "^11.0.0",
     "purescript-css": "^3.0.0",
     "purescript-aff": "^3.0.0",
-    "purescript-affjax": "^4.0.0"
+    "purescript-affjax": "^4.0.0",
+    "purescript-simple-parser": "^7.0.0"
   },
   "resolutions": {
     "purescript-aff": "^3.0.0"

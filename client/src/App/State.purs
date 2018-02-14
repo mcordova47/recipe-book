@@ -64,6 +64,8 @@ newtype IngredientAmount =
     -- , unitType :: Measurement
     }
 
+derive instance newtypeIngredientAmount :: Newtype IngredientAmount _
+
 instance decodeJsonIngredientAmount :: DecodeJson IngredientAmount where
   decodeJson json = do
     obj <- decodeJson json

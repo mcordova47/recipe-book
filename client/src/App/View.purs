@@ -3,19 +3,23 @@ module App.View where
 import Prelude
 
 import App.Events (Event(..))
-import App.State (State(..), Recipe, IngredientAmount(..), RecipeComponent(..), View(..), FoodId)
+import App.State (FoodId(..), IngredientAmount(..), Measurement, Recipe, RecipeComponent(..), State(..), View(..))
+import Data.Either (Either(..))
 import Data.Filterable (filterMap)
 import Data.Foldable (foldl, for_)
 import Data.Function (on)
-import Data.List (List, groupBy, sortBy)
+import Data.List (List, groupBy, sortBy, find)
 import Data.List.Types (NonEmptyList(..))
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
+import Data.Newtype (unwrap)
 import Data.NonEmpty (head)
 import Data.Number.Format (fixed, toString, toStringWith)
+import Markdown (Markdown(..), markdownParser)
+import Network.RemoteData (RemoteData(..))
 import Pux.DOM.Events as HE
 import Pux.DOM.HTML (HTML)
-import Network.RemoteData (RemoteData(..))
+import Text.Parsing.Simple (parse)
 import Text.Smolder.HTML as H
 import Text.Smolder.HTML.Attributes as HA
 import Text.Smolder.Markup (text, (!), (#!))
@@ -50,7 +54,7 @@ recipeMainView recipes recipe =
       H.ul $ for_ recipe.ingredients $ ingredientView recipes
     H.div $ do
       H.h3 $ text "Directions"
-      H.p $ text recipe.directions
+      recipeDirections recipes recipe
 
 ingredientView :: Map.Map FoodId RecipeComponent -> IngredientAmount -> HTML Event
 ingredientView recipes (IngredientAmount { ingredient, amount }) =
@@ -89,6 +93,38 @@ recipeView recipes recipe =
     H.div ! HA.className "recipe-view__directions" $ text recipe.directions
     H.div ! HA.className "recipe-view__cost" $ text $ formatCost $ getCost recipes recipe.ingredients
 
+recipeDirections :: Map.Map FoodId RecipeComponent -> Recipe -> HTML Event
+recipeDirections recipes recipe =
+  let md = parse markdownParser recipe.directions
+  in
+    H.div ! HA.className "recipe-directions" $
+      case parse markdownParser recipe.directions of
+        Right mdList ->
+          for_ mdList $ case _ of
+            Space ->
+              text " "
+            Word str ->
+              text str
+            Link label id ->
+              case recipeLink recipes recipe.ingredients label id of
+                Just html -> html
+                Nothing -> text label
+        Left _ ->
+          text recipe.directions
+
+recipeLink :: Map.Map FoodId RecipeComponent -> List IngredientAmount -> String -> Int -> Maybe (HTML Event)
+recipeLink recipes ingredients label id = do
+  IngredientAmount { ingredient, amount } <- find ((==) (FoodId id) <<< _.ingredient <<< unwrap) ingredients
+  recipeComp <- Map.lookup ingredient recipes
+  let unitType = getUnitType recipeComp
+  let name = getRecipeName recipeComp
+  pure do
+    H.div
+      ! HA.className "recipe-directions__link"
+      ! HA.title (toString amount <> " " <> show unitType <> " " <> name)
+      $ text label
+    -- H.div ! HA.className "recipe-directions__tooltip" $
+
 groupRecipes :: Map.Map FoodId RecipeComponent -> List (NonEmptyList Recipe)
 groupRecipes recipes =
   recipes
@@ -108,6 +144,18 @@ getCost recipes =
       Nothing ->
         0.0
     ) 0.0
+
+getUnitType :: RecipeComponent -> Measurement
+getUnitType recipeComp =
+  case recipeComp of
+    RecipeComp _ { unitType } -> unitType
+    IngredientComp _ { unitType } -> unitType
+
+getRecipeName :: RecipeComponent -> String
+getRecipeName recipeComp =
+  case recipeComp of
+    RecipeComp _ { name } -> name
+    IngredientComp _ { name } -> name
 
 formatCost :: Number -> String
 formatCost cost =
