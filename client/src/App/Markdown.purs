@@ -15,6 +15,7 @@ import Text.Parsing.Simple
   , many
   , someChar
   , newline
+  , cr
   )
 
 data Markdown
@@ -37,7 +38,7 @@ wordParser =
 
 spaceParser :: Parser String Markdown
 spaceParser =
-  map (const Space) (someChar (choice [space, newline]))
+  map (const Space) (someChar (choice [space, newline, cr]))
 
 markdownParser :: Parser String (List Markdown)
 markdownParser =
