@@ -4,6 +4,7 @@ import Prelude
 
 import App.Events (Event(..))
 import App.State (FoodId(..), IngredientAmount(..), Measurement, Recipe, RecipeComponent(..), State(..), View(..))
+import App.Tooltip as Tooltip
 import Data.Either (Either(..))
 import Data.Filterable (filterMap)
 import Data.Foldable (foldl, for_)
@@ -18,17 +19,18 @@ import Data.Number.Format (fixed, toString, toStringWith)
 import Markdown (Markdown(..), markdownParser)
 import Network.RemoteData (RemoteData(..))
 import Pux.DOM.Events as HE
-import Pux.DOM.HTML (HTML)
+import Pux.DOM.HTML (HTML, mapEvent)
 import Text.Parsing.Simple (parse)
 import Text.Smolder.HTML as H
 import Text.Smolder.HTML.Attributes as HA
 import Text.Smolder.Markup (text, (!), (#!))
 
 view :: State -> HTML Event
-view (State { view: viewType, recipes }) =
+view (State { view: viewType, recipes, tooltip }) =
   H.div $ do
     header
     mainView viewType recipes
+    mapEvent TooltipEvent $ Tooltip.tooltipView tooltip
 
 header :: HTML Event
 header =
@@ -118,12 +120,7 @@ recipeLink recipes ingredients label id = do
   recipeComp <- Map.lookup ingredient recipes
   let unitType = getUnitType recipeComp
   let name = getRecipeName recipeComp
-  pure do
-    H.div
-      ! HA.className "recipe-directions__link"
-      ! HA.title (toString amount <> " " <> show unitType <> " " <> name)
-      $ text label
-    -- H.div ! HA.className "recipe-directions__tooltip" $
+  pure $ mapEvent TooltipEvent $ Tooltip.label label (toString amount <> " " <> show unitType <> " " <> name)
 
 groupRecipes :: Map.Map FoodId RecipeComponent -> List (NonEmptyList Recipe)
 groupRecipes recipes =

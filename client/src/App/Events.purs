@@ -3,6 +3,7 @@ module App.Events where
 import Prelude
 
 import App.State (FoodId, Recipe, RecipeComponent(..), State(..), View(..))
+import App.Tooltip as Tooltip
 import Control.Monad.Aff (attempt)
 import Data.Argonaut (decodeJson)
 import Data.Bifunctor (bimap)
@@ -13,18 +14,17 @@ import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Network.HTTP.Affjax (AJAX, get)
 import Network.RemoteData (RemoteData(..))
-import Pux (EffModel, noEffects)
+import Pux (EffModel, mapEffects, noEffects)
 
 data Event
-  = NoOp
-  | SelectRecipe Recipe
+  = SelectRecipe Recipe
   | FetchRecipes
   | ReceiveRecipes (Either String (List RecipeComponent))
+  | TooltipEvent Tooltip.Event
 
-type AppEffects fx = (ajax :: AJAX | fx)
+type AppEffects fx = Tooltip.Effects (ajax :: AJAX | fx)
 
-foldp :: ∀ fx. Event -> State -> EffModel State Event (AppEffects fx)
-foldp NoOp state = noEffects state
+foldp :: forall fx. Event -> State -> EffModel State Event (AppEffects fx)
 foldp (SelectRecipe recipe) (State state) =
   noEffects $ State state { view = RecipeView recipe  }
 foldp FetchRecipes state =
@@ -41,9 +41,16 @@ foldp (ReceiveRecipes resp) (State state) =
     Right recipeList ->
       let recipes = fromFoldable $ map toTuple $ recipeList
       in
-      noEffects $ State state { recipes = Success recipes }
+        noEffects $ State state { recipes = Success recipes }
     Left _ ->
       noEffects $ State state
+foldp (TooltipEvent event) (State state) =
+  let { state: tooltipState, effects } = Tooltip.foldp event state.tooltip
+  in
+    mapEffects TooltipEvent
+      { state: State state { tooltip = tooltipState }
+      , effects
+      }
 
 toTuple :: RecipeComponent -> Tuple FoodId RecipeComponent
 toTuple rc@(RecipeComp id _) = Tuple id rc

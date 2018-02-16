@@ -8,6 +8,7 @@ import Data.List as List
 import Data.Map as Map
 import Data.Newtype (class Newtype)
 import Network.RemoteData (RemoteData(..))
+import App.Tooltip as Tooltip
 
 data VolumeMeasurement
   = Cups
@@ -119,7 +120,7 @@ data View
 newtype State = State
   { recipes :: RemoteData String (Map.Map FoodId RecipeComponent)
   , view :: View
-  , res :: String
+  , tooltip :: Tooltip.State
   }
 
 derive instance newtypeState :: Newtype State _
@@ -128,5 +129,5 @@ init :: State
 init = State
   { recipes: Loading
   , view: CategoryView
-  , res: ""
+  , tooltip: Tooltip.init
   }
