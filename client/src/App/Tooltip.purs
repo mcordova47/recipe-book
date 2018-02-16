@@ -52,8 +52,8 @@ foldp (Hover text event) state =
             Just el -> do
               pos <- liftEff' $ getBoundingClientRect el
               let maybePos = hush pos
-              pure $ map (\{ left, right, top } ->
-                  Show { left: (left + right) / 2.0, top: top + 25.0, text }
+              pure $ map (\{ left, right, bottom } ->
+                  Show { left: (left + right) / 2.0, top: bottom + 5.0, text }
                 ) maybePos
             Nothing ->
               pure Nothing
