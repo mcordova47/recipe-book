@@ -16,7 +16,7 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.NonEmpty (head)
 import Data.Number.Format (fixed, toString, toStringWith)
-import Markdown (Markdown(..), markdownParser)
+import Markdown (Markdown(..), markdownParser, tryStripMarkdown)
 import Network.RemoteData (RemoteData(..))
 import Pux.DOM.Events as HE
 import Pux.DOM.HTML (HTML, mapEvent)
@@ -93,7 +93,7 @@ recipeView :: Map.Map FoodId RecipeComponent -> Recipe -> HTML Event
 recipeView recipes recipe =
   H.div ! HA.className "recipe-view" #! HE.onClick (\_ -> SelectRecipe recipe) $ do
     H.div ! HA.className "recipe-view__title" $ text recipe.name
-    H.div ! HA.className "recipe-view__directions" $ text recipe.directions
+    H.div ! HA.className "recipe-view__directions" $ text $ tryStripMarkdown recipe.directions
     H.div ! HA.className "recipe-view__cost" $ text $ formatCost $ getCost recipes recipe.ingredients
 
 recipeDirections :: Map.Map FoodId RecipeComponent -> Recipe -> HTML Event

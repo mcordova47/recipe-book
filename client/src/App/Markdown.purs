@@ -1,22 +1,14 @@
 module Markdown where
 
 import Prelude
+
+import Data.Either (Either(..))
+import Data.Foldable (class Foldable, foldl)
+import Data.Functor (mapFlipped)
 import Data.List (List)
+import Data.Monoid (class Monoid, mempty)
 import Text.Parsing.Combinators (choice)
-import Text.Parsing.Simple
-  ( Parser
-  , int
-  , isn'tAny
-  , manyChar
-  , braces
-  , brackets
-  , space
-  , word
-  , many
-  , someChar
-  , newline
-  , cr
-  )
+import Text.Parsing.Simple (Parser, braces, brackets, cr, int, isn'tAny, many, manyChar, newline, parse, someChar, space, word)
 
 data Markdown
   = Link String Int
@@ -43,3 +35,19 @@ spaceParser =
 markdownParser :: Parser String (List Markdown)
 markdownParser =
   many (choice [linkParser, wordParser, spaceParser])
+
+stripParsed :: List Markdown -> String
+stripParsed md =
+  concat $ mapFlipped md $ case _ of
+    Link label _ -> label
+    Word str -> str
+    Space -> " "
+
+tryStripMarkdown :: String -> String
+tryStripMarkdown text =
+  case parse markdownParser text of
+    Right md -> stripParsed md
+    Left _ -> text
+
+concat :: forall f m. Foldable f => Monoid m => f m -> m
+concat = foldl (<>) mempty
