@@ -113,8 +113,12 @@ instance decodeRecipeComponent :: DecodeJson RecipeComponent where
       str ->
         Left $ "Expected 'I' or 'R', but got'" <> str <> "'"
 
+data Filter
+  = All
+  | Search String
+
 data View
-  = CategoryView
+  = CategoryView Filter
   | RecipeView Recipe
 
 newtype State = State
@@ -128,6 +132,6 @@ derive instance newtypeState :: Newtype State _
 init :: State
 init = State
   { recipes: Loading
-  , view: CategoryView
+  , view: CategoryView All
   , tooltip: Tooltip.init
   }

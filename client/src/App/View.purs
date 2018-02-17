@@ -3,7 +3,7 @@ module App.View where
 import Prelude
 
 import App.Events (Event(..))
-import App.State (FoodId(..), IngredientAmount(..), Measurement, Recipe, RecipeComponent(..), State(..), View(..))
+import App.State (Filter(..), FoodId(..), IngredientAmount(..), Measurement, Recipe, RecipeComponent(..), State(..), View(..))
 import App.Tooltip as Tooltip
 import Data.Either (Either(..))
 import Data.Filterable (filterMap)
@@ -16,6 +16,7 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.NonEmpty (head)
 import Data.Number.Format (fixed, toString, toStringWith)
+import Data.String (Pattern(..), contains, toLower)
 import Markdown (Markdown(..), markdownParser, tryStripMarkdown)
 import Network.RemoteData (RemoteData(..))
 import Pux.DOM.Events as HE
@@ -28,20 +29,25 @@ import Text.Smolder.Markup (text, (!), (#!))
 view :: State -> HTML Event
 view (State { view: viewType, recipes, tooltip }) =
   H.div $ do
-    header
+    header viewType
     mainView viewType recipes
     mapEvent TooltipEvent $ Tooltip.tooltipView tooltip
 
-header :: HTML Event
-header =
-  H.div ! HA.className "header" $
+header :: View -> HTML Event
+header viewType =
+  H.div ! HA.className "header" $ do
     H.div ! HA.className "header__title" $ text "Recipe Book"
+    H.div ! HA.className "header__search" $
+      H.input
+        ! HA.value (searchTerm viewType)
+        ! HA.placeholder "Search"
+        #! HE.onChange ChangeSearch
 
 mainView :: View -> RemoteData String (Map.Map FoodId RecipeComponent) -> HTML Event
 mainView viewType (Success recipes) =
   case viewType of
-    CategoryView ->
-      categoryList recipes
+    CategoryView filter' ->
+      categoryList filter' recipes
     RecipeView recipe ->
       recipeMainView recipes recipe
 mainView _ _ =
@@ -76,11 +82,11 @@ ingredientView recipes (IngredientAmount { ingredient, amount }) =
     Nothing ->
       text ""
 
-categoryList :: Map.Map FoodId RecipeComponent -> HTML Event
-categoryList recipes =
+categoryList :: Filter -> Map.Map FoodId RecipeComponent -> HTML Event
+categoryList filter' recipes =
   H.div ! HA.className "category-list-page" $
     H.div ! HA.className "category-list" $
-      for_ (groupRecipes recipes) $ categoryView recipes
+      for_ (groupRecipes (filterRecipes filter' recipes)) $ categoryView recipes
 
 categoryView :: Map.Map FoodId RecipeComponent -> NonEmptyList Recipe -> HTML Event
 categoryView recipeMap (NonEmptyList recipes) =
@@ -131,6 +137,11 @@ groupRecipes recipes =
     # sortBy (compare `on` _.category)
     # groupBy ((==) `on` _.category)
 
+filterRecipes :: Filter -> Map.Map FoodId RecipeComponent -> Map.Map FoodId RecipeComponent
+filterRecipes All = id
+filterRecipes (Search term) =
+  Map.filter (contains (Pattern term) <<< toLower <<< getRecipeName)
+
 getCost :: Map.Map FoodId RecipeComponent -> List IngredientAmount -> Number
 getCost recipes =
   foldl (\total (IngredientAmount { ingredient, amount }) ->
@@ -162,3 +173,7 @@ formatCost cost =
 toRecipe :: RecipeComponent -> Maybe Recipe
 toRecipe (RecipeComp _ recipe) = Just recipe
 toRecipe _ = Nothing
+
+searchTerm :: View -> String
+searchTerm (CategoryView (Search term)) = term
+searchTerm _ = ""
