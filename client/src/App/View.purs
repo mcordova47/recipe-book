@@ -39,7 +39,7 @@ view (State { view: route, recipes, tooltip }) =
 header :: Routes.Route -> HTML Event
 header route =
   H.div ! HA.className "header" $ do
-    H.div ! HA.className "header__title" $ text "Recipe Book"
+    H.a ! HA.href (toURL Routes.Home) ! HA.className "header__title" $ text "Recipe Book"
     H.div ! HA.className "header__search" $
       H.input
         ! HA.value (searchTerm route)
