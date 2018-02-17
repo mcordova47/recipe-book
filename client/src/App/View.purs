@@ -53,7 +53,7 @@ recipeMainView recipes recipe =
     H.h2 $ text recipe.name
     H.div $ do
       H.h3 $ text "Ingredients"
-      H.ul $ for_ recipe.ingredients $ ingredientView recipes
+      H.ul ! HA.className "ingredient-list" $ for_ recipe.ingredients $ ingredientView recipes
     H.div $ do
       H.h3 $ text "Directions"
       recipeDirections recipes recipe
@@ -78,8 +78,9 @@ ingredientView recipes (IngredientAmount { ingredient, amount }) =
 
 categoryList :: Map.Map FoodId RecipeComponent -> HTML Event
 categoryList recipes =
-  H.div ! HA.className "category-list" $
-    for_ (groupRecipes recipes) $ categoryView recipes
+  H.div ! HA.className "category-list-page" $
+    H.div ! HA.className "category-list" $
+      for_ (groupRecipes recipes) $ categoryView recipes
 
 categoryView :: Map.Map FoodId RecipeComponent -> NonEmptyList Recipe -> HTML Event
 categoryView recipeMap (NonEmptyList recipes) =
