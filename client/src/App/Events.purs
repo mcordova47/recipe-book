@@ -2,7 +2,8 @@ module App.Events where
 
 import Prelude
 
-import App.State (Filter(..), FoodId, Recipe, RecipeComponent(..), State(..), View(..))
+import App.Routes as Routes
+import App.State (FoodId, RecipeComponent(..), State(..))
 import App.Tooltip as Tooltip
 import Control.Monad.Aff (attempt)
 import Data.Argonaut (decodeJson)
@@ -18,17 +19,15 @@ import Pux (EffModel, mapEffects, noEffects)
 import Pux.DOM.Events (DOMEvent, targetValue)
 
 data Event
-  = SelectRecipe Recipe
-  | FetchRecipes
+  = FetchRecipes
   | ReceiveRecipes (Either String (List RecipeComponent))
   | TooltipEvent Tooltip.Event
   | ChangeSearch DOMEvent
+  | ChangeURL Routes.Route
 
 type AppEffects fx = Tooltip.Effects (ajax :: AJAX | fx)
 
 foldp :: forall fx. Event -> State -> EffModel State Event (AppEffects fx)
-foldp (SelectRecipe recipe) (State state) =
-  noEffects $ State state { view = RecipeView recipe  }
 foldp FetchRecipes state =
   { state
   , effects:
@@ -55,9 +54,11 @@ foldp (TooltipEvent event) (State state) =
       }
 foldp (ChangeSearch event) (State state) =
   let term = targetValue event
-      filter' = if term == "" then All else Search term
+      filter' = if term == "" then Routes.All else Routes.Search term
   in
-    noEffects $ State state { view = CategoryView filter' }
+    noEffects $ State state { view = Routes.Recipes filter' }
+foldp (ChangeURL route) (State state) =
+  noEffects $ State state { view = route }
 
 toTuple :: RecipeComponent -> Tuple FoodId RecipeComponent
 toTuple rc@(RecipeComp id _) = Tuple id rc

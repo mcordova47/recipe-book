@@ -2,28 +2,42 @@ module Main where
 
 import Prelude
 
-import App.Events (Event(..), AppEffects, foldp)
-import App.State (State, init)
+import App.Events (AppEffects, Event(..), foldp)
+import App.Routes (match)
+import App.State (State(..), init)
+import App.Util.History (sampleHash)
 import App.View (view)
 import Control.Monad.Eff (Eff)
 import DOM (DOM)
+import DOM.HTML (window)
+import DOM.HTML.Types (HISTORY)
 import Pux (CoreEffects, App, start)
 import Pux.DOM.Events (DOMEvent)
 import Pux.Renderer.React (renderToDOM)
-import Signal (constant)
+import Signal (constant, (~>))
 
 type WebApp = App (DOMEvent -> Event) Event State
 
-type ClientEffects = CoreEffects (AppEffects (dom :: DOM))
+type ClientEffects = CoreEffects (AppEffects (dom :: DOM, history :: HISTORY))
 
 main :: String -> State -> Eff ClientEffects WebApp
-main url state = do
+main url (State state) = do
+  -- | Create a signal of URL changes.
+  urlSignal <- sampleHash =<< window
+
+  -- | Map a signal of URL changes to PageView actions.
+  -- let routeSignal = urlSignal ~> NoOp
+  let routeSignal = urlSignal ~> ChangeURL <<< match
+
   -- | Start the app.
   app <- start
-    { initialState: state
+    { initialState: State state { view = match url }
     , view
     , foldp
-    , inputs: [constant FetchRecipes]
+    , inputs:
+        [ constant FetchRecipes
+        , routeSignal
+        ]
     }
 
   -- | Render to the DOM

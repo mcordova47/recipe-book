@@ -2,13 +2,14 @@ module App.State where
 
 import Prelude
 
+import App.Routes as Routes
+import App.Tooltip as Tooltip
 import Data.Argonaut (class DecodeJson, Json, decodeJson, (.?))
 import Data.Either (Either(..))
 import Data.List as List
 import Data.Map as Map
 import Data.Newtype (class Newtype)
 import Network.RemoteData (RemoteData(..))
-import App.Tooltip as Tooltip
 
 data VolumeMeasurement
   = Cups
@@ -113,17 +114,9 @@ instance decodeRecipeComponent :: DecodeJson RecipeComponent where
       str ->
         Left $ "Expected 'I' or 'R', but got'" <> str <> "'"
 
-data Filter
-  = All
-  | Search String
-
-data View
-  = CategoryView Filter
-  | RecipeView Recipe
-
 newtype State = State
   { recipes :: RemoteData String (Map.Map FoodId RecipeComponent)
-  , view :: View
+  , view :: Routes.Route
   , tooltip :: Tooltip.State
   }
 
@@ -132,6 +125,6 @@ derive instance newtypeState :: Newtype State _
 init :: State
 init = State
   { recipes: Loading
-  , view: CategoryView All
+  , view: Routes.Home
   , tooltip: Tooltip.init
   }

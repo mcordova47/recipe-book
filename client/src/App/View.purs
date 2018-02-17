@@ -3,7 +3,9 @@ module App.View where
 import Prelude
 
 import App.Events (Event(..))
-import App.State (Filter(..), FoodId(..), IngredientAmount(..), Measurement, Recipe, RecipeComponent(..), State(..), View(..))
+import App.Routes (toURL)
+import App.Routes as Routes
+import App.State (FoodId(..), IngredientAmount(..), Measurement, Recipe, RecipeComponent(..), State(..))
 import App.Tooltip as Tooltip
 import Data.Either (Either(..))
 import Data.Filterable (filterMap)
@@ -12,11 +14,12 @@ import Data.Function (on)
 import Data.List (List, groupBy, sortBy, find)
 import Data.List.Types (NonEmptyList(..))
 import Data.Map as Map
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Newtype (unwrap)
 import Data.NonEmpty (head)
 import Data.Number.Format (fixed, toString, toStringWith)
 import Data.String (Pattern(..), contains, toLower)
+import Data.Tuple (Tuple(..), snd)
 import Markdown (Markdown(..), markdownParser, tryStripMarkdown)
 import Network.RemoteData (RemoteData(..))
 import Pux.DOM.Events as HE
@@ -27,42 +30,46 @@ import Text.Smolder.HTML.Attributes as HA
 import Text.Smolder.Markup (text, (!), (#!))
 
 view :: State -> HTML Event
-view (State { view: viewType, recipes, tooltip }) =
+view (State { view: route, recipes, tooltip }) =
   H.div $ do
-    header viewType
-    mainView viewType recipes
+    header route
+    mainView route recipes
     mapEvent TooltipEvent $ Tooltip.tooltipView tooltip
 
-header :: View -> HTML Event
-header viewType =
+header :: Routes.Route -> HTML Event
+header route =
   H.div ! HA.className "header" $ do
     H.div ! HA.className "header__title" $ text "Recipe Book"
     H.div ! HA.className "header__search" $
       H.input
-        ! HA.value (searchTerm viewType)
+        ! HA.value (searchTerm route)
         ! HA.placeholder "Search"
         #! HE.onChange ChangeSearch
 
-mainView :: View -> RemoteData String (Map.Map FoodId RecipeComponent) -> HTML Event
-mainView viewType (Success recipes) =
-  case viewType of
-    CategoryView filter' ->
+mainView :: Routes.Route -> RemoteData String (Map.Map FoodId RecipeComponent) -> HTML Event
+mainView route (Success recipes) =
+  case route of
+    Routes.Home ->
+      categoryList Routes.All recipes
+    Routes.Recipes filter' ->
       categoryList filter' recipes
-    RecipeView recipe ->
-      recipeMainView recipes recipe
+    Routes.Recipe id ->
+      fromMaybe (text "") $ recipeMainView recipes $ FoodId id
 mainView _ _ =
   text ""
 
-recipeMainView :: Map.Map FoodId RecipeComponent -> Recipe -> HTML Event
-recipeMainView recipes recipe =
-  H.div ! HA.className "recipe-main-view" $ do
-    H.h2 $ text recipe.name
-    H.div $ do
-      H.h3 $ text "Ingredients"
-      H.ul ! HA.className "ingredient-list" $ for_ recipe.ingredients $ ingredientView recipes
-    H.div $ do
-      H.h3 $ text "Directions"
-      recipeDirections recipes recipe
+recipeMainView :: Map.Map FoodId RecipeComponent -> FoodId -> Maybe (HTML Event)
+recipeMainView recipes recipeId = do
+  recipe <- getRecipe recipeId recipes
+  pure $
+    H.div ! HA.className "recipe-main-view" $ do
+      H.h2 $ text recipe.name
+      H.div $ do
+        H.h3 $ text "Ingredients"
+        H.ul ! HA.className "ingredient-list" $ for_ recipe.ingredients $ ingredientView recipes
+      H.div $ do
+        H.h3 $ text "Directions"
+        recipeDirections recipes recipe
 
 ingredientView :: Map.Map FoodId RecipeComponent -> IngredientAmount -> HTML Event
 ingredientView recipes (IngredientAmount { ingredient, amount }) =
@@ -71,36 +78,37 @@ ingredientView recipes (IngredientAmount { ingredient, amount }) =
       H.li $ text
         (toString amount <> " " <> show unitType <> " " <> name)
 
-    Just (RecipeComp _ recipe@{ unitType, name }) ->
+    Just (RecipeComp (FoodId recipeId) { unitType, name }) ->
       H.li $ do
         text (toString amount <> " " <> show unitType <> " ")
-        H.span
+        H.a
           ! HA.className "ingredient-view__recipe-link"
-          #! HE.onClick (\_ -> SelectRecipe recipe)
+          ! HA.href (toURL (Routes.Recipe recipeId))
           $ text name
 
     Nothing ->
       text ""
 
-categoryList :: Filter -> Map.Map FoodId RecipeComponent -> HTML Event
+categoryList :: Routes.Filter -> Map.Map FoodId RecipeComponent -> HTML Event
 categoryList filter' recipes =
   H.div ! HA.className "category-list-page" $
     H.div ! HA.className "category-list" $
       for_ (groupRecipes (filterRecipes filter' recipes)) $ categoryView recipes
 
-categoryView :: Map.Map FoodId RecipeComponent -> NonEmptyList Recipe -> HTML Event
+categoryView :: Map.Map FoodId RecipeComponent -> NonEmptyList (Tuple FoodId Recipe) -> HTML Event
 categoryView recipeMap (NonEmptyList recipes) =
   H.div $ do
-    let first = head recipes
+    let first = snd $ head recipes
     H.h2 $ text $ first.category
     H.div ! HA.className "recipe-grid" $ for_ recipes $ recipeView recipeMap
 
-recipeView :: Map.Map FoodId RecipeComponent -> Recipe -> HTML Event
-recipeView recipes recipe =
-  H.div ! HA.className "recipe-view" #! HE.onClick (\_ -> SelectRecipe recipe) $ do
-    H.div ! HA.className "recipe-view__title" $ text recipe.name
-    H.div ! HA.className "recipe-view__directions" $ text $ tryStripMarkdown recipe.directions
-    H.div ! HA.className "recipe-view__cost" $ text $ formatCost $ getCost recipes recipe.ingredients
+recipeView :: Map.Map FoodId RecipeComponent -> Tuple FoodId Recipe -> HTML Event
+recipeView recipes (Tuple (FoodId recipeId) recipe) =
+  H.a ! HA.className "recipe-view-card-link" ! HA.href (toURL (Routes.Recipe recipeId)) $
+    H.div ! HA.className "recipe-view" $ do
+      H.div ! HA.className "recipe-view__title" $ text recipe.name
+      H.div ! HA.className "recipe-view__directions" $ text $ tryStripMarkdown recipe.directions
+      H.div ! HA.className "recipe-view__cost" $ text $ formatCost $ getCost recipes recipe.ingredients
 
 recipeDirections :: Map.Map FoodId RecipeComponent -> Recipe -> HTML Event
 recipeDirections recipes recipe =
@@ -129,17 +137,17 @@ recipeLink recipes ingredients label id = do
   let name = getRecipeName recipeComp
   pure $ mapEvent TooltipEvent $ Tooltip.label label (toString amount <> " " <> show unitType <> " " <> name)
 
-groupRecipes :: Map.Map FoodId RecipeComponent -> List (NonEmptyList Recipe)
+groupRecipes :: Map.Map FoodId RecipeComponent -> List (NonEmptyList (Tuple FoodId Recipe))
 groupRecipes recipes =
   recipes
     # Map.values
     # filterMap toRecipe
-    # sortBy (compare `on` _.category)
-    # groupBy ((==) `on` _.category)
+    # sortBy (compare `on` (_.category <<< snd))
+    # groupBy ((==) `on` (_.category <<< snd))
 
-filterRecipes :: Filter -> Map.Map FoodId RecipeComponent -> Map.Map FoodId RecipeComponent
-filterRecipes All = id
-filterRecipes (Search term) =
+filterRecipes :: Routes.Filter -> Map.Map FoodId RecipeComponent -> Map.Map FoodId RecipeComponent
+filterRecipes Routes.All = id
+filterRecipes (Routes.Search term) =
   Map.filter (contains (Pattern term) <<< toLower <<< getRecipeName)
 
 getCost :: Map.Map FoodId RecipeComponent -> List IngredientAmount -> Number
@@ -160,6 +168,13 @@ getUnitType recipeComp =
     RecipeComp _ { unitType } -> unitType
     IngredientComp _ { unitType } -> unitType
 
+getRecipe :: FoodId -> Map.Map FoodId RecipeComponent -> Maybe Recipe
+getRecipe recipeId recipes = do
+  recipeComp <- Map.lookup recipeId recipes
+  case recipeComp of
+    RecipeComp _ recipe -> pure recipe
+    _ -> Nothing
+
 getRecipeName :: RecipeComponent -> String
 getRecipeName recipeComp =
   case recipeComp of
@@ -170,10 +185,10 @@ formatCost :: Number -> String
 formatCost cost =
   "$" <> toStringWith (fixed 2) cost
 
-toRecipe :: RecipeComponent -> Maybe Recipe
-toRecipe (RecipeComp _ recipe) = Just recipe
+toRecipe :: RecipeComponent -> Maybe (Tuple FoodId Recipe)
+toRecipe (RecipeComp recipeId recipe) = Just $ Tuple recipeId recipe
 toRecipe _ = Nothing
 
-searchTerm :: View -> String
-searchTerm (CategoryView (Search term)) = term
+searchTerm :: Routes.Route -> String
+searchTerm (Routes.Recipes (Routes.Search term)) = term
 searchTerm _ = ""

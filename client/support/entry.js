@@ -1,5 +1,5 @@
 var ClientEntry = require('../src/Main.purs');
-var app = ClientEntry.main(window.location.pathname)(window.__puxLastState || ClientEntry.initialState)()
+var app = ClientEntry.main(window.location.hash)(window.__puxLastState || ClientEntry.initialState)()
 
 app.state.subscribe(function (state) {
  window.__puxLastState = state;
