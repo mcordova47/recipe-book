@@ -16,26 +16,40 @@ data VolumeMeasurement
   | Tbsp
   | Tsp
 
+data WeightMeasurement
+  = Lbs
+  | Oz
+  | Grams
+
 instance showVolumeMeasurement :: Show VolumeMeasurement where
   show Cups = "cups"
   show Tbsp = "tbsp"
   show Tsp = "tsp"
 
+instance showWeightMeasurement :: Show WeightMeasurement where
+  show Lbs = "lbs"
+  show Oz = "oz"
+  show Grams = "grams"
+
 data Measurement
   = Items
   | Volume VolumeMeasurement
-  -- | Weight WeightMeasurement
+  | Weight WeightMeasurement
 
 parseMeasurement :: String -> Either String Measurement
 parseMeasurement "ITEM" = Right $ Items
 parseMeasurement "CUP" = Right $ Volume Cups
 parseMeasurement "TBSP" = Right $ Volume Tbsp
 parseMeasurement "TSP" = Right $ Volume Tsp
+parseMeasurement "LB" = Right $ Weight Lbs
+parseMeasurement "OZ" = Right $ Weight Oz
+parseMeasurement "GRAM" = Right $ Weight Grams
 parseMeasurement str = Left $ "Expected Measurement, but got '" <> str <> "'"
 
 instance showMeasurement :: Show Measurement where
   show Items = ""
   show (Volume measurement) = show measurement
+  show (Weight measurement) = show measurement
 
 newtype FoodId = FoodId Int
 

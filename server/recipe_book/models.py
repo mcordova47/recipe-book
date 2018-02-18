@@ -2,22 +2,19 @@ from django.db import models
 
 
 class RecipeComponent(models.Model):
-    ITEM = 'ITEM'
-    CUP = 'CUP'
-    TBSP = 'TBSP'
-    TSP = 'TSP'
     UNITS = [
-        (ITEM, ITEM),
-        (CUP, CUP),
-        (TBSP, TBSP),
-        (TSP, TSP),
+        ('ITEM', 'ITEM'),
+        ('CUP', 'CUP'),
+        ('TBSP', 'TBSP'),
+        ('TSP', 'TSP'),
+        ('LB', 'LB'),
+        ('OZ', 'OZ'),
+        ('GRAM', 'GRAM'),
     ]
 
-    RECIPE = 'R'
-    INGREDIENT = 'I'
     COMPONENTS = {
-        RECIPE: 'Recipe',
-        INGREDIENT: 'Ingredient',
+        'R': 'Recipe',
+        'I': 'Ingredient',
     }
 
     name = models.CharField(max_length=100)
