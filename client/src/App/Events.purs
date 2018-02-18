@@ -24,6 +24,7 @@ data Event
   | TooltipEvent Tooltip.Event
   | ChangeSearch DOMEvent
   | ChangeURL Routes.Route
+  | ToggleDrawerState
 
 type AppEffects fx = Tooltip.Effects (ajax :: AJAX | fx)
 
@@ -59,6 +60,8 @@ foldp (ChangeSearch event) (State state) =
     noEffects $ State state { view = Routes.Recipes filter' }
 foldp (ChangeURL route) (State state) =
   noEffects $ State state { view = route }
+foldp ToggleDrawerState (State state) =
+  noEffects $ State state { drawerOpened = not state.drawerOpened }
 
 toTuple :: RecipeComponent -> Tuple FoodId RecipeComponent
 toTuple rc@(RecipeComp id _) = Tuple id rc

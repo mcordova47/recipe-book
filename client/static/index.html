@@ -4,12 +4,24 @@
     <meta charset="UTF-8">
     <title>Recipe Book</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
+      html, body, #app, .main-layout {
+        height: 100%;
+      }
 
       body {
         font-family: Montserrat, sans-serif;
         color: #212121;
         margin: 0;
+      }
+
+      .main-layout {
+        display: flex;
+      }
+
+      .main-app {
+        flex: 1;
       }
 
       .header {
@@ -27,16 +39,21 @@
       .header__search {
         flex: 1;
         display: flex;
+        justify-content: flex-end;
       }
-
       .header__search input {
         border: none;
         font-size: 16px;
         padding: 8px 30px;
         outline: none;
         border-radius: 4px;
-        width: 500px;
+        width: 200px;
         margin: 10px 25px;
+        transition: width 0.1s ease-in-out;
+      }
+
+      .header__search input:focus {
+        width: 100%;
       }
 
       .category-list-page {
@@ -131,6 +148,63 @@
         font-size: 14px;
         transform: translateX(-50%);
         font-family: Roboto, sans-serif;
+      }
+
+      .nav-drawer--opened {
+        height: 100%;
+        width: 250px;
+        transition: width 0.2s ease-out;
+      }
+
+      .nav-drawer--closed {
+        width: 0;
+        transition: width 0.2s ease-in;
+        overflow: hidden;
+      }
+
+      .nav-drawer__header {
+        font-size: 1.4em;
+        height: 44px;
+        background-color: #fff1c3;
+        padding: 15px 0 0 25px;
+      }
+
+      .nav-drawer__recipe-list {
+        padding-left: 10px;
+        border-right: 1px solid lightgray;
+      }
+
+      .nav-drawer__recipe-nav-link {
+        list-style-type: none;
+        width: 230px;
+        margin: 10px 5px;
+      }
+
+      .nav-drawer__recipe-nav-link--selected {
+        font-weight: bold;
+      }
+
+      .nav-drawer__recipe-nav-link a {
+        text-decoration: none;
+        color: unset;
+      }
+
+      .menu {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        background-color: #fff1c3;
+        margin: 4px 10px;
+        height: 50px;
+        width: 50px;
+        border-radius: 25px;
+        color: #ffc107;
+        cursor: pointer;
+      }
+
+      .menu i {
+        font-size: 28px;
+        margin: auto;
       }
     </style>
   </head>

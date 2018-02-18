@@ -7,7 +7,7 @@ import App.Routes (toURL)
 import App.Routes as Routes
 import App.State (FoodId(..), IngredientAmount(..), Measurement, Recipe, RecipeComponent(..), State(..))
 import App.Tooltip as Tooltip
-import CSS (CSS, Size, backgroundColor, borderRadius, height, margin, marginBottom, marginTop, px, rgb, width)
+import CSS (CSS, Size, backgroundColor, borderRadius, height, margin, px, rgb, width)
 import Data.Either (Either(..))
 import Data.Filterable (filterMap)
 import Data.Foldable (foldl, for_)
@@ -32,15 +32,51 @@ import Text.Smolder.HTML.Attributes as HA
 import Text.Smolder.Markup (text, (!), (#!))
 
 view :: State -> HTML Event
-view (State { view: route, recipes, tooltip }) =
-  H.div $ do
-    header route
-    mainView route recipes
-    mapEvent TooltipEvent $ Tooltip.tooltipView tooltip
+view (State { view: route, recipes, tooltip, drawerOpened }) =
+  H.div ! HA.className "main-layout" $ do
+    navDrawer drawerOpened route recipes
+    H.div ! HA.className "main-app" $ do
+      header route
+      mainView route recipes
+      mapEvent TooltipEvent $ Tooltip.tooltipView tooltip
+
+navDrawer :: Boolean -> Routes.Route -> RemoteData String (Map.Map FoodId RecipeComponent) -> HTML Event
+navDrawer opened route recipes =
+  let classNames = if opened then "nav-drawer nav-drawer--opened" else "nav-drawer nav-drawer--closed"
+  in
+    H.nav ! HA.className classNames $ do
+      H.div ! HA.className "nav-drawer__header" $ text "Recipes"
+      recipeNavList route recipes
+
+recipeNavList :: Routes.Route -> RemoteData String (Map.Map FoodId RecipeComponent) -> HTML Event
+recipeNavList route (Success recipes) =
+  H.ul ! HA.className "nav-drawer__recipe-list" $
+    for_ (listRecipes _.name recipes) $ recipeNavLink route
+recipeNavList _ _ =
+  text ""
+
+recipeNavLink :: Routes.Route -> Tuple FoodId Recipe -> HTML Event
+recipeNavLink route (Tuple (FoodId recipeId) recipe) =
+  let classNames =
+        if isRecipeSelected route recipeId then
+          "nav-drawer__recipe-nav-link nav-drawer__recipe-nav-link--selected"
+        else
+          "nav-drawer__recipe-nav-link"
+  in
+    H.li ! HA.className classNames $
+      H.a ! HA.href (toURL (Routes.Recipe recipeId)) $ text recipe.name
+
+isRecipeSelected :: Routes.Route -> Int -> Boolean
+isRecipeSelected (Routes.Recipe selectedId) recipeId =
+  selectedId == recipeId
+isRecipeSelected _ _ =
+  false
 
 header :: Routes.Route -> HTML Event
 header route =
   H.div ! HA.className "header" $ do
+    H.div ! HA.className "menu" #! HE.onClick (const ToggleDrawerState) $
+      H.i ! HA.className "material-icons" $ text "menu"
     H.a ! HA.href (toURL Routes.Home) ! HA.className "header__title" $ text "Recipe Book"
     H.div ! HA.className "header__search" $
       H.input
@@ -168,12 +204,17 @@ recipeLink recipes ingredients label id = do
   let name = getRecipeName recipeComp
   pure $ mapEvent TooltipEvent $ Tooltip.label label (toString amount <> " " <> show unitType <> " " <> name)
 
-groupRecipes :: Map.Map FoodId RecipeComponent -> List (NonEmptyList (Tuple FoodId Recipe))
-groupRecipes recipes =
+listRecipes :: forall a. Ord a => (Recipe -> a) -> Map.Map FoodId RecipeComponent -> List (Tuple FoodId Recipe)
+listRecipes accessor recipes =
   recipes
     # Map.values
     # filterMap toRecipe
-    # sortBy (compare `on` (_.category <<< snd))
+    # sortBy (compare `on` (accessor <<< snd))
+
+groupRecipes :: Map.Map FoodId RecipeComponent -> List (NonEmptyList (Tuple FoodId Recipe))
+groupRecipes recipes =
+  recipes
+    # listRecipes _.category
     # groupBy ((==) `on` (_.category <<< snd))
 
 filterRecipes :: Routes.Filter -> Map.Map FoodId RecipeComponent -> Map.Map FoodId RecipeComponent

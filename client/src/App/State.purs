@@ -118,6 +118,7 @@ newtype State = State
   { recipes :: RemoteData String (Map.Map FoodId RecipeComponent)
   , view :: Routes.Route
   , tooltip :: Tooltip.State
+  , drawerOpened :: Boolean
   }
 
 derive instance newtypeState :: Newtype State _
@@ -127,4 +128,5 @@ init = State
   { recipes: NotAsked
   , view: Routes.Home
   , tooltip: Tooltip.init
+  , drawerOpened: false
   }
