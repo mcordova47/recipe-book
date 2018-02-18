@@ -28,8 +28,8 @@ data Event
 type AppEffects fx = Tooltip.Effects (ajax :: AJAX | fx)
 
 foldp :: forall fx. Event -> State -> EffModel State Event (AppEffects fx)
-foldp FetchRecipes state =
-  { state
+foldp FetchRecipes (State state) =
+  { state: State state { recipes = Loading }
   , effects:
       [ do
           res <- attempt $ get "http://localhost:8000/api/recipes/"

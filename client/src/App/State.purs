@@ -124,7 +124,7 @@ derive instance newtypeState :: Newtype State _
 
 init :: State
 init = State
-  { recipes: Loading
+  { recipes: NotAsked
   , view: Routes.Home
   , tooltip: Tooltip.init
   }

@@ -7,6 +7,7 @@ import App.Routes (toURL)
 import App.Routes as Routes
 import App.State (FoodId(..), IngredientAmount(..), Measurement, Recipe, RecipeComponent(..), State(..))
 import App.Tooltip as Tooltip
+import CSS (CSS, Size, backgroundColor, borderRadius, height, margin, marginBottom, marginTop, px, rgb, width)
 import Data.Either (Either(..))
 import Data.Filterable (filterMap)
 import Data.Foldable (foldl, for_)
@@ -24,6 +25,7 @@ import Markdown (Markdown(..), markdownParser, tryStripMarkdown)
 import Network.RemoteData (RemoteData(..))
 import Pux.DOM.Events as HE
 import Pux.DOM.HTML (HTML, mapEvent)
+import Pux.DOM.HTML.Attributes (style)
 import Text.Parsing.Simple (parse)
 import Text.Smolder.HTML as H
 import Text.Smolder.HTML.Attributes as HA
@@ -47,19 +49,15 @@ header route =
         #! HE.onChange ChangeSearch
 
 mainView :: Routes.Route -> RemoteData String (Map.Map FoodId RecipeComponent) -> HTML Event
-mainView route (Success recipes) =
-  case route of
-    Routes.Home ->
-      categoryList Routes.All recipes
-    Routes.Recipes filter' ->
-      categoryList filter' recipes
-    Routes.Recipe id ->
-      fromMaybe (text "") $ recipeMainView recipes $ FoodId id
-mainView _ _ =
-  text ""
+mainView Routes.Home recipes =
+  categoryList Routes.All recipes
+mainView (Routes.Recipes filter') recipes =
+  categoryList filter' recipes
+mainView (Routes.Recipe recipeId) recipes =
+  fromMaybe (text "") $ recipeMainView recipes $ FoodId recipeId
 
-recipeMainView :: Map.Map FoodId RecipeComponent -> FoodId -> Maybe (HTML Event)
-recipeMainView recipes recipeId = do
+recipeMainView :: RemoteData String (Map.Map FoodId RecipeComponent) -> FoodId -> Maybe (HTML Event)
+recipeMainView (Success recipes) recipeId = do
   recipe <- getRecipe recipeId recipes
   pure $
     H.div ! HA.className "recipe-main-view" $ do
@@ -70,6 +68,37 @@ recipeMainView recipes recipeId = do
       H.div $ do
         H.h3 $ text "Directions"
         recipeDirections recipes recipe
+recipeMainView Loading _ =
+  Just recipePlaceholderView
+recipeMainView _ _ =
+  Nothing
+
+recipePlaceholderView :: HTML Event
+recipePlaceholderView =
+  H.div ! HA.className "recipe-main-view" $ do
+    placeholder 32.0 400.0 30.0 0.0
+    placeholder 24.0 350.0 30.0 0.0
+    placeholder 18.0 250.0 20.0 40.0
+    placeholder 18.0 260.0 20.0 40.0
+    placeholder 24.0 350.0 30.0 0.0
+    placeholder 14.0 1000.0 20.0 0.0
+    placeholder 14.0 1100.0 20.0 0.0
+    placeholder 14.0 800.0 20.0 0.0
+
+placeholder :: Number -> Number -> Number -> Number -> HTML Event
+placeholder h w my mx =
+  H.div
+    ! style do
+        backgroundColor (rgb 228 228 228)
+        uniBorderRadius (3.0 # px)
+        height (px h)
+        width (px w)
+        margin (px my) (px mx) (px my) (px mx)
+    $ text ""
+
+uniBorderRadius :: forall a. Size a -> CSS
+uniBorderRadius size =
+  borderRadius size size size size
 
 ingredientView :: Map.Map FoodId RecipeComponent -> IngredientAmount -> HTML Event
 ingredientView recipes (IngredientAmount { ingredient, amount }) =
@@ -89,11 +118,13 @@ ingredientView recipes (IngredientAmount { ingredient, amount }) =
     Nothing ->
       text ""
 
-categoryList :: Routes.Filter -> Map.Map FoodId RecipeComponent -> HTML Event
-categoryList filter' recipes =
+categoryList :: Routes.Filter -> RemoteData String (Map.Map FoodId RecipeComponent) -> HTML Event
+categoryList filter' (Success recipes) =
   H.div ! HA.className "category-list-page" $
     H.div ! HA.className "category-list" $
       for_ (groupRecipes (filterRecipes filter' recipes)) $ categoryView recipes
+categoryList _ _ =
+  text ""
 
 categoryView :: Map.Map FoodId RecipeComponent -> NonEmptyList (Tuple FoodId Recipe) -> HTML Event
 categoryView recipeMap (NonEmptyList recipes) =
