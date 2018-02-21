@@ -4,6 +4,7 @@ import Prelude
 
 import App.Events (Event(..))
 import App.Filter (Filter(..))
+import App.Markdown (Markdown(..), markdownParser, tryStripMarkdown)
 import App.Routes (toURL)
 import App.Routes as Routes
 import App.State (FoodId(..), IngredientAmount(..), Measurement, Recipe, RecipeComponent(..), State(..), RecipesResponse)
@@ -22,7 +23,6 @@ import Data.NonEmpty (head)
 import Data.Number.Format (fixed, toString, toStringWith)
 import Data.String (Pattern(..), contains, toLower)
 import Data.Tuple (Tuple(..), snd)
-import Markdown (Markdown(..), markdownParser, tryStripMarkdown)
 import Network.RemoteData (RemoteData(..))
 import Pux.DOM.Events as HE
 import Pux.DOM.HTML (HTML, mapEvent)

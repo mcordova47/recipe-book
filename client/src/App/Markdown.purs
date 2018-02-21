@@ -1,4 +1,4 @@
-module Markdown where
+module App.Markdown where
 
 import Prelude
 
