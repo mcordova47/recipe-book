@@ -3,6 +3,7 @@ module App.View where
 import Prelude
 
 import App.Events (Event(..))
+import App.Filter (Filter(..))
 import App.Routes (toURL)
 import App.Routes as Routes
 import App.State (FoodId(..), IngredientAmount(..), Measurement, Recipe, RecipeComponent(..), State(..), RecipesResponse)
@@ -86,7 +87,7 @@ header route =
 
 mainView :: Routes.Route -> RecipesResponse -> HTML Event
 mainView Routes.Home recipes =
-  categoryList Routes.All recipes
+  categoryList All recipes
 mainView (Routes.Recipes filter') recipes =
   categoryList filter' recipes
 mainView (Routes.Recipe recipeId) recipes =
@@ -154,7 +155,7 @@ ingredientView recipes (IngredientAmount { ingredient, amount }) =
     Nothing ->
       text ""
 
-categoryList :: Routes.Filter -> RecipesResponse -> HTML Event
+categoryList :: Filter -> RecipesResponse -> HTML Event
 categoryList filter' (Success recipes) =
   H.div ! HA.className "category-list-page" $
     H.div ! HA.className "category-list" $
@@ -217,9 +218,9 @@ groupRecipes recipes =
     # listRecipes _.category
     # groupBy ((==) `on` (_.category <<< snd))
 
-filterRecipes :: Routes.Filter -> Map.Map FoodId RecipeComponent -> Map.Map FoodId RecipeComponent
-filterRecipes Routes.All = id
-filterRecipes (Routes.Search term) =
+filterRecipes :: Filter -> Map.Map FoodId RecipeComponent -> Map.Map FoodId RecipeComponent
+filterRecipes All = id
+filterRecipes (Search term) =
   Map.filter (contains (Pattern term) <<< toLower <<< getRecipeName)
 
 getCost :: Map.Map FoodId RecipeComponent -> List IngredientAmount -> Number
@@ -262,5 +263,5 @@ toRecipe (RecipeComp recipeId recipe) = Just $ Tuple recipeId recipe
 toRecipe _ = Nothing
 
 searchTerm :: Routes.Route -> String
-searchTerm (Routes.Recipes (Routes.Search term)) = term
+searchTerm (Routes.Recipes (Search term)) = term
 searchTerm _ = ""

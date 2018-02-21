@@ -2,6 +2,7 @@ module App.Events where
 
 import Prelude
 
+import App.Filter (Filter(..))
 import App.Routes as Routes
 import App.State (FoodId, RecipeComponent(..), State(..))
 import App.Tooltip as Tooltip
@@ -55,7 +56,7 @@ foldp (TooltipEvent event) (State state) =
       }
 foldp (ChangeSearch event) (State state) =
   let term = targetValue event
-      filter' = if term == "" then Routes.All else Routes.Search term
+      filter' = if term == "" then All else Search term
   in
     noEffects $ State state { view = Routes.Recipes filter' }
 foldp (ChangeURL route) (State state) =

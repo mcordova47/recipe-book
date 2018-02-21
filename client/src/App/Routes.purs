@@ -2,6 +2,7 @@ module App.Routes where
 
 import Prelude
 
+import App.Filter (Filter(..))
 import Control.Alt ((<|>))
 import Data.Maybe (fromMaybe)
 import Pux.Router (end, int, lit, router)
@@ -10,10 +11,6 @@ data Route
   = Home
   | Recipes Filter
   | Recipe Int
-
-data Filter
-  = All
-  | Search String
 
 match :: String -> Route
 match url = fromMaybe Home $ router url $
