@@ -128,8 +128,10 @@ instance decodeRecipeComponent :: DecodeJson RecipeComponent where
       str ->
         Left $ "Expected 'I' or 'R', but got'" <> str <> "'"
 
+type RecipesResponse = RemoteData String (Map.Map FoodId RecipeComponent)
+
 newtype State = State
-  { recipes :: RemoteData String (Map.Map FoodId RecipeComponent)
+  { recipes :: RecipesResponse
   , view :: Routes.Route
   , tooltip :: Tooltip.State
   , drawerOpened :: Boolean

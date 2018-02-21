@@ -5,7 +5,7 @@ import Prelude
 import App.Events (Event(..))
 import App.Routes (toURL)
 import App.Routes as Routes
-import App.State (FoodId(..), IngredientAmount(..), Measurement, Recipe, RecipeComponent(..), State(..))
+import App.State (FoodId(..), IngredientAmount(..), Measurement, Recipe, RecipeComponent(..), State(..), RecipesResponse)
 import App.Tooltip as Tooltip
 import CSS (CSS, Size, backgroundColor, borderRadius, height, margin, px, rgb, width)
 import Data.Either (Either(..))
@@ -40,7 +40,7 @@ view (State { view: route, recipes, tooltip, drawerOpened }) =
       mainView route recipes
       mapEvent TooltipEvent $ Tooltip.tooltipView tooltip
 
-navDrawer :: Boolean -> Routes.Route -> RemoteData String (Map.Map FoodId RecipeComponent) -> HTML Event
+navDrawer :: Boolean -> Routes.Route -> RecipesResponse -> HTML Event
 navDrawer opened route recipes =
   let classNames = if opened then "nav-drawer nav-drawer--opened" else "nav-drawer nav-drawer--closed"
   in
@@ -48,7 +48,7 @@ navDrawer opened route recipes =
       H.div ! HA.className "nav-drawer__header" $ text "Recipes"
       recipeNavList route recipes
 
-recipeNavList :: Routes.Route -> RemoteData String (Map.Map FoodId RecipeComponent) -> HTML Event
+recipeNavList :: Routes.Route -> RecipesResponse -> HTML Event
 recipeNavList route (Success recipes) =
   H.ul ! HA.className "nav-drawer__recipe-list" $
     for_ (listRecipes _.name recipes) $ recipeNavLink route
@@ -84,7 +84,7 @@ header route =
         ! HA.placeholder "Search"
         #! HE.onChange ChangeSearch
 
-mainView :: Routes.Route -> RemoteData String (Map.Map FoodId RecipeComponent) -> HTML Event
+mainView :: Routes.Route -> RecipesResponse -> HTML Event
 mainView Routes.Home recipes =
   categoryList Routes.All recipes
 mainView (Routes.Recipes filter') recipes =
@@ -92,7 +92,7 @@ mainView (Routes.Recipes filter') recipes =
 mainView (Routes.Recipe recipeId) recipes =
   fromMaybe (text "") $ recipeMainView recipes $ FoodId recipeId
 
-recipeMainView :: RemoteData String (Map.Map FoodId RecipeComponent) -> FoodId -> Maybe (HTML Event)
+recipeMainView :: RecipesResponse -> FoodId -> Maybe (HTML Event)
 recipeMainView (Success recipes) recipeId = do
   recipe <- getRecipe recipeId recipes
   pure $
@@ -154,7 +154,7 @@ ingredientView recipes (IngredientAmount { ingredient, amount }) =
     Nothing ->
       text ""
 
-categoryList :: Routes.Filter -> RemoteData String (Map.Map FoodId RecipeComponent) -> HTML Event
+categoryList :: Routes.Filter -> RecipesResponse -> HTML Event
 categoryList filter' (Success recipes) =
   H.div ! HA.className "category-list-page" $
     H.div ! HA.className "category-list" $
