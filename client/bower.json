@@ -12,7 +12,12 @@
     "purescript-css": "^3.4.0",
     "purescript-aff": "^3.0.0",
     "purescript-affjax": "^4.0.0",
-    "purescript-simple-parser": "^7.0.0"
+    "purescript-simple-parser": "^7.0.0",
+    "purescript-remotedata": "^2.2.0",
+    "purescript-numbers": "^5.0.0",
+    "purescript-dom-classy": "^2.1.0",
+    "purescript-argonaut": "^3.1.0",
+    "purescript-filterable": "^2.4.1"
   },
   "resolutions": {
     "purescript-aff": "^3.0.0"
