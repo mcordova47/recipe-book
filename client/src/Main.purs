@@ -20,8 +20,8 @@ type WebApp = App (DOMEvent -> Event) Event State
 
 type ClientEffects = CoreEffects (AppEffects (dom :: DOM, history :: HISTORY))
 
-main :: String -> State -> Eff ClientEffects WebApp
-main url (State state) = do
+main :: String -> String -> State -> Eff ClientEffects WebApp
+main url api (State state) = do
   -- | Create a signal of URL changes.
   urlSignal <- sampleHash =<< window
 
@@ -35,7 +35,7 @@ main url (State state) = do
     , view
     , foldp
     , inputs:
-        [ constant FetchRecipes
+        [ constant (FetchRecipes api)
         , routeSignal
         ]
     }

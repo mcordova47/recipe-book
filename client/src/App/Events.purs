@@ -20,7 +20,7 @@ import Pux (EffModel, mapEffects, noEffects)
 import Pux.DOM.Events (DOMEvent, targetValue)
 
 data Event
-  = FetchRecipes
+  = FetchRecipes String
   | ReceiveRecipes (Either String (List RecipeComponent))
   | TooltipEvent Tooltip.Event
   | ChangeSearch DOMEvent
@@ -30,11 +30,11 @@ data Event
 type AppEffects fx = Tooltip.Effects (ajax :: AJAX | fx)
 
 foldp :: forall fx. Event -> State -> EffModel State Event (AppEffects fx)
-foldp FetchRecipes (State state) =
+foldp (FetchRecipes api) (State state) =
   { state: State state { recipes = Loading }
   , effects:
       [ do
-          res <- attempt $ get "http://localhost:8000/api/recipes/"
+          res <- attempt $ get (api <> "recipes/")
           let recipes = bimap show _.response res >>= decodeJson
           pure $ Just $ ReceiveRecipes recipes
       ]
