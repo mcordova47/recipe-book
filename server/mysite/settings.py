@@ -25,8 +25,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = client_secrets['SECRET_KEY']
 
-# DEBUG = not os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine')
-DEBUG = True
+DEBUG = not os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine')
 
 # SECURITY WARNING: App Engine's security features ensure that it is safe to
 # have ALLOWED_HOSTS = ['*'] when the app is deployed. If you deploy a Django
