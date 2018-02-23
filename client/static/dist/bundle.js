@@ -1015,7 +1015,7 @@ module.exports = g;
 var ClientEntry = __webpack_require__(12);
 var url = window.location.hash;
 var api =  true
-  ? 'http://recipe-book-194820.appspot.com/api/'
+  ? 'https://recipe-book-194820.appspot.com/api/'
   : 'http://localhost:8000/api/';
 var initialState = window.__puxLastState || ClientEntry.initialState;
 var app = ClientEntry.main(url)(api)(initialState)();
