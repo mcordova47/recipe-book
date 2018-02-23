@@ -13,6 +13,7 @@
     "postinstall": "bower cache clean && bower install",
     "clean": "rimraf static/dist",
     "build": "npm run clean && webpack --config ./webpack.config.js --progress --profile --colors",
+
     "deploy": "npm run build && gh-pages --dist ./static",
     "watch": "npm run clean && webpack-dev-server --content-base static/ --hot --inline --config webpack.config.js",
     "serve": "npm run build && serve -s static",
