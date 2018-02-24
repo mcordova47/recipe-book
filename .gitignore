@@ -3,7 +3,7 @@ client/bower_components/
 client/output/
 client/.psci_modules
 client/npm-debug.log
-client/.psc-ide-port
+.psc-ide-port
 **DS_Store
 server/env
 server/lib
