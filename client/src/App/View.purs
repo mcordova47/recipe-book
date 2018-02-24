@@ -221,7 +221,7 @@ groupRecipes recipes =
 filterRecipes :: Filter -> Map.Map FoodId RecipeComponent -> Map.Map FoodId RecipeComponent
 filterRecipes All = id
 filterRecipes (Search term) =
-  Map.filter (contains (Pattern term) <<< toLower <<< getRecipeName)
+  Map.filter (contains (Pattern (toLower term)) <<< toLower <<< getRecipeName)
 
 getCost :: Map.Map FoodId RecipeComponent -> List IngredientAmount -> Number
 getCost recipes =
