@@ -97,8 +97,20 @@
 
       .recipe-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: repeat(1, 1fr);
         grid-gap: 20px;
+      }
+
+      @media (min-width: 550px) {
+        .recipe-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (min-width: 1100px) {
+        .recipe-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
       }
 
       .recipe-view {
