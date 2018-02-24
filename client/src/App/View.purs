@@ -190,6 +190,10 @@ recipeDirections recipes recipe =
               text " "
             Word str ->
               text str
+            Bold str ->
+              H.b $ text str
+            Italics str ->
+              H.em $ text str
             Link label id ->
               case recipeLink recipes recipe.ingredients label id of
                 Just html -> html
