@@ -4,49 +4,52 @@ import Prelude
 
 import Data.Either (Either(..))
 import Data.Foldable (class Foldable, foldl)
-import Data.Functor (mapFlipped)
 import Data.List (List)
 import Data.Monoid (class Monoid, mempty)
 import Text.Parsing.Combinators (choice)
-import Text.Parsing.Simple (Parser, (>>), (<<), braces, brackets, cr, int, isn'tAny, many, manyChar, newline, parse, someChar, space, word, char)
+import Text.Parsing.Simple (Parser, (>>), (<<))
+import Text.Parsing.Simple as P
 
 data Markdown
+ = Paragraph (List Inline)
+
+data Inline
   = Link String Int
   | Italics String
   | Bold String
   | Word String
   | Space
 
-instance showMarkdown :: Show Markdown where
+instance showInline :: Show Inline where
   show (Link text id) = "Link " <> show text <> " " <> show id
   show (Italics text) = "Italics " <> show text
   show (Bold text) = "Bold " <> show text
   show (Word text) = "Word " <> show text
   show Space = "Space"
 
-linkParser :: Parser String Markdown
+linkParser :: Parser String Inline
 linkParser =
-  Link <$> braces (manyChar (isn'tAny "{}")) <*> brackets int
+  Link <$> P.braces (P.manyChar (P.isn'tAny "{}")) <*> P.brackets P.int
 
-italicsParser :: Parser String Markdown
+italicsParser :: Parser String Inline
 italicsParser =
-  Italics <$> (char '_' >> manyChar (isn'tAny "_") << char '_')
+  Italics <$> (P.char '_' >> P.manyChar (P.isn'tAny "_") << P.char '_')
 
-boldParser :: Parser String Markdown
+boldParser :: Parser String Inline
 boldParser =
-  Bold <$> (char '*' >> manyChar (isn'tAny "*") << char '*')
+  Bold <$> (P.char '*' >> P.manyChar (P.isn'tAny "*") << P.char '*')
 
-wordParser :: Parser String Markdown
+wordParser :: Parser String Inline
 wordParser =
-  Word <$> word
+  Word <$> P.word
 
-spaceParser :: Parser String Markdown
+spaceParser :: Parser String Inline
 spaceParser =
-  map (const Space) (someChar (choice [space, newline, cr]))
+  map (const Space) (P.someChar (P.anyOf " \t"))
 
-markdownParser :: Parser String (List Markdown)
-markdownParser =
-  many $ choice
+inlineParser :: Parser String Inline
+inlineParser =
+  choice
     [ linkParser
     , italicsParser
     , boldParser
@@ -54,19 +57,33 @@ markdownParser =
     , spaceParser
     ]
 
-stripParsed :: List Markdown -> String
-stripParsed md =
-  concat $ mapFlipped md $ case _ of
-    Link label _ -> label
-    Italics str -> str
-    Bold str -> str
-    Word str -> str
-    Space -> " "
+paragraphParser :: Parser String Markdown
+paragraphParser =
+  Paragraph <$> (P.some inlineParser << P.some (choice [P.newline, P.cr]))
+
+markdownParser :: Parser String (List Markdown)
+markdownParser =
+  P.many paragraphParser
+
+stripInline :: Inline -> String
+stripInline (Link label _) = label
+stripInline (Italics str) = str
+stripInline (Bold str) = str
+stripInline (Word str) = str
+stripInline Space = " "
+
+stripBlock :: Markdown -> String
+stripBlock (Paragraph inlines) =
+  concat $ map stripInline inlines
+
+stripMarkdown :: List Markdown -> String
+stripMarkdown md =
+  concat $ map stripBlock md
 
 tryStripMarkdown :: String -> String
 tryStripMarkdown text =
-  case parse markdownParser text of
-    Right md -> stripParsed md
+  case P.parse markdownParser text of
+    Right md -> stripMarkdown md
     Left _ -> text
 
 concat :: forall f m. Foldable f => Monoid m => f m -> m

@@ -4,7 +4,7 @@ import Prelude
 
 import App.Events (Event(..))
 import App.Filter (Filter(..))
-import App.Markdown (Markdown(..), markdownParser, tryStripMarkdown)
+import App.Markdown (Markdown(..), Inline(..), markdownParser, tryStripMarkdown)
 import App.Routes (toURL)
 import App.Routes as Routes
 import App.State (FoodId(..), IngredientAmount(..), Measurement, Recipe, RecipeComponent(..), State(..), RecipesResponse)
@@ -16,6 +16,7 @@ import Data.Foldable (foldl, for_)
 import Data.Function (on)
 import Data.List (List, groupBy, sortBy, find)
 import Data.List.Types (NonEmptyList(..))
+import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Newtype (unwrap)
@@ -137,7 +138,7 @@ uniBorderRadius :: forall a. Size a -> CSS
 uniBorderRadius size =
   borderRadius size size size size
 
-ingredientView :: Map.Map FoodId RecipeComponent -> IngredientAmount -> HTML Event
+ingredientView :: Map FoodId RecipeComponent -> IngredientAmount -> HTML Event
 ingredientView recipes (IngredientAmount { ingredient, amount }) =
   case Map.lookup ingredient recipes of
     Just (IngredientComp _ { unitType, name }) ->
@@ -163,14 +164,14 @@ categoryList filter' (Success recipes) =
 categoryList _ _ =
   text ""
 
-categoryView :: Map.Map FoodId RecipeComponent -> NonEmptyList (Tuple FoodId Recipe) -> HTML Event
+categoryView :: Map FoodId RecipeComponent -> NonEmptyList (Tuple FoodId Recipe) -> HTML Event
 categoryView recipeMap (NonEmptyList recipes) =
   H.div $ do
     let first = snd $ head recipes
     H.h2 $ text $ first.category
     H.div ! HA.className "recipe-grid" $ for_ recipes $ recipeView recipeMap
 
-recipeView :: Map.Map FoodId RecipeComponent -> Tuple FoodId Recipe -> HTML Event
+recipeView :: Map FoodId RecipeComponent -> Tuple FoodId Recipe -> HTML Event
 recipeView recipes (Tuple (FoodId recipeId) recipe) =
   H.a ! HA.className "recipe-view-card-link" ! HA.href (toURL (Routes.Recipe recipeId)) $
     H.div ! HA.className "recipe-view" $ do
@@ -178,30 +179,33 @@ recipeView recipes (Tuple (FoodId recipeId) recipe) =
       H.div ! HA.className "recipe-view__directions" $ text $ tryStripMarkdown recipe.directions
       H.div ! HA.className "recipe-view__cost" $ text $ formatCost $ getCost recipes recipe.ingredients
 
-recipeDirections :: Map.Map FoodId RecipeComponent -> Recipe -> HTML Event
+recipeDirections :: Map FoodId RecipeComponent -> Recipe -> HTML Event
 recipeDirections recipes recipe =
-  let md = parse markdownParser recipe.directions
-  in
-    H.div ! HA.className "recipe-directions" $
-      case parse markdownParser recipe.directions of
-        Right mdList ->
-          for_ mdList $ case _ of
-            Space ->
-              text " "
-            Word str ->
-              text str
-            Bold str ->
-              H.b $ text str
-            Italics str ->
-              H.em $ text str
-            Link label id ->
-              case recipeLink recipes recipe.ingredients label id of
-                Just html -> html
-                Nothing -> text label
-        Left _ ->
-          text recipe.directions
+  H.div ! HA.className "recipe-directions" $
+    case parse markdownParser recipe.directions of
+      Right mdList ->
+        for_ mdList $ markdownToHtml recipes recipe
+      Left _ ->
+        text recipe.directions
 
-recipeLink :: Map.Map FoodId RecipeComponent -> List IngredientAmount -> String -> Int -> Maybe (HTML Event)
+markdownToHtml :: Map FoodId RecipeComponent -> Recipe -> Markdown -> HTML Event
+markdownToHtml recipes recipe (Paragraph inlines) =
+  H.p $ for_ inlines $ inlineToHtml recipes recipe
+
+inlineToHtml :: Map FoodId RecipeComponent -> Recipe -> Inline -> HTML Event
+inlineToHtml _ _ Space =
+  text " "
+inlineToHtml _ _ (Word str) =
+  text str
+inlineToHtml _ _ (Bold str) =
+  H.b $ text str
+inlineToHtml _ _ (Italics str) =
+  H.em $ text str
+inlineToHtml recipes recipe (Link label recipeId) =
+  recipeLink recipes recipe.ingredients label recipeId
+    # fromMaybe (text label)
+
+recipeLink :: Map FoodId RecipeComponent -> List IngredientAmount -> String -> Int -> Maybe (HTML Event)
 recipeLink recipes ingredients label id = do
   IngredientAmount { ingredient, amount } <- find ((==) (FoodId id) <<< _.ingredient <<< unwrap) ingredients
   recipeComp <- Map.lookup ingredient recipes
@@ -209,25 +213,25 @@ recipeLink recipes ingredients label id = do
   let name = getRecipeName recipeComp
   pure $ mapEvent TooltipEvent $ Tooltip.label label (toString amount <> " " <> show unitType <> " " <> name)
 
-listRecipes :: forall a. Ord a => (Recipe -> a) -> Map.Map FoodId RecipeComponent -> List (Tuple FoodId Recipe)
+listRecipes :: forall a. Ord a => (Recipe -> a) -> Map FoodId RecipeComponent -> List (Tuple FoodId Recipe)
 listRecipes accessor recipes =
   recipes
     # Map.values
     # filterMap toRecipe
     # sortBy (compare `on` (accessor <<< snd))
 
-groupRecipes :: Map.Map FoodId RecipeComponent -> List (NonEmptyList (Tuple FoodId Recipe))
+groupRecipes :: Map FoodId RecipeComponent -> List (NonEmptyList (Tuple FoodId Recipe))
 groupRecipes recipes =
   recipes
     # listRecipes _.category
     # groupBy ((==) `on` (_.category <<< snd))
 
-filterRecipes :: Filter -> Map.Map FoodId RecipeComponent -> Map.Map FoodId RecipeComponent
+filterRecipes :: Filter -> Map FoodId RecipeComponent -> Map FoodId RecipeComponent
 filterRecipes All = id
 filterRecipes (Search term) =
   Map.filter (contains (Pattern (toLower term)) <<< toLower <<< getRecipeName)
 
-getCost :: Map.Map FoodId RecipeComponent -> List IngredientAmount -> Number
+getCost :: Map FoodId RecipeComponent -> List IngredientAmount -> Number
 getCost recipes =
   foldl (\total (IngredientAmount { ingredient, amount }) ->
     case Map.lookup ingredient recipes of
@@ -245,7 +249,7 @@ getUnitType recipeComp =
     RecipeComp _ { unitType } -> unitType
     IngredientComp _ { unitType } -> unitType
 
-getRecipe :: FoodId -> Map.Map FoodId RecipeComponent -> Maybe Recipe
+getRecipe :: FoodId -> Map FoodId RecipeComponent -> Maybe Recipe
 getRecipe recipeId recipes = do
   recipeComp <- Map.lookup recipeId recipes
   case recipeComp of
