@@ -9,4 +9,5 @@ server/env
 server/lib
 server/static
 server/client_secrets.json
+server/recipe-book-credentials.json
 *.pyc
