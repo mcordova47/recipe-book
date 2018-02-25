@@ -59,7 +59,7 @@ inlineParser =
 
 paragraphParser :: Parser String Markdown
 paragraphParser =
-  Paragraph <$> (P.some inlineParser << P.some (choice [P.newline, P.cr]))
+  Paragraph <$> (P.some inlineParser << choice [P.skip $ P.some $ choice [P.newline, P.cr], P.eof])
 
 markdownParser :: Parser String (List Markdown)
 markdownParser =
