@@ -34,6 +34,8 @@ Dev buid with hot module reloading
 ## Production
 The front end is hosted on github pages
 
+    $ npm run build
+    $ cd ..
     $ git subtree push --prefix client/static origin gh-pages
 
 The server is hosted on google app engine
