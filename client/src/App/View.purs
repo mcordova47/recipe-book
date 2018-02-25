@@ -39,7 +39,7 @@ view (State { view: route, recipes, tooltip, drawerOpened }) =
     navDrawer drawerOpened route recipes
     H.div ! HA.className "main-app" $ do
       header route
-      mainView route recipes
+      H.div ! HA.className "scroll-container" $ mainView route recipes
       mapEvent TooltipEvent $ Tooltip.tooltipView tooltip
 
 navDrawer :: Boolean -> Routes.Route -> RecipesResponse -> HTML Event
@@ -158,9 +158,8 @@ ingredientView recipes (IngredientAmount { ingredient, amount }) =
 
 categoryList :: Filter -> RecipesResponse -> HTML Event
 categoryList filter' (Success recipes) =
-  H.div ! HA.className "category-list-page" $
-    H.div ! HA.className "category-list" $
-      for_ (groupRecipes (filterRecipes filter' recipes)) $ categoryView recipes
+  H.div ! HA.className "category-list" $
+    for_ (groupRecipes (filterRecipes filter' recipes)) $ categoryView recipes
 categoryList _ _ =
   text ""
 

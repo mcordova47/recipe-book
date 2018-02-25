@@ -60,23 +60,28 @@
         width: 100%;
       }
 
-      .category-list-page {
-        background-color: #eeeeee;
+      .scroll-container {
         position: absolute;
         top: 58px;
         bottom: 0;
         overflow: auto;
       }
 
-      .category-list-page::-webkit-scrollbar {
+      .scroll-container::-webkit-scrollbar {
         width: 8px;
       }
 
-      .category-list-page::-webkit-scrollbar-thumb {
+      .scroll-container::-webkit-scrollbar-thumb {
         background-color: #bbbbbb;
       }
 
-      .category-list,
+      .category-list {
+        background-color: #eeeeee;
+        margin: 0;
+        width: calc(100% - 80px);
+        padding: 10px 40px;
+      }
+
       .recipe-main-view {
         width: 90%;
         margin: auto;
