@@ -13555,6 +13555,9 @@ var PS = {};
       };
       return "";
   };
+  var scrollContainer = function (html) {
+      return Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("scroll-container"))(html);
+  };
   var placeholder = function (h) {
       return function (w) {
           return function (my) {
@@ -13655,7 +13658,7 @@ var PS = {};
           if (v1 instanceof Data_Maybe.Nothing) {
               return Text_Smolder_Markup.text("");
           };
-          throw new Error("Failed pattern match at App.View line 143, column 3 - line 159, column 1: " + [ v1.constructor.name ]);
+          throw new Error("Failed pattern match at App.View line 147, column 3 - line 163, column 1: " + [ v1.constructor.name ]);
       };
   };
   var header = function (route) {
@@ -13681,7 +13684,7 @@ var PS = {};
       if (recipeComp instanceof App_State.IngredientComp) {
           return recipeComp.value1.unitType;
       };
-      throw new Error("Failed pattern match at App.View line 247, column 3 - line 249, column 46: " + [ recipeComp.constructor.name ]);
+      throw new Error("Failed pattern match at App.View line 255, column 3 - line 257, column 46: " + [ recipeComp.constructor.name ]);
   };
   var getRecipeName = function (recipeComp) {
       if (recipeComp instanceof App_State.RecipeComp) {
@@ -13690,7 +13693,7 @@ var PS = {};
       if (recipeComp instanceof App_State.IngredientComp) {
           return recipeComp.value1.name;
       };
-      throw new Error("Failed pattern match at App.View line 260, column 3 - line 262, column 38: " + [ recipeComp.constructor.name ]);
+      throw new Error("Failed pattern match at App.View line 268, column 3 - line 270, column 38: " + [ recipeComp.constructor.name ]);
   };
   var recipeLink = function (recipes) {
       return function (ingredients) {
@@ -13729,7 +13732,7 @@ var PS = {};
               if (v2 instanceof App_Markdown.Link) {
                   return Data_Maybe.fromMaybe(Text_Smolder_Markup.text(v2.value0))(recipeLink(v)(v1.ingredients)(v2.value0)(v2.value1));
               };
-              throw new Error("Failed pattern match at App.View line 194, column 1 - line 194, column 77: " + [ v.constructor.name, v1.constructor.name, v2.constructor.name ]);
+              throw new Error("Failed pattern match at App.View line 202, column 1 - line 202, column 77: " + [ v.constructor.name, v1.constructor.name, v2.constructor.name ]);
           };
       };
   };
@@ -13750,7 +13753,7 @@ var PS = {};
               if (v instanceof Data_Either.Left) {
                   return Text_Smolder_Markup.text(recipe.directions);
               };
-              throw new Error("Failed pattern match at App.View line 184, column 5 - line 188, column 31: " + [ v.constructor.name ]);
+              throw new Error("Failed pattern match at App.View line 192, column 5 - line 196, column 31: " + [ v.constructor.name ]);
           })());
       };
   };
@@ -13798,7 +13801,7 @@ var PS = {};
               if (v1 instanceof Data_Maybe.Nothing) {
                   return 0.0;
               };
-              throw new Error("Failed pattern match at App.View line 236, column 5 - line 243, column 5: " + [ v1.constructor.name ]);
+              throw new Error("Failed pattern match at App.View line 244, column 5 - line 251, column 5: " + [ v1.constructor.name ]);
           };
       })(0.0);
   };
@@ -13823,7 +13826,7 @@ var PS = {};
               return Data_String.contains(Data_String.toLower(v.value0))(Data_String.toLower(getRecipeName($145)));
           });
       };
-      throw new Error("Failed pattern match at App.View line 228, column 1 - line 228, column 84: " + [ v.constructor.name ]);
+      throw new Error("Failed pattern match at App.View line 236, column 1 - line 236, column 84: " + [ v.constructor.name ]);
   };
   var categoryView = function (recipeMap) {
       return function (v) {
@@ -13838,9 +13841,9 @@ var PS = {};
   var categoryList = function (v) {
       return function (v1) {
           if (v1 instanceof Network_RemoteData.Success) {
-              return Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("category-list"))(Data_Foldable.for_(Control_Monad_Free.freeApplicative)(Data_List_Types.foldableList)(groupRecipes(filterRecipes(v)(v1.value0)))(categoryView(v1.value0)));
+              return Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("category-list-background"))(scrollContainer(Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("category-list"))(Data_Foldable.for_(Control_Monad_Free.freeApplicative)(Data_List_Types.foldableList)(groupRecipes(filterRecipes(v)(v1.value0)))(categoryView(v1.value0)))));
           };
-          return Text_Smolder_Markup.text("");
+          return Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("category-list-background"))(Text_Smolder_Markup.text(""));
       };
   };
   var mainView = function (v) {
@@ -13852,21 +13855,22 @@ var PS = {};
               return categoryList(v.value0)(recipes);
           };
           if (v instanceof App_Routes.Recipe) {
-              return Data_Maybe.fromMaybe(Text_Smolder_Markup.text(""))(recipeMainView(recipes)(v.value0));
+              return scrollContainer(Data_Maybe.fromMaybe(Text_Smolder_Markup.text(""))(recipeMainView(recipes)(v.value0)));
           };
-          throw new Error("Failed pattern match at App.View line 89, column 1 - line 89, column 58: " + [ v.constructor.name, recipes.constructor.name ]);
+          throw new Error("Failed pattern match at App.View line 93, column 1 - line 93, column 58: " + [ v.constructor.name, recipes.constructor.name ]);
       };
   };
   var view = function (v) {
       return Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("main-layout"))(Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Free.freeBind)(navDrawer(v.drawerOpened)(v.view)(v.recipes))(function () {
           return Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("main-app"))(Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Free.freeBind)(header(v.view))(function () {
-              return Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Free.freeBind)(Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("scroll-container"))(mainView(v.view)(v.recipes)))(function () {
+              return Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Free.freeBind)(mainView(v.view)(v.recipes))(function () {
                   return Pux_DOM_HTML.mapEvent(App_Events.TooltipEvent.create)(App_Tooltip.tooltipView(v.tooltip));
               });
           }));
       }));
   };
   exports["view"] = view;
+  exports["scrollContainer"] = scrollContainer;
   exports["navDrawer"] = navDrawer;
   exports["recipeNavList"] = recipeNavList;
   exports["recipeNavLink"] = recipeNavLink;

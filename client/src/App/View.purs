@@ -39,8 +39,12 @@ view (State { view: route, recipes, tooltip, drawerOpened }) =
     navDrawer drawerOpened route recipes
     H.div ! HA.className "main-app" $ do
       header route
-      H.div ! HA.className "scroll-container" $ mainView route recipes
+      mainView route recipes
       mapEvent TooltipEvent $ Tooltip.tooltipView tooltip
+
+scrollContainer :: HTML Event -> HTML Event
+scrollContainer html =
+  H.div ! HA.className "scroll-container" $ html
 
 navDrawer :: Boolean -> Routes.Route -> RecipesResponse -> HTML Event
 navDrawer opened route recipes =
@@ -92,7 +96,7 @@ mainView Routes.Home recipes =
 mainView (Routes.Recipes filter') recipes =
   categoryList filter' recipes
 mainView (Routes.Recipe recipeId) recipes =
-  fromMaybe (text "") $ recipeMainView recipes $ FoodId recipeId
+  scrollContainer $ fromMaybe (text "") $ recipeMainView recipes $ FoodId recipeId
 
 recipeMainView :: RecipesResponse -> FoodId -> Maybe (HTML Event)
 recipeMainView (Success recipes) recipeId = do
@@ -158,10 +162,14 @@ ingredientView recipes (IngredientAmount { ingredient, amount }) =
 
 categoryList :: Filter -> RecipesResponse -> HTML Event
 categoryList filter' (Success recipes) =
-  H.div ! HA.className "category-list" $
-    for_ (groupRecipes (filterRecipes filter' recipes)) $ categoryView recipes
+  H.div ! HA.className "category-list-background" $
+    scrollContainer $
+      H.div ! HA.className "category-list" $
+        for_
+          (groupRecipes (filterRecipes filter' recipes))
+          (categoryView recipes)
 categoryList _ _ =
-  text ""
+  H.div ! HA.className "category-list-background" $ text ""
 
 categoryView :: Map FoodId RecipeComponent -> NonEmptyList (Tuple FoodId Recipe) -> HTML Event
 categoryView recipeMap (NonEmptyList recipes) =
