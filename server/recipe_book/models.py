@@ -1,17 +1,17 @@
 from django.db import models
 
+UNITS = [
+    ('ITEM', 'ITEM'),
+    ('CUP', 'CUP'),
+    ('TBSP', 'TBSP'),
+    ('TSP', 'TSP'),
+    ('LB', 'LB'),
+    ('OZ', 'OZ'),
+    ('GRAM', 'GRAM'),
+]
+
 
 class RecipeComponent(models.Model):
-    UNITS = [
-        ('ITEM', 'ITEM'),
-        ('CUP', 'CUP'),
-        ('TBSP', 'TBSP'),
-        ('TSP', 'TSP'),
-        ('LB', 'LB'),
-        ('OZ', 'OZ'),
-        ('GRAM', 'GRAM'),
-    ]
-
     COMPONENTS = {
         'R': 'Recipe',
         'I': 'Ingredient',
@@ -36,10 +36,12 @@ class IngredientAmount(models.Model):
     recipe = models.ForeignKey(RecipeComponent, related_name='ingredients')
     ingredient = models.ForeignKey(RecipeComponent, related_name='recipes')
     amount = models.FloatField()
+    unit_type = models.CharField(max_length=10, choices=UNITS)
 
     def __unicode__(self):
-        return u'<IngredientAmount: {}, {}, {}>'.format(
+        return u'<IngredientAmount: {}, {}, {}, {}>'.format(
             self.recipe,
             self.ingredient,
-            self.amount
+            self.amount,
+            self.unit_type
         )

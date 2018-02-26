@@ -5,9 +5,10 @@ import Prelude
 import App.Events (Event(..))
 import App.Filter (Filter(..))
 import App.Markdown (Markdown(..), Inline(..), markdownParser, tryStripMarkdown)
+import App.Measurement (Measurement, convertMeasurement)
 import App.Routes (toURL)
 import App.Routes as Routes
-import App.State (FoodId(..), IngredientAmount(..), Measurement, Recipe, RecipeComponent(..), State(..), RecipesResponse)
+import App.State (FoodId(..), IngredientAmount(..), Recipe, RecipeComponent(..), State(..), RecipesResponse)
 import App.Tooltip as Tooltip
 import CSS (CSS, Size, backgroundColor, borderRadius, height, margin, px, rgb, width)
 import Data.Either (Either(..))
@@ -143,13 +144,13 @@ uniBorderRadius size =
   borderRadius size size size size
 
 ingredientView :: Map FoodId RecipeComponent -> IngredientAmount -> HTML Event
-ingredientView recipes (IngredientAmount { ingredient, amount }) =
+ingredientView recipes (IngredientAmount { ingredient, amount, unitType }) =
   case Map.lookup ingredient recipes of
-    Just (IngredientComp _ { unitType, name }) ->
+    Just (IngredientComp _ { name }) ->
       H.li $ text
         (toString amount <> " " <> show unitType <> " " <> name)
 
-    Just (RecipeComp (FoodId recipeId) { unitType, name }) ->
+    Just (RecipeComp (FoodId recipeId) { name }) ->
       H.li $ do
         text (toString amount <> " " <> show unitType <> " ")
         H.a
@@ -214,9 +215,8 @@ inlineToHtml recipes recipe (Link label recipeId) =
 
 recipeLink :: Map FoodId RecipeComponent -> List IngredientAmount -> String -> Int -> Maybe (HTML Event)
 recipeLink recipes ingredients label id = do
-  IngredientAmount { ingredient, amount } <- find ((==) (FoodId id) <<< _.ingredient <<< unwrap) ingredients
+  IngredientAmount { ingredient, amount, unitType } <- find ((==) (FoodId id) <<< _.ingredient <<< unwrap) ingredients
   recipeComp <- Map.lookup ingredient recipes
-  let unitType = getUnitType recipeComp
   let name = getRecipeName recipeComp
   pure $ mapEvent TooltipEvent $ Tooltip.label label (toString amount <> " " <> show unitType <> " " <> name)
 
@@ -240,15 +240,17 @@ filterRecipes (Search term) =
 
 getCost :: Map FoodId RecipeComponent -> List IngredientAmount -> Number
 getCost recipes =
-  foldl (\total (IngredientAmount { ingredient, amount }) ->
-    case Map.lookup ingredient recipes of
-      Just (IngredientComp _ { unitCost, amount: totalAmount }) ->
-        total + (amount / totalAmount) * unitCost
-      Just (RecipeComp _ { ingredients, amount: totalAmount }) ->
-        total + (amount / totalAmount) * getCost recipes ingredients
-      Nothing ->
-        0.0
-    ) 0.0
+  let convert from to amount = fromMaybe 0.0 $ convertMeasurement from to amount
+  in
+    foldl (\total (IngredientAmount { ingredient, amount, unitType: iaUnit }) ->
+      case Map.lookup ingredient recipes of
+        Just (IngredientComp _ { unitCost, unitType, amount: unitAmount }) ->
+          total + convert iaUnit unitType amount * unitCost / unitAmount
+        Just (RecipeComp _ { ingredients, unitType, amount: unitAmount }) ->
+          total + convert iaUnit unitType amount * getCost recipes ingredients / unitAmount
+        Nothing ->
+          0.0
+      ) 0.0
 
 getUnitType :: RecipeComponent -> Measurement
 getUnitType recipeComp =

@@ -6862,6 +6862,262 @@ var PS = {};
   exports["toURL"] = toURL;
 })(PS["App.Routes"] = PS["App.Routes"] || {});
 (function(exports) {
+    "use strict";
+  var Data_Either = PS["Data.Either"];
+  var Data_Eq = PS["Data.Eq"];
+  var Data_EuclideanRing = PS["Data.EuclideanRing"];
+  var Data_Function = PS["Data.Function"];
+  var Data_Maybe = PS["Data.Maybe"];
+  var Data_Semigroup = PS["Data.Semigroup"];
+  var Data_Semiring = PS["Data.Semiring"];
+  var Data_Show = PS["Data.Show"];
+  var Prelude = PS["Prelude"];        
+  var Lbs = (function () {
+      function Lbs() {
+
+      };
+      Lbs.value = new Lbs();
+      return Lbs;
+  })();
+  var Oz = (function () {
+      function Oz() {
+
+      };
+      Oz.value = new Oz();
+      return Oz;
+  })();
+  var Grams = (function () {
+      function Grams() {
+
+      };
+      Grams.value = new Grams();
+      return Grams;
+  })();
+  var Cups = (function () {
+      function Cups() {
+
+      };
+      Cups.value = new Cups();
+      return Cups;
+  })();
+  var Tbsp = (function () {
+      function Tbsp() {
+
+      };
+      Tbsp.value = new Tbsp();
+      return Tbsp;
+  })();
+  var Tsp = (function () {
+      function Tsp() {
+
+      };
+      Tsp.value = new Tsp();
+      return Tsp;
+  })();
+  var Items = (function () {
+      function Items() {
+
+      };
+      Items.value = new Items();
+      return Items;
+  })();
+  var Volume = (function () {
+      function Volume(value0) {
+          this.value0 = value0;
+      };
+      Volume.create = function (value0) {
+          return new Volume(value0);
+      };
+      return Volume;
+  })();
+  var Weight = (function () {
+      function Weight(value0) {
+          this.value0 = value0;
+      };
+      Weight.create = function (value0) {
+          return new Weight(value0);
+      };
+      return Weight;
+  })();
+  var Convertible = function (Eq0, convertBase) {
+      this.Eq0 = Eq0;
+      this.convertBase = convertBase;
+  };
+  var showWeightMeasurement = new Data_Show.Show(function (v) {
+      if (v instanceof Lbs) {
+          return "lbs";
+      };
+      if (v instanceof Oz) {
+          return "oz";
+      };
+      if (v instanceof Grams) {
+          return "grams";
+      };
+      throw new Error("Failed pattern match at App.Measurement line 42, column 1 - line 42, column 57: " + [ v.constructor.name ]);
+  });
+  var showVolumeMeasurement = new Data_Show.Show(function (v) {
+      if (v instanceof Cups) {
+          return "cups";
+      };
+      if (v instanceof Tbsp) {
+          return "tbsp";
+      };
+      if (v instanceof Tsp) {
+          return "tsp";
+      };
+      throw new Error("Failed pattern match at App.Measurement line 25, column 1 - line 25, column 57: " + [ v.constructor.name ]);
+  });
+  var showMeasurement = new Data_Show.Show(function (v) {
+      if (v instanceof Items) {
+          return "";
+      };
+      if (v instanceof Volume) {
+          return Data_Show.show(showVolumeMeasurement)(v.value0);
+      };
+      if (v instanceof Weight) {
+          return Data_Show.show(showWeightMeasurement)(v.value0);
+      };
+      throw new Error("Failed pattern match at App.Measurement line 57, column 1 - line 57, column 45: " + [ v.constructor.name ]);
+  });
+  var parse = function (v) {
+      if (v === "ITEM") {
+          return new Data_Either.Right(Items.value);
+      };
+      if (v === "CUP") {
+          return Data_Either.Right.create(new Volume(Cups.value));
+      };
+      if (v === "TBSP") {
+          return Data_Either.Right.create(new Volume(Tbsp.value));
+      };
+      if (v === "TSP") {
+          return Data_Either.Right.create(new Volume(Tsp.value));
+      };
+      if (v === "LB") {
+          return Data_Either.Right.create(new Weight(Lbs.value));
+      };
+      if (v === "OZ") {
+          return Data_Either.Right.create(new Weight(Oz.value));
+      };
+      if (v === "GRAM") {
+          return Data_Either.Right.create(new Weight(Grams.value));
+      };
+      return Data_Either.Left.create("Expected Measurement, but got '" + (v + "'"));
+  };
+  var eqWeightMeasurement = new Data_Eq.Eq(function (x) {
+      return function (y) {
+          if (x instanceof Lbs && y instanceof Lbs) {
+              return true;
+          };
+          if (x instanceof Oz && y instanceof Oz) {
+              return true;
+          };
+          if (x instanceof Grams && y instanceof Grams) {
+              return true;
+          };
+          return false;
+      };
+  });
+  var eqVolumeMeasurement = new Data_Eq.Eq(function (x) {
+      return function (y) {
+          if (x instanceof Cups && y instanceof Cups) {
+              return true;
+          };
+          if (x instanceof Tbsp && y instanceof Tbsp) {
+              return true;
+          };
+          if (x instanceof Tsp && y instanceof Tsp) {
+              return true;
+          };
+          return false;
+      };
+  });
+  var convertibleWeightMeasurement = new Convertible(function () {
+      return eqWeightMeasurement;
+  }, function (v) {
+      return function (x) {
+          if (v instanceof Lbs) {
+              return x;
+          };
+          if (v instanceof Oz) {
+              return 16.0 * x;
+          };
+          if (v instanceof Grams) {
+              return 453.592 * x;
+          };
+          throw new Error("Failed pattern match at App.Measurement line 47, column 1 - line 47, column 71: " + [ v.constructor.name, x.constructor.name ]);
+      };
+  });
+  var convertibleVolumeMeasurement = new Convertible(function () {
+      return eqVolumeMeasurement;
+  }, function (v) {
+      return function (x) {
+          if (v instanceof Cups) {
+              return x;
+          };
+          if (v instanceof Tbsp) {
+              return 16.0 * x;
+          };
+          if (v instanceof Tsp) {
+              return 48.0 * x;
+          };
+          throw new Error("Failed pattern match at App.Measurement line 30, column 1 - line 30, column 71: " + [ v.constructor.name, x.constructor.name ]);
+      };
+  });
+  var convertBase = function (dict) {
+      return dict.convertBase;
+  };
+  var convert = function (dictConvertible) {
+      return function (unit1) {
+          return function (unit2) {
+              return function (x) {
+                  var $28 = Data_Eq.eq(dictConvertible.Eq0())(unit1)(unit2);
+                  if ($28) {
+                      return x;
+                  };
+                  return convertBase(dictConvertible)(unit2)(x / convertBase(dictConvertible)(unit1)(1.0));
+              };
+          };
+      };
+  };
+  var convertMeasurement = function (v) {
+      return function (v1) {
+          return function (v2) {
+              if (v instanceof Items && v1 instanceof Items) {
+                  return new Data_Maybe.Just(v2);
+              };
+              if (v instanceof Volume && v1 instanceof Volume) {
+                  return Data_Maybe.Just.create(convert(convertibleVolumeMeasurement)(v.value0)(v1.value0)(v2));
+              };
+              if (v instanceof Weight && v1 instanceof Weight) {
+                  return Data_Maybe.Just.create(convert(convertibleWeightMeasurement)(v.value0)(v1.value0)(v2));
+              };
+              return Data_Maybe.Nothing.value;
+          };
+      };
+  };
+  exports["convertBase"] = convertBase;
+  exports["Convertible"] = Convertible;
+  exports["convert"] = convert;
+  exports["Cups"] = Cups;
+  exports["Tbsp"] = Tbsp;
+  exports["Tsp"] = Tsp;
+  exports["Lbs"] = Lbs;
+  exports["Oz"] = Oz;
+  exports["Grams"] = Grams;
+  exports["Items"] = Items;
+  exports["Volume"] = Volume;
+  exports["Weight"] = Weight;
+  exports["parse"] = parse;
+  exports["convertMeasurement"] = convertMeasurement;
+  exports["eqVolumeMeasurement"] = eqVolumeMeasurement;
+  exports["showVolumeMeasurement"] = showVolumeMeasurement;
+  exports["convertibleVolumeMeasurement"] = convertibleVolumeMeasurement;
+  exports["eqWeightMeasurement"] = eqWeightMeasurement;
+  exports["showWeightMeasurement"] = showWeightMeasurement;
+  exports["convertibleWeightMeasurement"] = convertibleWeightMeasurement;
+  exports["showMeasurement"] = showMeasurement;
+})(PS["App.Measurement"] = PS["App.Measurement"] || {});
+(function(exports) {
   // Generated by purs version 0.11.7
   "use strict";
   var Control_Category = PS["Control.Category"];
@@ -11368,8 +11624,8 @@ var PS = {};
   exports["Success"] = Success;
 })(PS["Network.RemoteData"] = PS["Network.RemoteData"] || {});
 (function(exports) {
-  // Generated by purs version 0.11.7
-  "use strict";
+    "use strict";
+  var App_Measurement = PS["App.Measurement"];
   var App_Routes = PS["App.Routes"];
   var App_Tooltip = PS["App.Tooltip"];
   var Control_Applicative = PS["Control.Applicative"];
@@ -11386,76 +11642,8 @@ var PS = {};
   var Data_Newtype = PS["Data.Newtype"];
   var Data_Ord = PS["Data.Ord"];
   var Data_Semigroup = PS["Data.Semigroup"];
-  var Data_Show = PS["Data.Show"];
   var Network_RemoteData = PS["Network.RemoteData"];
   var Prelude = PS["Prelude"];        
-  var Lbs = (function () {
-      function Lbs() {
-
-      };
-      Lbs.value = new Lbs();
-      return Lbs;
-  })();
-  var Oz = (function () {
-      function Oz() {
-
-      };
-      Oz.value = new Oz();
-      return Oz;
-  })();
-  var Grams = (function () {
-      function Grams() {
-
-      };
-      Grams.value = new Grams();
-      return Grams;
-  })();
-  var Cups = (function () {
-      function Cups() {
-
-      };
-      Cups.value = new Cups();
-      return Cups;
-  })();
-  var Tbsp = (function () {
-      function Tbsp() {
-
-      };
-      Tbsp.value = new Tbsp();
-      return Tbsp;
-  })();
-  var Tsp = (function () {
-      function Tsp() {
-
-      };
-      Tsp.value = new Tsp();
-      return Tsp;
-  })();
-  var Items = (function () {
-      function Items() {
-
-      };
-      Items.value = new Items();
-      return Items;
-  })();
-  var Volume = (function () {
-      function Volume(value0) {
-          this.value0 = value0;
-      };
-      Volume.create = function (value0) {
-          return new Volume(value0);
-      };
-      return Volume;
-  })();
-  var Weight = (function () {
-      function Weight(value0) {
-          this.value0 = value0;
-      };
-      Weight.create = function (value0) {
-          return new Weight(value0);
-      };
-      return Weight;
-  })();
   var FoodId = function (x) {
       return x;
   };
@@ -11485,67 +11673,7 @@ var PS = {};
           };
       };
       return RecipeComp;
-  })();
-  var showWeightMeasurement = new Data_Show.Show(function (v) {
-      if (v instanceof Lbs) {
-          return "lbs";
-      };
-      if (v instanceof Oz) {
-          return "oz";
-      };
-      if (v instanceof Grams) {
-          return "grams";
-      };
-      throw new Error("Failed pattern match at App.State line 29, column 1 - line 29, column 57: " + [ v.constructor.name ]);
-  });
-  var showVolumeMeasurement = new Data_Show.Show(function (v) {
-      if (v instanceof Cups) {
-          return "cups";
-      };
-      if (v instanceof Tbsp) {
-          return "tbsp";
-      };
-      if (v instanceof Tsp) {
-          return "tsp";
-      };
-      throw new Error("Failed pattern match at App.State line 24, column 1 - line 24, column 57: " + [ v.constructor.name ]);
-  });
-  var showMeasurement = new Data_Show.Show(function (v) {
-      if (v instanceof Items) {
-          return "";
-      };
-      if (v instanceof Volume) {
-          return Data_Show.show(showVolumeMeasurement)(v.value0);
-      };
-      if (v instanceof Weight) {
-          return Data_Show.show(showWeightMeasurement)(v.value0);
-      };
-      throw new Error("Failed pattern match at App.State line 49, column 1 - line 49, column 45: " + [ v.constructor.name ]);
-  });
-  var parseMeasurement = function (v) {
-      if (v === "ITEM") {
-          return Data_Either.Right.create(Items.value);
-      };
-      if (v === "CUP") {
-          return Data_Either.Right.create(new Volume(Cups.value));
-      };
-      if (v === "TBSP") {
-          return Data_Either.Right.create(new Volume(Tbsp.value));
-      };
-      if (v === "TSP") {
-          return Data_Either.Right.create(new Volume(Tsp.value));
-      };
-      if (v === "LB") {
-          return Data_Either.Right.create(new Weight(Lbs.value));
-      };
-      if (v === "OZ") {
-          return Data_Either.Right.create(new Weight(Oz.value));
-      };
-      if (v === "GRAM") {
-          return Data_Either.Right.create(new Weight(Grams.value));
-      };
-      return Data_Either.Left.create("Expected Measurement, but got '" + (v + "'"));
-  };        
+  })();     
   var newtypeIngredientAmount = new Data_Newtype.Newtype(function (n) {
       return n;
   }, IngredientAmount);
@@ -11571,9 +11699,12 @@ var PS = {};
       return Control_Bind.bind(Data_Either.bindEither)(Data_Argonaut_Decode_Class.decodeJson(Data_Argonaut_Decode_Class.decodeStrMap(Data_Argonaut_Decode_Class.decodeJsonJson))(json))(function (v) {
           return Control_Bind.bind(Data_Either.bindEither)(Data_Functor.map(Data_Either.functorEither)(FoodId)(Data_Argonaut_Decode_Combinators.getField(Data_Argonaut_Decode_Class.decodeJsonInt)(v)("ingredient")))(function (v1) {
               return Control_Bind.bind(Data_Either.bindEither)(Data_Argonaut_Decode_Combinators.getField(Data_Argonaut_Decode_Class.decodeJsonNumber)(v)("amount"))(function (v2) {
-                  return Control_Applicative.pure(Data_Either.applicativeEither)({
-                      ingredient: v1,
-                      amount: v2
+                  return Control_Bind.bind(Data_Either.bindEither)(Control_Bind.bind(Data_Either.bindEither)(Data_Argonaut_Decode_Combinators.getField(Data_Argonaut_Decode_Class.decodeJsonString)(v)("unit_type"))(App_Measurement.parse))(function (v3) {
+                      return Control_Applicative.pure(Data_Either.applicativeEither)({
+                          ingredient: v1,
+                          amount: v2,
+                          unitType: v3
+                      });
                   });
               });
           });
@@ -11584,7 +11715,7 @@ var PS = {};
           return Control_Bind.bind(Data_Either.bindEither)(Data_Argonaut_Decode_Combinators.getField(Data_Argonaut_Decode_Class.decodeJsonString)(v)("name"))(function (v1) {
               return Control_Bind.bind(Data_Either.bindEither)(Data_Argonaut_Decode_Combinators.getField(Data_Argonaut_Decode_Class.decodeJsonString)(v)("category"))(function (v2) {
                   return Control_Bind.bind(Data_Either.bindEither)(Control_Bind.bind(Data_Either.bindEither)(Data_Argonaut_Decode_Combinators.getField(Data_Argonaut_Decode_Class.decodeJsonJson)(v)("ingredients"))(Data_Argonaut_Decode_Class.decodeJson(Data_Argonaut_Decode_Class.decodeList(decodeJsonIngredientAmount))))(function (v3) {
-                      return Control_Bind.bind(Data_Either.bindEither)(Control_Bind.bind(Data_Either.bindEither)(Data_Argonaut_Decode_Combinators.getField(Data_Argonaut_Decode_Class.decodeJsonString)(v)("unit_type"))(parseMeasurement))(function (v4) {
+                      return Control_Bind.bind(Data_Either.bindEither)(Control_Bind.bind(Data_Either.bindEither)(Data_Argonaut_Decode_Combinators.getField(Data_Argonaut_Decode_Class.decodeJsonString)(v)("unit_type"))(App_Measurement.parse))(function (v4) {
                           return Control_Bind.bind(Data_Either.bindEither)(Data_Argonaut_Decode_Combinators.getField(Data_Argonaut_Decode_Class.decodeJsonNumber)(v)("amount"))(function (v5) {
                               return Control_Bind.bind(Data_Either.bindEither)(Data_Argonaut_Decode_Combinators.getField(Data_Argonaut_Decode_Class.decodeJsonString)(v)("directions"))(function (v6) {
                                   return Control_Applicative.pure(Data_Either.applicativeEither)({
@@ -11607,7 +11738,7 @@ var PS = {};
       return Control_Bind.bind(Data_Either.bindEither)(Data_Argonaut_Decode_Class.decodeJson(Data_Argonaut_Decode_Class.decodeStrMap(Data_Argonaut_Decode_Class.decodeJsonJson))(json))(function (v) {
           return Control_Bind.bind(Data_Either.bindEither)(Data_Argonaut_Decode_Combinators.getField(Data_Argonaut_Decode_Class.decodeJsonString)(v)("name"))(function (v1) {
               return Control_Bind.bind(Data_Either.bindEither)(Data_Argonaut_Decode_Combinators.getField(Data_Argonaut_Decode_Class.decodeJsonNumber)(v)("unit_cost"))(function (v2) {
-                  return Control_Bind.bind(Data_Either.bindEither)(Control_Bind.bind(Data_Either.bindEither)(Data_Argonaut_Decode_Combinators.getField(Data_Argonaut_Decode_Class.decodeJsonString)(v)("unit_type"))(parseMeasurement))(function (v3) {
+                  return Control_Bind.bind(Data_Either.bindEither)(Control_Bind.bind(Data_Either.bindEither)(Data_Argonaut_Decode_Combinators.getField(Data_Argonaut_Decode_Class.decodeJsonString)(v)("unit_type"))(App_Measurement.parse))(function (v3) {
                       return Control_Bind.bind(Data_Either.bindEither)(Data_Argonaut_Decode_Combinators.getField(Data_Argonaut_Decode_Class.decodeJsonNumber)(v)("amount"))(function (v4) {
                           return Control_Applicative.pure(Data_Either.applicativeEither)({
                               name: v1,
@@ -11640,16 +11771,6 @@ var PS = {};
           });
       });
   });
-  exports["Cups"] = Cups;
-  exports["Tbsp"] = Tbsp;
-  exports["Tsp"] = Tsp;
-  exports["Lbs"] = Lbs;
-  exports["Oz"] = Oz;
-  exports["Grams"] = Grams;
-  exports["Items"] = Items;
-  exports["Volume"] = Volume;
-  exports["Weight"] = Weight;
-  exports["parseMeasurement"] = parseMeasurement;
   exports["FoodId"] = FoodId;
   exports["decodeIngredient"] = decodeIngredient;
   exports["IngredientAmount"] = IngredientAmount;
@@ -11657,9 +11778,6 @@ var PS = {};
   exports["IngredientComp"] = IngredientComp;
   exports["RecipeComp"] = RecipeComp;
   exports["init"] = init;
-  exports["showVolumeMeasurement"] = showVolumeMeasurement;
-  exports["showWeightMeasurement"] = showWeightMeasurement;
-  exports["showMeasurement"] = showMeasurement;
   exports["eqFoodId"] = eqFoodId;
   exports["ordFoodId"] = ordFoodId;
   exports["newtypeIngredientAmount"] = newtypeIngredientAmount;
@@ -13497,6 +13615,7 @@ var PS = {};
   var App_Events = PS["App.Events"];
   var App_Filter = PS["App.Filter"];
   var App_Markdown = PS["App.Markdown"];
+  var App_Measurement = PS["App.Measurement"];
   var App_Routes = PS["App.Routes"];
   var App_State = PS["App.State"];
   var App_Tooltip = PS["App.Tooltip"];
@@ -13593,8 +13712,8 @@ var PS = {};
   var listRecipes = function (dictOrd) {
       return function (accessor) {
           return function (recipes) {
-              return Data_List.sortBy(Data_Function.on(Data_Ord.compare(dictOrd))(function ($142) {
-                  return accessor(Data_Tuple.snd($142));
+              return Data_List.sortBy(Data_Function.on(Data_Ord.compare(dictOrd))(function ($145) {
+                  return accessor(Data_Tuple.snd($145));
               }))(Data_Filterable.filterMap(Data_Filterable.filterableList)(toRecipe)(Data_Map.values(recipes)));
           };
       };
@@ -13648,17 +13767,17 @@ var PS = {};
       return function (v) {
           var v1 = Data_Map.lookup(App_State.ordFoodId)(v.ingredient)(recipes);
           if (v1 instanceof Data_Maybe.Just && v1.value0 instanceof App_State.IngredientComp) {
-              return Text_Smolder_HTML.li(Text_Smolder_Markup.text(Data_Number_Format.toString(v.amount) + (" " + (Data_Show.show(App_State.showMeasurement)(v1.value0.value1.unitType) + (" " + v1.value0.value1.name)))));
+              return Text_Smolder_HTML.li(Text_Smolder_Markup.text(Data_Number_Format.toString(v.amount) + (" " + (Data_Show.show(App_Measurement.showMeasurement)(v.unitType) + (" " + v1.value0.value1.name)))));
           };
           if (v1 instanceof Data_Maybe.Just && v1.value0 instanceof App_State.RecipeComp) {
-              return Text_Smolder_HTML.li(Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Free.freeBind)(Text_Smolder_Markup.text(Data_Number_Format.toString(v.amount) + (" " + (Data_Show.show(App_State.showMeasurement)(v1.value0.value1.unitType) + " "))))(function () {
+              return Text_Smolder_HTML.li(Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Free.freeBind)(Text_Smolder_Markup.text(Data_Number_Format.toString(v.amount) + (" " + (Data_Show.show(App_Measurement.showMeasurement)(v.unitType) + " "))))(function () {
                   return Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.a)(Text_Smolder_HTML_Attributes.className("ingredient-view__recipe-link")))(Text_Smolder_HTML_Attributes.href(App_Routes.toURL(new App_Routes.Recipe(v1.value0.value0))))(Text_Smolder_Markup.text(v1.value0.value1.name));
               }));
           };
           if (v1 instanceof Data_Maybe.Nothing) {
               return Text_Smolder_Markup.text("");
           };
-          throw new Error("Failed pattern match at App.View line 147, column 3 - line 163, column 1: " + [ v1.constructor.name ]);
+          throw new Error("Failed pattern match at App.View line 148, column 3 - line 164, column 1: " + [ v1.constructor.name ]);
       };
   };
   var header = function (route) {
@@ -13669,22 +13788,13 @@ var PS = {};
       }));
   };
   var groupRecipes = function (recipes) {
-      return Data_List.groupBy(Data_Function.on(Data_Eq.eq(Data_Eq.eqString))(function ($143) {
+      return Data_List.groupBy(Data_Function.on(Data_Eq.eq(Data_Eq.eqString))(function ($146) {
           return (function (v) {
               return v.category;
-          })(Data_Tuple.snd($143));
+          })(Data_Tuple.snd($146));
       }))(listRecipes(Data_Ord.ordString)(function (v) {
           return v.category;
       })(recipes));
-  };
-  var getUnitType = function (recipeComp) {
-      if (recipeComp instanceof App_State.RecipeComp) {
-          return recipeComp.value1.unitType;
-      };
-      if (recipeComp instanceof App_State.IngredientComp) {
-          return recipeComp.value1.unitType;
-      };
-      throw new Error("Failed pattern match at App.View line 255, column 3 - line 257, column 46: " + [ recipeComp.constructor.name ]);
   };
   var getRecipeName = function (recipeComp) {
       if (recipeComp instanceof App_State.RecipeComp) {
@@ -13693,21 +13803,20 @@ var PS = {};
       if (recipeComp instanceof App_State.IngredientComp) {
           return recipeComp.value1.name;
       };
-      throw new Error("Failed pattern match at App.View line 268, column 3 - line 270, column 38: " + [ recipeComp.constructor.name ]);
+      throw new Error("Failed pattern match at App.View line 270, column 3 - line 272, column 38: " + [ recipeComp.constructor.name ]);
   };
   var recipeLink = function (recipes) {
       return function (ingredients) {
           return function (label) {
               return function (id) {
-                  return Control_Bind.bind(Data_Maybe.bindMaybe)(Data_Foldable.find(Data_List_Types.foldableList)(function ($144) {
+                  return Control_Bind.bind(Data_Maybe.bindMaybe)(Data_Foldable.find(Data_List_Types.foldableList)(function ($147) {
                       return Data_Eq.eq(App_State.eqFoodId)(id)((function (v) {
                           return v.ingredient;
-                      })(Data_Newtype.unwrap(App_State.newtypeIngredientAmount)($144)));
+                      })(Data_Newtype.unwrap(App_State.newtypeIngredientAmount)($147)));
                   })(ingredients))(function (v) {
                       return Control_Bind.bind(Data_Maybe.bindMaybe)(Data_Map.lookup(App_State.ordFoodId)(v.ingredient)(recipes))(function (v1) {
-                          var unitType = getUnitType(v1);
                           var name = getRecipeName(v1);
-                          return Control_Applicative.pure(Data_Maybe.applicativeMaybe)(Pux_DOM_HTML.mapEvent(App_Events.TooltipEvent.create)(App_Tooltip.label(label)(Data_Number_Format.toString(v.amount) + (" " + (Data_Show.show(App_State.showMeasurement)(unitType) + (" " + name))))));
+                          return Control_Applicative.pure(Data_Maybe.applicativeMaybe)(Pux_DOM_HTML.mapEvent(App_Events.TooltipEvent.create)(App_Tooltip.label(label)(Data_Number_Format.toString(v.amount) + (" " + (Data_Show.show(App_Measurement.showMeasurement)(v.unitType) + (" " + name))))));
                       });
                   });
               };
@@ -13732,7 +13841,7 @@ var PS = {};
               if (v2 instanceof App_Markdown.Link) {
                   return Data_Maybe.fromMaybe(Text_Smolder_Markup.text(v2.value0))(recipeLink(v)(v1.ingredients)(v2.value0)(v2.value1));
               };
-              throw new Error("Failed pattern match at App.View line 202, column 1 - line 202, column 77: " + [ v.constructor.name, v1.constructor.name, v2.constructor.name ]);
+              throw new Error("Failed pattern match at App.View line 203, column 1 - line 203, column 77: " + [ v.constructor.name, v1.constructor.name, v2.constructor.name ]);
           };
       };
   };
@@ -13753,7 +13862,7 @@ var PS = {};
               if (v instanceof Data_Either.Left) {
                   return Text_Smolder_Markup.text(recipe.directions);
               };
-              throw new Error("Failed pattern match at App.View line 192, column 5 - line 196, column 31: " + [ v.constructor.name ]);
+              throw new Error("Failed pattern match at App.View line 193, column 5 - line 197, column 31: " + [ v.constructor.name ]);
           })());
       };
   };
@@ -13789,19 +13898,26 @@ var PS = {};
       };
   };
   var getCost = function (recipes) {
+      var convert = function (from) {
+          return function (to) {
+              return function (amount) {
+                  return Data_Maybe.fromMaybe(0.0)(App_Measurement.convertMeasurement(from)(to)(amount));
+              };
+          };
+      };
       return Data_Foldable.foldl(Data_List_Types.foldableList)(function (total) {
           return function (v) {
               var v1 = Data_Map.lookup(App_State.ordFoodId)(v.ingredient)(recipes);
               if (v1 instanceof Data_Maybe.Just && v1.value0 instanceof App_State.IngredientComp) {
-                  return total + (v.amount / v1.value0.value1.amount) * v1.value0.value1.unitCost;
+                  return total + (convert(v.unitType)(v1.value0.value1.unitType)(v.amount) * v1.value0.value1.unitCost) / v1.value0.value1.amount;
               };
               if (v1 instanceof Data_Maybe.Just && v1.value0 instanceof App_State.RecipeComp) {
-                  return total + (v.amount / v1.value0.value1.amount) * getCost(recipes)(v1.value0.value1.ingredients);
+                  return total + (convert(v.unitType)(v1.value0.value1.unitType)(v.amount) * getCost(recipes)(v1.value0.value1.ingredients)) / v1.value0.value1.amount;
               };
               if (v1 instanceof Data_Maybe.Nothing) {
                   return 0.0;
               };
-              throw new Error("Failed pattern match at App.View line 244, column 5 - line 251, column 5: " + [ v1.constructor.name ]);
+              throw new Error("Failed pattern match at App.View line 246, column 7 - line 253, column 7: " + [ v1.constructor.name ]);
           };
       })(0.0);
   };
@@ -13822,8 +13938,8 @@ var PS = {};
           return Control_Category.id(Control_Category.categoryFn);
       };
       if (v instanceof App_Filter.Search) {
-          return Data_Map.filter(App_State.ordFoodId)(function ($145) {
-              return Data_String.contains(Data_String.toLower(v.value0))(Data_String.toLower(getRecipeName($145)));
+          return Data_Map.filter(App_State.ordFoodId)(function ($148) {
+              return Data_String.contains(Data_String.toLower(v.value0))(Data_String.toLower(getRecipeName($148)));
           });
       };
       throw new Error("Failed pattern match at App.View line 236, column 1 - line 236, column 84: " + [ v.constructor.name ]);
@@ -13857,7 +13973,7 @@ var PS = {};
           if (v instanceof App_Routes.Recipe) {
               return scrollContainer(Data_Maybe.fromMaybe(Text_Smolder_Markup.text(""))(recipeMainView(recipes)(v.value0)));
           };
-          throw new Error("Failed pattern match at App.View line 93, column 1 - line 93, column 58: " + [ v.constructor.name, recipes.constructor.name ]);
+          throw new Error("Failed pattern match at App.View line 94, column 1 - line 94, column 58: " + [ v.constructor.name, recipes.constructor.name ]);
       };
   };
   var view = function (v) {
@@ -13893,7 +14009,6 @@ var PS = {};
   exports["groupRecipes"] = groupRecipes;
   exports["filterRecipes"] = filterRecipes;
   exports["getCost"] = getCost;
-  exports["getUnitType"] = getUnitType;
   exports["getRecipe"] = getRecipe;
   exports["getRecipeName"] = getRecipeName;
   exports["formatCost"] = formatCost;

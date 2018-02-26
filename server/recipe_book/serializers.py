@@ -4,7 +4,7 @@ from .models import RecipeComponent, IngredientAmount
 class IngredientAmountSerializer(serializers.ModelSerializer):
     class Meta:
         model = IngredientAmount
-        fields = ('ingredient', 'amount')
+        fields = ('ingredient', 'amount', 'unit_type')
 
 class RecipeComponentSerializer(serializers.ModelSerializer):
     ingredients = IngredientAmountSerializer(many=True, read_only=True)

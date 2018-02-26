@@ -2,6 +2,8 @@ module App.State where
 
 import Prelude
 
+import App.Measurement (Measurement)
+import App.Measurement as Measurement
 import App.Routes as Routes
 import App.Tooltip as Tooltip
 import Data.Argonaut (class DecodeJson, Json, decodeJson, (.?))
@@ -10,46 +12,6 @@ import Data.List as List
 import Data.Map as Map
 import Data.Newtype (class Newtype)
 import Network.RemoteData (RemoteData(..))
-
-data VolumeMeasurement
-  = Cups
-  | Tbsp
-  | Tsp
-
-data WeightMeasurement
-  = Lbs
-  | Oz
-  | Grams
-
-instance showVolumeMeasurement :: Show VolumeMeasurement where
-  show Cups = "cups"
-  show Tbsp = "tbsp"
-  show Tsp = "tsp"
-
-instance showWeightMeasurement :: Show WeightMeasurement where
-  show Lbs = "lbs"
-  show Oz = "oz"
-  show Grams = "grams"
-
-data Measurement
-  = Items
-  | Volume VolumeMeasurement
-  | Weight WeightMeasurement
-
-parseMeasurement :: String -> Either String Measurement
-parseMeasurement "ITEM" = Right $ Items
-parseMeasurement "CUP" = Right $ Volume Cups
-parseMeasurement "TBSP" = Right $ Volume Tbsp
-parseMeasurement "TSP" = Right $ Volume Tsp
-parseMeasurement "LB" = Right $ Weight Lbs
-parseMeasurement "OZ" = Right $ Weight Oz
-parseMeasurement "GRAM" = Right $ Weight Grams
-parseMeasurement str = Left $ "Expected Measurement, but got '" <> str <> "'"
-
-instance showMeasurement :: Show Measurement where
-  show Items = ""
-  show (Volume measurement) = show measurement
-  show (Weight measurement) = show measurement
 
 newtype FoodId = FoodId Int
 
@@ -69,7 +31,7 @@ decodeIngredient json = do
   obj <- decodeJson json
   name <- obj .? "name"
   unitCost <- obj .? "unit_cost"
-  unitType <- obj .? "unit_type" >>= parseMeasurement
+  unitType <- obj .? "unit_type" >>= Measurement.parse
   amount <- obj .? "amount"
   pure $ { name, unitCost, unitType, amount }
 
@@ -77,7 +39,7 @@ newtype IngredientAmount =
   IngredientAmount
     { ingredient :: FoodId
     , amount :: Number
-    -- , unitType :: Measurement
+    , unitType :: Measurement
     }
 
 derive instance newtypeIngredientAmount :: Newtype IngredientAmount _
@@ -87,7 +49,8 @@ instance decodeJsonIngredientAmount :: DecodeJson IngredientAmount where
     obj <- decodeJson json
     ingredient <- obj .? "ingredient" # map FoodId
     amount <- obj .? "amount"
-    pure $ IngredientAmount { ingredient, amount }
+    unitType <- obj .? "unit_type" >>= Measurement.parse
+    pure $ IngredientAmount { ingredient, amount, unitType }
 
 type Recipe =
   { name :: String
@@ -104,7 +67,7 @@ decodeRecipe json = do
   name <- obj .? "name"
   category <- obj .? "category"
   ingredients <- obj .? "ingredients" >>= decodeJson
-  unitType <- obj .? "unit_type" >>= parseMeasurement
+  unitType <- obj .? "unit_type" >>= Measurement.parse
   amount <- obj .? "amount"
   directions <- obj .? "directions"
   pure $ { name, category, ingredients, unitType, amount, directions }
