@@ -16,7 +16,7 @@ import Pux (EffModel, noEffects)
 import Pux.DOM.Events (DOMEvent, onMouseEnter, onMouseLeave)
 import Pux.DOM.HTML (HTML)
 import Pux.DOM.HTML.Attributes (style)
-import Text.Smolder.HTML (div)
+import Text.Smolder.HTML (div, span)
 import Text.Smolder.HTML.Attributes (className)
 import Text.Smolder.Markup (text, (!), (#!))
 
@@ -76,7 +76,7 @@ tooltipView state =
 
 label :: String -> String -> HTML Event
 label lbl tooltip =
-  div
+  span
     ! className "tooltip-label"
     #! onMouseEnter (Hover tooltip)
     #! onMouseLeave (const Hide)
