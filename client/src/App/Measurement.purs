@@ -5,15 +5,16 @@ import Prelude
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 
-class Eq a <= Convertible a where
-  convertBase :: a -> Number -> Number
+class Convertible a where
+  convertFromBase :: a -> Number -> Number
+
+convertToBase :: forall a. Convertible a => a -> Number -> Number
+convertToBase unit x =
+  x / convertFromBase unit 1.0
 
 convert :: forall a. Convertible a => a -> a -> Number -> Number
-convert unit1 unit2 x =
-  if unit1 == unit2 then
-    x
-  else
-    convertBase unit2 (x / convertBase unit1 1.0)
+convert fromUnit toUnit =
+  convertToBase fromUnit >>> convertFromBase toUnit
 
 data VolumeMeasurement
   = Cups
@@ -28,9 +29,9 @@ instance showVolumeMeasurement :: Show VolumeMeasurement where
   show Tsp = "tsp"
 
 instance convertibleVolumeMeasurement :: Convertible VolumeMeasurement where
-  convertBase Cups x = x
-  convertBase Tbsp x = 16.0 * x
-  convertBase Tsp x = 48.0 * x
+  convertFromBase Cups x = x
+  convertFromBase Tbsp x = 16.0 * x
+  convertFromBase Tsp x = 48.0 * x
 
 data WeightMeasurement
   = Lbs
@@ -45,9 +46,9 @@ instance showWeightMeasurement :: Show WeightMeasurement where
   show Grams = "grams"
 
 instance convertibleWeightMeasurement :: Convertible WeightMeasurement where
-  convertBase Lbs x = x
-  convertBase Oz x = 16.0 * x
-  convertBase Grams x = 453.592 * x
+  convertFromBase Lbs x = x
+  convertFromBase Oz x = 16.0 * x
+  convertFromBase Grams x = 453.592 * x
 
 data Measurement
   = Items

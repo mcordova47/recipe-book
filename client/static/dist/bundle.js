@@ -6863,6 +6863,7 @@ var PS = {};
 })(PS["App.Routes"] = PS["App.Routes"] || {});
 (function(exports) {
     "use strict";
+  var Control_Semigroupoid = PS["Control.Semigroupoid"];
   var Data_Either = PS["Data.Either"];
   var Data_Eq = PS["Data.Eq"];
   var Data_EuclideanRing = PS["Data.EuclideanRing"];
@@ -6939,9 +6940,8 @@ var PS = {};
       };
       return Weight;
   })();
-  var Convertible = function (Eq0, convertBase) {
-      this.Eq0 = Eq0;
-      this.convertBase = convertBase;
+  var Convertible = function (convertFromBase) {
+      this.convertFromBase = convertFromBase;
   };
   var showWeightMeasurement = new Data_Show.Show(function (v) {
       if (v instanceof Lbs) {
@@ -6953,7 +6953,7 @@ var PS = {};
       if (v instanceof Grams) {
           return "grams";
       };
-      throw new Error("Failed pattern match at App.Measurement line 42, column 1 - line 42, column 57: " + [ v.constructor.name ]);
+      throw new Error("Failed pattern match at App.Measurement line 43, column 1 - line 43, column 57: " + [ v.constructor.name ]);
   });
   var showVolumeMeasurement = new Data_Show.Show(function (v) {
       if (v instanceof Cups) {
@@ -6965,7 +6965,7 @@ var PS = {};
       if (v instanceof Tsp) {
           return "tsp";
       };
-      throw new Error("Failed pattern match at App.Measurement line 25, column 1 - line 25, column 57: " + [ v.constructor.name ]);
+      throw new Error("Failed pattern match at App.Measurement line 26, column 1 - line 26, column 57: " + [ v.constructor.name ]);
   });
   var showMeasurement = new Data_Show.Show(function (v) {
       if (v instanceof Items) {
@@ -6977,7 +6977,7 @@ var PS = {};
       if (v instanceof Weight) {
           return Data_Show.show(showWeightMeasurement)(v.value0);
       };
-      throw new Error("Failed pattern match at App.Measurement line 57, column 1 - line 57, column 45: " + [ v.constructor.name ]);
+      throw new Error("Failed pattern match at App.Measurement line 58, column 1 - line 58, column 45: " + [ v.constructor.name ]);
   });
   var parse = function (v) {
       if (v === "ITEM") {
@@ -7002,38 +7002,8 @@ var PS = {};
           return Data_Either.Right.create(new Weight(Grams.value));
       };
       return Data_Either.Left.create("Expected Measurement, but got '" + (v + "'"));
-  };
-  var eqWeightMeasurement = new Data_Eq.Eq(function (x) {
-      return function (y) {
-          if (x instanceof Lbs && y instanceof Lbs) {
-              return true;
-          };
-          if (x instanceof Oz && y instanceof Oz) {
-              return true;
-          };
-          if (x instanceof Grams && y instanceof Grams) {
-              return true;
-          };
-          return false;
-      };
-  });
-  var eqVolumeMeasurement = new Data_Eq.Eq(function (x) {
-      return function (y) {
-          if (x instanceof Cups && y instanceof Cups) {
-              return true;
-          };
-          if (x instanceof Tbsp && y instanceof Tbsp) {
-              return true;
-          };
-          if (x instanceof Tsp && y instanceof Tsp) {
-              return true;
-          };
-          return false;
-      };
-  });
-  var convertibleWeightMeasurement = new Convertible(function () {
-      return eqWeightMeasurement;
-  }, function (v) {
+  }; 
+  var convertibleWeightMeasurement = new Convertible(function (v) {
       return function (x) {
           if (v instanceof Lbs) {
               return x;
@@ -7044,12 +7014,10 @@ var PS = {};
           if (v instanceof Grams) {
               return 453.592 * x;
           };
-          throw new Error("Failed pattern match at App.Measurement line 47, column 1 - line 47, column 71: " + [ v.constructor.name, x.constructor.name ]);
+          throw new Error("Failed pattern match at App.Measurement line 48, column 1 - line 48, column 71: " + [ v.constructor.name, x.constructor.name ]);
       };
   });
-  var convertibleVolumeMeasurement = new Convertible(function () {
-      return eqVolumeMeasurement;
-  }, function (v) {
+  var convertibleVolumeMeasurement = new Convertible(function (v) {
       return function (x) {
           if (v instanceof Cups) {
               return x;
@@ -7060,21 +7028,24 @@ var PS = {};
           if (v instanceof Tsp) {
               return 48.0 * x;
           };
-          throw new Error("Failed pattern match at App.Measurement line 30, column 1 - line 30, column 71: " + [ v.constructor.name, x.constructor.name ]);
+          throw new Error("Failed pattern match at App.Measurement line 31, column 1 - line 31, column 71: " + [ v.constructor.name, x.constructor.name ]);
       };
   });
-  var convertBase = function (dict) {
-      return dict.convertBase;
+  var convertFromBase = function (dict) {
+      return dict.convertFromBase;
+  };
+  var convertToBase = function (dictConvertible) {
+      return function (unit) {
+          return function (x) {
+              return x / convertFromBase(dictConvertible)(unit)(1.0);
+          };
+      };
   };
   var convert = function (dictConvertible) {
-      return function (unit1) {
-          return function (unit2) {
-              return function (x) {
-                  var $28 = Data_Eq.eq(dictConvertible.Eq0())(unit1)(unit2);
-                  if ($28) {
-                      return x;
-                  };
-                  return convertBase(dictConvertible)(unit2)(x / convertBase(dictConvertible)(unit1)(1.0));
+      return function (fromUnit) {
+          return function (toUnit) {
+              return function ($36) {
+                  return convertFromBase(dictConvertible)(toUnit)(convertToBase(dictConvertible)(fromUnit)($36));
               };
           };
       };
@@ -7095,8 +7066,9 @@ var PS = {};
           };
       };
   };
-  exports["convertBase"] = convertBase;
+  exports["convertFromBase"] = convertFromBase;
   exports["Convertible"] = Convertible;
+  exports["convertToBase"] = convertToBase;
   exports["convert"] = convert;
   exports["Cups"] = Cups;
   exports["Tbsp"] = Tbsp;
@@ -7109,10 +7081,8 @@ var PS = {};
   exports["Weight"] = Weight;
   exports["parse"] = parse;
   exports["convertMeasurement"] = convertMeasurement;
-  exports["eqVolumeMeasurement"] = eqVolumeMeasurement;
   exports["showVolumeMeasurement"] = showVolumeMeasurement;
   exports["convertibleVolumeMeasurement"] = convertibleVolumeMeasurement;
-  exports["eqWeightMeasurement"] = eqWeightMeasurement;
   exports["showWeightMeasurement"] = showWeightMeasurement;
   exports["convertibleWeightMeasurement"] = convertibleWeightMeasurement;
   exports["showMeasurement"] = showMeasurement;
