@@ -7,9 +7,10 @@ import App.Measurement as Measurement
 import App.Routes as Routes
 import App.Tooltip as Tooltip
 import Data.Argonaut (class DecodeJson, Json, decodeJson, (.?))
-import Data.Either (Either(..))
+import Data.Either (Either(..), hush)
 import Data.List as List
 import Data.Map as Map
+import Data.Maybe (Maybe)
 import Data.Newtype (class Newtype)
 import Network.RemoteData (RemoteData(..))
 
@@ -24,6 +25,7 @@ type Ingredient =
   , unitCost :: Number
   , unitType :: Measurement
   , amount :: Number
+  , cupsToLbs :: Maybe Number
   }
 
 decodeIngredient :: Json -> Either String Ingredient
@@ -33,7 +35,8 @@ decodeIngredient json = do
   unitCost <- obj .? "unit_cost"
   unitType <- obj .? "unit_type" >>= Measurement.parse
   amount <- obj .? "amount"
-  pure $ { name, unitCost, unitType, amount }
+  let cupsToLbs = hush $ obj .? "cups_to_lbs"
+  pure $ { name, unitCost, unitType, amount, cupsToLbs }
 
 newtype IngredientAmount =
   IngredientAmount
@@ -59,6 +62,7 @@ type Recipe =
   , unitType :: Measurement
   , amount :: Number
   , directions :: String
+  , cupsToLbs :: Maybe Number
   }
 
 decodeRecipe :: Json -> Either String Recipe
@@ -70,7 +74,8 @@ decodeRecipe json = do
   unitType <- obj .? "unit_type" >>= Measurement.parse
   amount <- obj .? "amount"
   directions <- obj .? "directions"
-  pure $ { name, category, ingredients, unitType, amount, directions }
+  let cupsToLbs = hush $ obj .? "cups_to_lbs"
+  pure $ { name, category, ingredients, unitType, amount, directions, cupsToLbs }
 
 data RecipeComponent
   = IngredientComp FoodId Ingredient

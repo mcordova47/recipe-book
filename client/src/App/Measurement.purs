@@ -16,6 +16,10 @@ convert :: forall a. Convertible a => a -> a -> Number -> Number
 convert fromUnit toUnit =
   convertToBase fromUnit >>> convertFromBase toUnit
 
+crossConvert :: forall a b. Convertible a => Convertible b => a -> b -> Number -> Number -> Number
+crossConvert fromUnit toUnit baseRatio =
+  convertToBase fromUnit >>> (*) baseRatio >>> convertFromBase toUnit
+
 data VolumeMeasurement
   = Cups
   | Tbsp
@@ -70,8 +74,10 @@ parse "OZ" = Right $ Weight Oz
 parse "GRAM" = Right $ Weight Grams
 parse str = Left $ "Expected Measurement, but got '" <> str <> "'"
 
-convertMeasurement :: Measurement -> Measurement -> Number -> Maybe Number
-convertMeasurement Items Items x = Just x
-convertMeasurement (Volume u) (Volume u') x = Just $ convert u u' x
-convertMeasurement (Weight u) (Weight u') x = Just $ convert u u' x
-convertMeasurement _ _ _ = Nothing
+convertMeasurement :: Measurement -> Measurement -> Maybe Number -> Number -> Maybe Number
+convertMeasurement Items Items _ x = Just x
+convertMeasurement (Volume u) (Volume u') _ x = Just $ convert u u' x
+convertMeasurement (Weight u) (Weight u') _ x = Just $ convert u u' x
+convertMeasurement (Volume u) (Weight u') (Just r) x = Just $ crossConvert u u' r x
+convertMeasurement (Weight u) (Volume u') (Just r) x = Just $ crossConvert u u' (1.0 / r) x
+convertMeasurement _ _ _ _ = Nothing

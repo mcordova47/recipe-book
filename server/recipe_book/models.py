@@ -24,6 +24,7 @@ class RecipeComponent(models.Model):
     amount = models.FloatField(null=True, blank=True)
     component_type = models.CharField(max_length=2, choices=COMPONENTS.items())
     directions = models.TextField(blank=True)
+    cups_to_lbs = models.FloatField(null=True, blank=True)
 
     def __unicode__(self):
         return u'<{}: {}>'.format(

@@ -11,4 +11,15 @@ class RecipeComponentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecipeComponent
-        fields = ('id', 'name', 'category', 'unit_type', 'unit_cost', 'amount', 'component_type', 'directions', 'ingredients')
+        fields = (
+            'id',
+            'name',
+            'category',
+            'unit_type',
+            'unit_cost',
+            'amount',
+            'component_type',
+            'directions',
+            'ingredients',
+            'cups_to_lbs',
+        )

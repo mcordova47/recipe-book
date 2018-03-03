@@ -240,14 +240,14 @@ filterRecipes (Search term) =
 
 getCost :: Map FoodId RecipeComponent -> List IngredientAmount -> Number
 getCost recipes =
-  let convert from to amount = fromMaybe 0.0 $ convertMeasurement from to amount
+  let convert from to ratio amount = fromMaybe 0.0 $ convertMeasurement from to ratio amount
   in
     foldl (\total (IngredientAmount { ingredient, amount, unitType: iaUnit }) ->
       case Map.lookup ingredient recipes of
-        Just (IngredientComp _ { unitCost, unitType, amount: unitAmount }) ->
-          total + convert iaUnit unitType amount * unitCost / unitAmount
-        Just (RecipeComp _ { ingredients, unitType, amount: unitAmount }) ->
-          total + convert iaUnit unitType amount * getCost recipes ingredients / unitAmount
+        Just (IngredientComp _ { unitCost, unitType, cupsToLbs, amount: unitAmount }) ->
+          total + convert iaUnit unitType cupsToLbs amount * unitCost / unitAmount
+        Just (RecipeComp _ { ingredients, unitType, cupsToLbs, amount: unitAmount }) ->
+          total + convert iaUnit unitType cupsToLbs amount * getCost recipes ingredients / unitAmount
         Nothing ->
           0.0
       ) 0.0
