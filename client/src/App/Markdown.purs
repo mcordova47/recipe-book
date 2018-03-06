@@ -3,9 +3,8 @@ module App.Markdown where
 import Prelude
 
 import Data.Either (Either(..))
-import Data.Foldable (class Foldable, foldl)
+import Data.Foldable (foldMap)
 import Data.List (List)
-import Data.Monoid (class Monoid, mempty)
 import Text.Parsing.Combinators (choice)
 import Text.Parsing.Simple (Parser, (>>), (<<))
 import Text.Parsing.Simple as P
@@ -74,17 +73,14 @@ stripInline Space = " "
 
 stripBlock :: Markdown -> String
 stripBlock (Paragraph inlines) =
-  concat $ map stripInline inlines
+  foldMap stripInline inlines
 
 stripMarkdown :: List Markdown -> String
 stripMarkdown md =
-  concat $ map stripBlock md
+  foldMap stripBlock md
 
 tryStripMarkdown :: String -> String
 tryStripMarkdown text =
   case P.parse markdownParser text of
     Right md -> stripMarkdown md
     Left _ -> text
-
-concat :: forall f m. Foldable f => Monoid m => f m -> m
-concat = foldl (<>) mempty
