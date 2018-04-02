@@ -13224,22 +13224,17 @@ var PS = {};
       if (v instanceof Space) {
           return " ";
       };
-      throw new Error("Failed pattern match at App.Markdown line 68, column 1 - line 68, column 32: " + [ v.constructor.name ]);
+      throw new Error("Failed pattern match at App.Markdown line 67, column 1 - line 67, column 32: " + [ v.constructor.name ]);
+  };
+  var stripBlock = function (v) {
+      return Data_Foldable.foldMap(Data_List_Types.foldableList)(Data_Monoid.monoidString)(stripInline)(v.value0);
+  };
+  var stripMarkdown = function (md) {
+      return Data_Foldable.foldMap(Data_List_Types.foldableList)(Data_Monoid.monoidString)(stripBlock)(md);
   };
   var spaceParser = Data_Functor.map(Text_Parsing_Simple.functorParser)(Data_Function["const"](Space.value))(Text_Parsing_Simple.someChar(Text_Parsing_Simple.anyOf(" \x09")));
   var linkParser = Control_Apply.apply(Text_Parsing_Simple.applyParser)(Data_Functor.map(Text_Parsing_Simple.functorParser)(Link.create)(Text_Parsing_Simple.braces(Text_Parsing_Simple.manyChar(Text_Parsing_Simple["isn'tAny"]("{}")))))(Text_Parsing_Simple.brackets(Text_Parsing_Simple["int"]));
   var italicsParser = Data_Functor.map(Text_Parsing_Simple.functorParser)(Italics.create)(Text_Parsing_Simple.applyL(Text_Parsing_Simple.applyR(Text_Parsing_Simple["char"]("_"))(Text_Parsing_Simple.manyChar(Text_Parsing_Simple["isn'tAny"]("_"))))(Text_Parsing_Simple["char"]("_")));
-  var concat = function (dictFoldable) {
-      return function (dictMonoid) {
-          return Data_Foldable.foldl(dictFoldable)(Data_Semigroup.append(dictMonoid.Semigroup0()))(Data_Monoid.mempty(dictMonoid));
-      };
-  };
-  var stripBlock = function (v) {
-      return concat(Data_List_Types.foldableList)(Data_Monoid.monoidString)(Data_Functor.map(Data_List_Types.functorList)(stripInline)(v.value0));
-  };
-  var stripMarkdown = function (md) {
-      return concat(Data_List_Types.foldableList)(Data_Monoid.monoidString)(Data_Functor.map(Data_List_Types.functorList)(stripBlock)(md));
-  };
   var boldParser = Data_Functor.map(Text_Parsing_Simple.functorParser)(Bold.create)(Text_Parsing_Simple.applyL(Text_Parsing_Simple.applyR(Text_Parsing_Simple["char"]("*"))(Text_Parsing_Simple.manyChar(Text_Parsing_Simple["isn'tAny"]("*"))))(Text_Parsing_Simple["char"]("*")));
   var inlineParser = Text_Parsing_Combinators.choice(Text_Parsing_Simple.plusParser)(Data_Foldable.foldableArray)([ linkParser, italicsParser, boldParser, wordParser, spaceParser ]);
   var paragraphParser = Data_Functor.map(Text_Parsing_Simple.functorParser)(Paragraph.create)(Text_Parsing_Simple.applyL(Text_Parsing_Simple.some(inlineParser))(Text_Parsing_Combinators.choice(Text_Parsing_Simple.plusParser)(Data_Foldable.foldableArray)([ Text_Parsing_Simple.skip(Text_Parsing_Simple.some(Text_Parsing_Combinators.choice(Text_Parsing_Simple.plusParser)(Data_Foldable.foldableArray)([ Text_Parsing_Simple.newline, Text_Parsing_Simple.cr ]))), Text_Parsing_Simple.eof ])));
@@ -13252,7 +13247,7 @@ var PS = {};
       if (v instanceof Data_Either.Left) {
           return text;
       };
-      throw new Error("Failed pattern match at App.Markdown line 85, column 3 - line 87, column 19: " + [ v.constructor.name ]);
+      throw new Error("Failed pattern match at App.Markdown line 84, column 3 - line 86, column 15: " + [ v.constructor.name ]);
   };
   exports["Paragraph"] = Paragraph;
   exports["Link"] = Link;
@@ -13272,7 +13267,6 @@ var PS = {};
   exports["stripBlock"] = stripBlock;
   exports["stripMarkdown"] = stripMarkdown;
   exports["tryStripMarkdown"] = tryStripMarkdown;
-  exports["concat"] = concat;
 })(PS["App.Markdown"] = PS["App.Markdown"] || {});
 (function(exports) {
     "use strict";
@@ -13674,8 +13668,16 @@ var PS = {};
       };
       return "";
   };
-  var scrollContainer = function (html) {
-      return Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("scroll-container"))(html);
+  var scrollContainer = function (drawerOpened) {
+      return function (html) {
+          var classModifier = (function () {
+              if (drawerOpened) {
+                  return "opened";
+              };
+              return "closed";
+          })();
+          return Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("scroll-container scroll-container--" + classModifier))(html);
+      };
   };
   var placeholder = function (h) {
       return function (w) {
@@ -13712,8 +13714,8 @@ var PS = {};
   var listRecipes = function (dictOrd) {
       return function (accessor) {
           return function (recipes) {
-              return Data_List.sortBy(Data_Function.on(Data_Ord.compare(dictOrd))(function ($147) {
-                  return accessor(Data_Tuple.snd($147));
+              return Data_List.sortBy(Data_Function.on(Data_Ord.compare(dictOrd))(function ($151) {
+                  return accessor(Data_Tuple.snd($151));
               }))(Data_Filterable.filterMap(Data_Filterable.filterableList)(toRecipe)(Data_Map.values(recipes)));
           };
       };
@@ -13729,8 +13731,8 @@ var PS = {};
   var recipeNavLink = function (route) {
       return function (v) {
           var classNames = (function () {
-              var $45 = isRecipeSelected(route)(v.value0);
-              if ($45) {
+              var $47 = isRecipeSelected(route)(v.value0);
+              if ($47) {
                   return "nav-drawer__recipe-nav-link nav-drawer__recipe-nav-link--selected";
               };
               return "nav-drawer__recipe-nav-link";
@@ -13777,7 +13779,7 @@ var PS = {};
           if (v1 instanceof Data_Maybe.Nothing) {
               return Text_Smolder_Markup.text("");
           };
-          throw new Error("Failed pattern match at App.View line 148, column 3 - line 164, column 1: " + [ v1.constructor.name ]);
+          throw new Error("Failed pattern match at App.View line 152, column 3 - line 168, column 1: " + [ v1.constructor.name ]);
       };
   };
   var header = function (route) {
@@ -13788,10 +13790,10 @@ var PS = {};
       }));
   };
   var groupRecipes = function (recipes) {
-      return Data_List.groupBy(Data_Function.on(Data_Eq.eq(Data_Eq.eqString))(function ($148) {
+      return Data_List.groupBy(Data_Function.on(Data_Eq.eq(Data_Eq.eqString))(function ($152) {
           return (function (v) {
               return v.category;
-          })(Data_Tuple.snd($148));
+          })(Data_Tuple.snd($152));
       }))(listRecipes(Data_Ord.ordString)(function (v) {
           return v.category;
       })(recipes));
@@ -13803,16 +13805,16 @@ var PS = {};
       if (recipeComp instanceof App_State.IngredientComp) {
           return recipeComp.value1.name;
       };
-      throw new Error("Failed pattern match at App.View line 270, column 3 - line 272, column 38: " + [ recipeComp.constructor.name ]);
+      throw new Error("Failed pattern match at App.View line 274, column 3 - line 276, column 38: " + [ recipeComp.constructor.name ]);
   };
   var recipeLink = function (recipes) {
       return function (ingredients) {
           return function (label) {
               return function (id) {
-                  return Control_Bind.bind(Data_Maybe.bindMaybe)(Data_Foldable.find(Data_List_Types.foldableList)(function ($149) {
+                  return Control_Bind.bind(Data_Maybe.bindMaybe)(Data_Foldable.find(Data_List_Types.foldableList)(function ($153) {
                       return Data_Eq.eq(App_State.eqFoodId)(id)((function (v) {
                           return v.ingredient;
-                      })(Data_Newtype.unwrap(App_State.newtypeIngredientAmount)($149)));
+                      })(Data_Newtype.unwrap(App_State.newtypeIngredientAmount)($153)));
                   })(ingredients))(function (v) {
                       return Control_Bind.bind(Data_Maybe.bindMaybe)(Data_Map.lookup(App_State.ordFoodId)(v.ingredient)(recipes))(function (v1) {
                           var name = getRecipeName(v1);
@@ -13841,7 +13843,7 @@ var PS = {};
               if (v2 instanceof App_Markdown.Link) {
                   return Data_Maybe.fromMaybe(Text_Smolder_Markup.text(v2.value0))(recipeLink(v)(v1.ingredients)(v2.value0)(v2.value1));
               };
-              throw new Error("Failed pattern match at App.View line 203, column 1 - line 203, column 77: " + [ v.constructor.name, v1.constructor.name, v2.constructor.name ]);
+              throw new Error("Failed pattern match at App.View line 207, column 1 - line 207, column 77: " + [ v.constructor.name, v1.constructor.name, v2.constructor.name ]);
           };
       };
   };
@@ -13862,7 +13864,7 @@ var PS = {};
               if (v instanceof Data_Either.Left) {
                   return Text_Smolder_Markup.text(recipe.directions);
               };
-              throw new Error("Failed pattern match at App.View line 193, column 5 - line 197, column 31: " + [ v.constructor.name ]);
+              throw new Error("Failed pattern match at App.View line 197, column 5 - line 201, column 31: " + [ v.constructor.name ]);
           })());
       };
   };
@@ -13919,7 +13921,7 @@ var PS = {};
               if (v1 instanceof Data_Maybe.Nothing) {
                   return 0.0;
               };
-              throw new Error("Failed pattern match at App.View line 246, column 7 - line 253, column 7: " + [ v1.constructor.name ]);
+              throw new Error("Failed pattern match at App.View line 250, column 7 - line 257, column 7: " + [ v1.constructor.name ]);
           };
       })(0.0);
   };
@@ -13940,11 +13942,11 @@ var PS = {};
           return Control_Category.id(Control_Category.categoryFn);
       };
       if (v instanceof App_Filter.Search) {
-          return Data_Map.filter(App_State.ordFoodId)(function ($150) {
-              return Data_String.contains(Data_String.toLower(v.value0))(Data_String.toLower(getRecipeName($150)));
+          return Data_Map.filter(App_State.ordFoodId)(function ($154) {
+              return Data_String.contains(Data_String.toLower(v.value0))(Data_String.toLower(getRecipeName($154)));
           });
       };
-      throw new Error("Failed pattern match at App.View line 236, column 1 - line 236, column 84: " + [ v.constructor.name ]);
+      throw new Error("Failed pattern match at App.View line 240, column 1 - line 240, column 84: " + [ v.constructor.name ]);
   };
   var categoryView = function (recipeMap) {
       return function (v) {
@@ -13958,30 +13960,34 @@ var PS = {};
   };
   var categoryList = function (v) {
       return function (v1) {
-          if (v1 instanceof Network_RemoteData.Success) {
-              return Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("category-list-background"))(scrollContainer(Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("category-list"))(Data_Foldable.for_(Control_Monad_Free.freeApplicative)(Data_List_Types.foldableList)(groupRecipes(filterRecipes(v)(v1.value0)))(categoryView(v1.value0)))));
+          return function (v2) {
+              if (v2 instanceof Network_RemoteData.Success) {
+                  return Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("category-list-background"))(scrollContainer(v)(Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("category-list"))(Data_Foldable.for_(Control_Monad_Free.freeApplicative)(Data_List_Types.foldableList)(groupRecipes(filterRecipes(v1)(v2.value0)))(categoryView(v2.value0)))));
+              };
+              return Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("category-list-background"))(Text_Smolder_Markup.text(""));
           };
-          return Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("category-list-background"))(Text_Smolder_Markup.text(""));
       };
   };
-  var mainView = function (v) {
-      return function (recipes) {
-          if (v instanceof App_Routes.Home) {
-              return categoryList(App_Filter.All.value)(recipes);
+  var mainView = function (drawerOpened) {
+      return function (v) {
+          return function (recipes) {
+              if (v instanceof App_Routes.Home) {
+                  return categoryList(drawerOpened)(App_Filter.All.value)(recipes);
+              };
+              if (v instanceof App_Routes.Recipes) {
+                  return categoryList(drawerOpened)(v.value0)(recipes);
+              };
+              if (v instanceof App_Routes.Recipe) {
+                  return scrollContainer(drawerOpened)(Data_Maybe.fromMaybe(Text_Smolder_Markup.text(""))(recipeMainView(recipes)(v.value0)));
+              };
+              throw new Error("Failed pattern match at App.View line 98, column 1 - line 98, column 69: " + [ drawerOpened.constructor.name, v.constructor.name, recipes.constructor.name ]);
           };
-          if (v instanceof App_Routes.Recipes) {
-              return categoryList(v.value0)(recipes);
-          };
-          if (v instanceof App_Routes.Recipe) {
-              return scrollContainer(Data_Maybe.fromMaybe(Text_Smolder_Markup.text(""))(recipeMainView(recipes)(v.value0)));
-          };
-          throw new Error("Failed pattern match at App.View line 94, column 1 - line 94, column 58: " + [ v.constructor.name, recipes.constructor.name ]);
       };
   };
   var view = function (v) {
       return Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("main-layout"))(Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Free.freeBind)(navDrawer(v.drawerOpened)(v.view)(v.recipes))(function () {
           return Text_Smolder_Markup["with"](Text_Smolder_Markup.attributableMarkupF)(Text_Smolder_HTML.div)(Text_Smolder_HTML_Attributes.className("main-app"))(Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Free.freeBind)(header(v.view))(function () {
-              return Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Free.freeBind)(mainView(v.view)(v.recipes))(function () {
+              return Control_Bind.discard(Control_Bind.discardUnit)(Control_Monad_Free.freeBind)(mainView(v.drawerOpened)(v.view)(v.recipes))(function () {
                   return Pux_DOM_HTML.mapEvent(App_Events.TooltipEvent.create)(App_Tooltip.tooltipView(v.tooltip));
               });
           }));
