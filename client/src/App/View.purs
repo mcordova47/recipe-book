@@ -40,12 +40,16 @@ view (State { view: route, recipes, tooltip, drawerOpened }) =
     navDrawer drawerOpened route recipes
     H.div ! HA.className "main-app" $ do
       header route
-      mainView route recipes
+      mainView drawerOpened route recipes
       mapEvent TooltipEvent $ Tooltip.tooltipView tooltip
 
-scrollContainer :: HTML Event -> HTML Event
-scrollContainer html =
-  H.div ! HA.className "scroll-container" $ html
+scrollContainer :: Boolean -> HTML Event -> HTML Event
+scrollContainer drawerOpened html =
+  let classModifier = if drawerOpened then "opened" else "closed"
+  in
+    H.div
+      ! HA.className ("scroll-container scroll-container--" <> classModifier)
+      $ html
 
 navDrawer :: Boolean -> Routes.Route -> RecipesResponse -> HTML Event
 navDrawer opened route recipes =
@@ -91,13 +95,13 @@ header route =
         ! HA.placeholder "Search"
         #! HE.onChange ChangeSearch
 
-mainView :: Routes.Route -> RecipesResponse -> HTML Event
-mainView Routes.Home recipes =
-  categoryList All recipes
-mainView (Routes.Recipes filter') recipes =
-  categoryList filter' recipes
-mainView (Routes.Recipe recipeId) recipes =
-  scrollContainer $ fromMaybe (text "") $ recipeMainView recipes $ FoodId recipeId
+mainView :: Boolean -> Routes.Route -> RecipesResponse -> HTML Event
+mainView drawerOpened Routes.Home recipes =
+  categoryList drawerOpened All recipes
+mainView drawerOpened (Routes.Recipes filter') recipes =
+  categoryList drawerOpened filter' recipes
+mainView drawerOpened (Routes.Recipe recipeId) recipes =
+  scrollContainer drawerOpened $ fromMaybe (text "") $ recipeMainView recipes $ FoodId recipeId
 
 recipeMainView :: RecipesResponse -> FoodId -> Maybe (HTML Event)
 recipeMainView (Success recipes) recipeId = do
@@ -161,15 +165,15 @@ ingredientView recipes (IngredientAmount { ingredient, amount, unitType }) =
     Nothing ->
       text ""
 
-categoryList :: Filter -> RecipesResponse -> HTML Event
-categoryList filter' (Success recipes) =
+categoryList :: Boolean -> Filter -> RecipesResponse -> HTML Event
+categoryList drawerOpened filter' (Success recipes) =
   H.div ! HA.className "category-list-background" $
-    scrollContainer $
+    scrollContainer drawerOpened $
       H.div ! HA.className "category-list" $
         for_
           (groupRecipes (filterRecipes filter' recipes))
           (categoryView recipes)
-categoryList _ _ =
+categoryList _ _ _ =
   H.div ! HA.className "category-list-background" $ text ""
 
 categoryView :: Map FoodId RecipeComponent -> NonEmptyList (Tuple FoodId Recipe) -> HTML Event
