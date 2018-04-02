@@ -1,7 +1,20 @@
 # recipe-book
 
 ## A UI for Managing Recipes
-Reads recipes from a Django server and displays as either a list view or a detail view.  Filter recipes via the search box and use the slide-out panel to quickly navigate to another recipe.  Recipe directions use markdown
+
+### Features
+* List view of all recipes by category
+* Detail views of each recipe
+* Filter recipes with the search box
+* Calculates cost of recipes based on ingredients
+* Recipe directions support markdown for basic text formatting as well as tooltips for referenced ingredients
+* Recipes can be used as ingredients, in which case they will render as a link to the referenced recipe
+* Side-panel to quickly scan for recipes
+
+### TODO
+* View for editing recipes
+* View for editing ingredients
+* Multi-user support
 
 ## Development
 The front end is written using [Purescript](http://www.purescript.org/) with [purescript-pux](http://purescript-pux.org/).  The server side is written with Python and Django.
