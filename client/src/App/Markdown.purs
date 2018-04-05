@@ -12,12 +12,19 @@ import Text.Parsing.Simple as P
 data Markdown
  = Paragraph (List Inline)
 
+derive instance eqMarkdown :: Eq Markdown
+
+instance showMarkdown :: Show Markdown where
+  show (Paragraph inlines) = "Paragraph" <> show inlines
+
 data Inline
   = Link String Int
   | Italics String
   | Bold String
   | Word String
   | Space
+
+derive instance eqInline :: Eq Inline
 
 instance showInline :: Show Inline where
   show (Link text id) = "Link " <> show text <> " " <> show id
