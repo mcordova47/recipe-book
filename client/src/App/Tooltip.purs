@@ -50,11 +50,8 @@ foldp (Hover text event) state =
           let maybeEl = (fromNode (currentTarget event)) :: Maybe HTMLElement
           case maybeEl of
             Just el -> do
-              pos <- liftEff' $ getBoundingClientRect el
-              let maybePos = hush pos
-              pure $ map (\{ left, right, top } ->
-                  Show { left: (left + right) / 2.0, top: top - 45.0, text }
-                ) maybePos
+              { left, right, top } <- liftEff' $ getBoundingClientRect el
+              pure $ Just $ Show { left: (left + right) / 2.0, top: top - 45.0, text }
             Nothing ->
               pure Nothing
       ]
