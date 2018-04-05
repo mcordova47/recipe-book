@@ -5,7 +5,6 @@ import Prelude
 import App.Markdown (Inline(..), Markdown(..), markdownParser)
 import Control.Monad.Eff (Eff)
 import Data.Either (Either(..))
-import Data.Int (round)
 import Data.List (List(..), (:))
 import Data.String (Pattern(..), Replacement(..), replaceAll)
 import Test.QuickCheck (arbitrary, (===))
@@ -21,9 +20,9 @@ main = run [consoleReporter] do
   describe "Markdown" do
     it "parses tooltip link" $
       quickCheck
-        \(LinkText s) n ->
-          parse markdownParser ("{" <> s <> "}[" <> show (round n) <> "]") ===
-            Right ((Paragraph (Link s (round n) : Nil)) : Nil)
+        \(LinkText s) (n :: Int) ->
+          parse markdownParser ("{" <> s <> "}[" <> show n <> "]") ===
+            Right ((Paragraph (Link s n : Nil)) : Nil)
 
 newtype LinkText = LinkText String
 
