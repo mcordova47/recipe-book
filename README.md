@@ -37,7 +37,7 @@ DB Migrations
 
 Connect to Cloud SQL via proxy
 
-    $ cloud_sql_proxy -instances=recipe-book-194820:us-east1:recipebook=tcp:3306 -credential_file=recipe-book-credentials.json
+    $ cloud_sql_proxy -instances=recipe-book-194820:us-east1:recipebook=tcp:3306 -credential_file="./recipe-book-credentials.json"
 
 ### Webpack dev server
 Dev buid with hot module reloading
