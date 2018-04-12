@@ -2,15 +2,12 @@ module App.State where
 
 import Prelude
 
-import App.Markdown (Markdown)
-import App.Markdown as Markdown
 import App.Measurement (Measurement)
 import App.Measurement as Measurement
 import App.Routes as Routes
 import App.Tooltip as Tooltip
 import Data.Argonaut (class DecodeJson, Json, decodeJson, (.?))
 import Data.Either (Either(..), hush)
-import Data.List (List)
 import Data.List as List
 import Data.Map as Map
 import Data.Maybe (Maybe)
@@ -64,7 +61,7 @@ type Recipe =
   , ingredients :: List.List IngredientAmount
   , unitType :: Measurement
   , amount :: Number
-  , directions :: List Markdown
+  , directions :: String
   , cupsToLbs :: Maybe Number
   }
 
@@ -76,8 +73,7 @@ decodeRecipe json = do
   ingredients <- obj .? "ingredients" >>= decodeJson
   unitType <- obj .? "unit_type" >>= Measurement.parse
   amount <- obj .? "amount"
-  directionsText <- obj .? "directions"
-  let directions = Markdown.parse directionsText
+  directions <- obj .? "directions"
   let cupsToLbs = hush $ obj .? "cups_to_lbs"
   pure $ { name, category, ingredients, unitType, amount, directions, cupsToLbs }
 
