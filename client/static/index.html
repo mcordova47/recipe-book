@@ -70,10 +70,12 @@
 
       .scroll-container--opened {
         width: calc(100% - 250px);
+        transition: width 0.2s ease-out;
       }
 
       .scroll-container--closed {
         width: 100%;
+        transition: width 0.2s ease-in;
       }
 
       .scroll-container::-webkit-scrollbar {
