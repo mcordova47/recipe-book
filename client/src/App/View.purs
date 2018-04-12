@@ -4,14 +4,13 @@ import Prelude
 
 import App.Events (Event(..))
 import App.Filter (Filter(..))
-import App.Markdown (Markdown(..), Inline(..), markdownParser, tryStripMarkdown)
+import App.Markdown (Markdown(..), Inline(..), stripMarkdown)
 import App.Measurement (Measurement, convertMeasurement)
 import App.Routes (toURL)
 import App.Routes as Routes
 import App.State (FoodId(..), IngredientAmount(..), Recipe, RecipeComponent(..), State(..), RecipesResponse)
 import App.Tooltip as Tooltip
 import CSS (CSS, Size, backgroundColor, borderRadius, height, margin, px, rgb, width)
-import Data.Either (Either(..))
 import Data.Filterable (filterMap)
 import Data.Foldable (foldl, for_)
 import Data.Function (on)
@@ -29,7 +28,6 @@ import Network.RemoteData (RemoteData(..))
 import Pux.DOM.Events as HE
 import Pux.DOM.HTML (HTML, mapEvent)
 import Pux.DOM.HTML.Attributes (style)
-import Text.Parsing.Simple (parse)
 import Text.Smolder.HTML as H
 import Text.Smolder.HTML.Attributes as HA
 import Text.Smolder.Markup (text, (!), (#!))
@@ -188,17 +186,13 @@ recipeView recipes (Tuple (FoodId recipeId) recipe) =
   H.a ! HA.className "recipe-view-card-link" ! HA.href (toURL (Routes.Recipe recipeId)) $
     H.div ! HA.className "recipe-view" $ do
       H.div ! HA.className "recipe-view__title" $ text recipe.name
-      H.div ! HA.className "recipe-view__directions" $ text $ tryStripMarkdown recipe.directions
+      H.div ! HA.className "recipe-view__directions" $ text $ stripMarkdown recipe.directions
       H.div ! HA.className "recipe-view__cost" $ text $ formatCost $ getCost recipes recipe.ingredients
 
 recipeDirections :: Map FoodId RecipeComponent -> Recipe -> HTML Event
 recipeDirections recipes recipe =
   H.div ! HA.className "recipe-directions" $
-    case parse markdownParser recipe.directions of
-      Right mdList ->
-        for_ mdList $ markdownToHtml recipes recipe
-      Left _ ->
-        text recipe.directions
+    for_ recipe.directions $ markdownToHtml recipes recipe
 
 markdownToHtml :: Map FoodId RecipeComponent -> Recipe -> Markdown -> HTML Event
 markdownToHtml recipes recipe (Paragraph inlines) =

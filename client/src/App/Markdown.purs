@@ -4,7 +4,7 @@ import Prelude
 
 import Data.Either (Either(..))
 import Data.Foldable (foldMap)
-import Data.List (List)
+import Data.List (List(..), (:))
 import Text.Parsing.Combinators (choice)
 import Text.Parsing.Simple (Parser, (>>), (<<))
 import Text.Parsing.Simple as P
@@ -91,3 +91,10 @@ tryStripMarkdown text =
   case P.parse markdownParser text of
     Right md -> stripMarkdown md
     Left _ -> text
+
+
+parse :: String -> List Markdown
+parse text =
+  case P.parse markdownParser text of
+    Right md -> md
+    Left text -> Paragraph (Word text : Nil) : Nil
