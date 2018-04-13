@@ -5,7 +5,7 @@ import Prelude
 import App.Events (Event(..))
 import App.Filter (Filter(..))
 import App.Markdown as Markdown
-import App.Markdown (Markdown(..), Inline(..), markdownParser, tryStripMarkdown)
+import App.Markdown (Markdown(..), Inline(..))
 import App.Measurement (Measurement, convertMeasurement)
 import App.Routes (toURL)
 import App.Routes as Routes
@@ -189,7 +189,7 @@ recipeView recipes (Tuple (FoodId recipeId) recipe) =
   H.a ! HA.className "recipe-view-card-link" ! HA.href (toURL (Routes.Recipe recipeId)) $
     H.div ! HA.className "recipe-view" $ do
       H.div ! HA.className "recipe-view__title" $ text recipe.name
-      H.div ! HA.className "recipe-view__directions" $ text $ tryStripMarkdown recipe.directions
+      H.div ! HA.className "recipe-view__directions" $ text $ Markdown.strip recipe.directions
       H.div ! HA.className "recipe-view__cost" $ text $ formatCost $ getCost recipes recipe.ingredients
 
 recipeDirections :: Map FoodId RecipeComponent -> Recipe -> HTML Event

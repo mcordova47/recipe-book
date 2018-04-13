@@ -1,4 +1,4 @@
-module App.Markdown where
+module App.Markdown (Markdown(..), Inline(..), strip, parse) where
 
 import Prelude
 
@@ -86,12 +86,11 @@ stripMarkdown :: List Markdown -> String
 stripMarkdown md =
   foldMap stripBlock md
 
-tryStripMarkdown :: String -> String
-tryStripMarkdown text =
+strip :: String -> String
+strip text =
   case P.parse markdownParser text of
     Right md -> stripMarkdown md
     Left _ -> text
-
 
 parse :: String -> List Markdown
 parse text =
