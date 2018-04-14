@@ -4,8 +4,8 @@ import Prelude
 
 import App.Events (Event(..))
 import App.Filter (Filter(..))
-import App.Markdown as Markdown
 import App.Markdown (Markdown(..), Inline(..))
+import App.Markdown as Markdown
 import App.Measurement (Measurement, convertMeasurement)
 import App.Routes (toURL)
 import App.Routes as Routes
@@ -34,6 +34,8 @@ import Text.Parsing.Simple (parse)
 import Text.Smolder.HTML as H
 import Text.Smolder.HTML.Attributes as HA
 import Text.Smolder.Markup (text, (!), (#!))
+import Text.Smolder.SVG as SVG
+import Text.Smolder.SVG.Attributes as SA
 
 view :: State -> HTML Event
 view (State { view: route, recipes, tooltip, drawerOpened }) =
@@ -91,10 +93,29 @@ header route =
       H.i ! HA.className "material-icons" $ text "menu"
     H.a ! HA.href (toURL Routes.Home) ! HA.className "header__title" $ text "Recipe Book"
     H.div ! HA.className "header__search" $
-      H.input
-        ! HA.value (searchTerm route)
-        ! HA.placeholder "Search"
-        #! HE.onChange ChangeSearch
+      H.div ! HA.className "header__search__input" $ do
+        H.div
+          ! HA.className "header__search__input__icon"
+          $ searchIcon
+        H.input
+          ! HA.value (searchTerm route)
+          ! HA.placeholder "Search"
+          #! HE.onChange ChangeSearch
+
+searchIcon :: HTML Event
+searchIcon =
+  SVG.svg
+    ! SA.height "24"
+    ! SA.viewBox "0 0 24 24"
+    ! SA.width "24"
+    $ do
+        SVG.path
+          ! SA.d "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+          $ text ""
+        SVG.path
+          ! SA.d "M0 0h24v24H0z"
+          ! SA.fill "none"
+          $ text ""
 
 mainView :: Boolean -> Routes.Route -> RecipesResponse -> HTML Event
 mainView drawerOpened Routes.Home recipes =
