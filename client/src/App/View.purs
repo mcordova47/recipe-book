@@ -12,7 +12,6 @@ import App.Routes as Routes
 import App.State (FoodId(..), IngredientAmount(..), Recipe, RecipeComponent(..), State(..), RecipesResponse)
 import App.Tooltip as Tooltip
 import CSS (CSS, Size, backgroundColor, borderRadius, height, margin, px, rgb, width)
-import Data.Either (Either(..))
 import Data.Filterable (filterMap)
 import Data.Foldable (foldl, for_)
 import Data.Function (on)
@@ -30,7 +29,6 @@ import Network.RemoteData (RemoteData(..))
 import Pux.DOM.Events as HE
 import Pux.DOM.HTML (HTML, mapEvent)
 import Pux.DOM.HTML.Attributes (style)
-import Text.Parsing.Simple (parse)
 import Text.Smolder.HTML as H
 import Text.Smolder.HTML.Attributes as HA
 import Text.Smolder.Markup (text, (!), (#!))
