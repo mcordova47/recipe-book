@@ -42,7 +42,7 @@ view (State { view: route, recipes, tooltip, drawerOpened }) =
     H.div ! HA.className "main-app" $ do
       header route
       mainView drawerOpened route recipes
-      mapEvent TooltipEvent $ Tooltip.tooltipView tooltip
+      mapEvent TooltipEvent $ Tooltip.tooltip tooltip
 
 scrollContainer :: Boolean -> HTML Event -> HTML Event
 scrollContainer drawerOpened html =

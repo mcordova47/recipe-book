@@ -10,7 +10,7 @@ import DOM.Classy.HTMLElement (getBoundingClientRect)
 import DOM.Classy.Node (fromNode)
 import DOM.Event.Event (currentTarget)
 import DOM.HTML.Types (HTMLElement)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Pux (EffModel, noEffects)
 import Pux.DOM.Events (DOMEvent, onMouseEnter, onMouseLeave)
 import Pux.DOM.HTML (HTML)
@@ -40,8 +40,8 @@ type Effects fx = (console :: CONSOLE, dom :: DOM | fx)
 foldp :: forall fx. Event -> State -> EffModel State Event (Effects fx)
 foldp Hide state =
   noEffects Nothing
-foldp (Show tooltip) _ =
-  noEffects $ Just tooltip
+foldp (Show tt) _ =
+  noEffects $ Just tt
 foldp (Hover text event) state =
   { state
   , effects:
@@ -56,24 +56,24 @@ foldp (Hover text event) state =
       ]
   }
 
-tooltipView :: State -> HTML Event
+tooltipView :: Tooltip -> HTML Event
 tooltipView state =
-  case state of
-    Just tooltipState ->
-      div
-        ! className "tooltip"
-        ! style do
-            top (tooltipState.top # px)
-            left (tooltipState.left # px)
-            position fixed
-        $ text tooltipState.text
-    Nothing ->
-      text ""
+  div
+    ! className "tooltip"
+    ! style do
+        top (state.top # px)
+        left (state.left # px)
+        position fixed
+    $ text state.text
+
+tooltip :: State -> HTML Event
+tooltip =
+  fromMaybe (text "") <<< map tooltipView
 
 label :: String -> String -> HTML Event
-label lbl tooltip =
+label labelText tooltipText =
   span
     ! className "tooltip-label"
-    #! onMouseEnter (Hover tooltip)
+    #! onMouseEnter (Hover tooltipText)
     #! onMouseLeave (const Hide)
-    $ text lbl
+    $ text labelText
