@@ -39,14 +39,12 @@ foldp (FetchRecipes api) (State state) =
           pure $ Just $ ReceiveRecipes recipes
       ]
   }
-foldp (ReceiveRecipes resp) (State state) =
-  case resp of
-    Right recipeList ->
-      let recipes = fromFoldable $ map toTuple $ recipeList
-      in
-        noEffects $ State state { recipes = Success recipes }
-    Left _ ->
-      noEffects $ State state
+foldp (ReceiveRecipes (Right recipeList)) (State state) =
+  let recipes = fromFoldable $ map toTuple $ recipeList
+  in
+    noEffects $ State state { recipes = Success recipes }
+foldp (ReceiveRecipes (Left _)) state =
+  noEffects state
 foldp (TooltipEvent event) (State state) =
   let { state: tooltipState, effects } = Tooltip.foldp event state.tooltip
   in
