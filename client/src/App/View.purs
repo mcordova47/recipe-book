@@ -137,6 +137,11 @@ recipeMainView (Success recipes) recipeId = do
         recipeDirections recipes recipe
 recipeMainView Loading _ =
   Just recipePlaceholderView
+recipeMainView (Failure err) _ =
+  Just $
+    H.div
+      ! HA.className "error-message"
+      $ text err
 recipeMainView _ _ =
   Nothing
 
@@ -193,6 +198,10 @@ categoryList drawerOpened filter' (Success recipes) =
         for_
           (groupRecipes (filterRecipes filter' recipes))
           (categoryView recipes)
+categoryList _ _ (Failure err) =
+  H.div
+    ! HA.className "category-list-background"
+    $ H.div ! HA.className "error-message" $ text err
 categoryList _ _ _ =
   H.div ! HA.className "category-list-background" $ text ""
 

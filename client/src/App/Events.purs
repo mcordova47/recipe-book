@@ -43,9 +43,8 @@ foldp (ReceiveRecipes (Right recipeList)) (State state) =
   let recipes = fromFoldable $ map toTuple $ recipeList
   in
     noEffects $ State state { recipes = Success recipes }
-foldp (ReceiveRecipes (Left _)) state =
-  -- TODO: display error message
-  noEffects state
+foldp (ReceiveRecipes (Left err)) (State state) =
+  noEffects $ State state { recipes = Failure err }
 foldp (TooltipEvent event) (State state) =
   let { state: tooltipState, effects } = Tooltip.foldp event state.tooltip
   in
