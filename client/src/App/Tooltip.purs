@@ -1,6 +1,6 @@
 module App.Tooltip where
 
-import Prelude hiding (div,top)
+import Prelude hiding (div, top)
 
 import CSS (fixed, left, position, px, top)
 import Control.Monad.Aff (liftEff')

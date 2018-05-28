@@ -83,8 +83,8 @@ stripBlock (Paragraph inlines) =
   foldMap stripInline inlines
 
 stripMarkdown :: List Markdown -> String
-stripMarkdown md =
-  foldMap stripBlock md
+stripMarkdown =
+  foldMap stripBlock
 
 strip :: String -> String
 strip text =

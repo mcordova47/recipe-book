@@ -44,6 +44,7 @@ foldp (ReceiveRecipes (Right recipeList)) (State state) =
   in
     noEffects $ State state { recipes = Success recipes }
 foldp (ReceiveRecipes (Left _)) state =
+  -- TODO: display error message
   noEffects state
 foldp (TooltipEvent event) (State state) =
   let { state: tooltipState, effects } = Tooltip.foldp event state.tooltip

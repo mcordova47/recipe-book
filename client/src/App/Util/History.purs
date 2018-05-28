@@ -14,7 +14,7 @@ import Data.String (Pattern(..), stripPrefix)
 import Signal (Signal)
 import Signal.Channel (CHANNEL, channel, send, subscribe)
 
-sampleHash :: ∀ eff. Window -> Eff (channel :: CHANNEL, history :: HISTORY, dom :: DOM | eff) (Signal String)
+sampleHash :: forall eff. Window -> Eff (channel :: CHANNEL, history :: HISTORY, dom :: DOM | eff) (Signal String)
 sampleHash win = do
   loc <- location win
   hash' <- hash loc
