@@ -264,6 +264,38 @@
         font-size: 28px;
         margin: auto;
       }
+
+      @keyframes loading-smoke {
+        0% { opacity: 0; transform: translateY(10px); }
+        20% { opacity: 0; }
+        50% { opacity: 1; }
+        80% { opacity: 0; }
+        100% { opacity: 0; }
+      }
+
+      .loader {
+        display: flex;
+        justify-content: center;
+        padding-top: 25px;
+      }
+
+      .loader svg {
+        transform: scale(0.5);
+      }
+
+      .loader__smoke-1 {
+        animation: loading-smoke 2s infinite;
+        animation-delay: 0.2s;
+      }
+
+      .loader__smoke-2 {
+        animation: loading-smoke 2s infinite;
+      }
+
+      .loader__smoke-3 {
+        animation: loading-smoke 2s infinite;
+        animation-delay: 0.4s;
+      }
     </style>
   </head>
   <body>

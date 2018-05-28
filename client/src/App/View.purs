@@ -4,6 +4,7 @@ import Prelude
 
 import App.Events (Event(..))
 import App.Filter (Filter(..))
+import App.Loader (loader)
 import App.Markdown (Markdown(..), Inline(..))
 import App.Markdown as Markdown
 import App.Measurement (Measurement, convertMeasurement)
@@ -202,6 +203,12 @@ categoryList _ _ (Failure err) =
   H.div
     ! HA.className "category-list-background"
     $ H.div ! HA.className "error-message" $ text err
+categoryList _ _ Loading =
+  H.div
+    ! HA.className "category-list-background"
+    $ H.div
+      ! HA.className "loader"
+      $ loader
 categoryList _ _ _ =
   H.div ! HA.className "category-list-background" $ text ""
 
