@@ -75,7 +75,7 @@ decodeRecipe json = do
   amount <- obj .? "amount"
   directions <- obj .? "directions"
   let cupsToLbs = hush $ obj .? "cups_to_lbs"
-  pure $ { name, category, ingredients, unitType, amount, directions, cupsToLbs }
+  pure { name, category, ingredients, unitType, amount, directions, cupsToLbs }
 
 data RecipeComponent
   = IngredientComp FoodId Ingredient
