@@ -274,12 +274,12 @@
       }
 
       .loader {
-        display: flex;
-        justify-content: center;
         padding-top: 25px;
       }
 
       .loader svg {
+        display: block;
+        margin: auto;
         transform: scale(0.5);
       }
 
@@ -295,6 +295,11 @@
       .loader__smoke-3 {
         animation: loading-smoke 2s infinite;
         animation-delay: 0.4s;
+      }
+
+      .loader__message {
+        text-align: center;
+        margin-top: -30px;
       }
     </style>
   </head>

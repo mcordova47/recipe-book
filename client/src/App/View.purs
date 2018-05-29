@@ -208,7 +208,11 @@ categoryList _ _ Loading =
     ! HA.className "category-list-background"
     $ H.div
       ! HA.className "loader"
-      $ loader
+      $ do
+        loader
+        H.div
+          ! HA.className "loader__message"
+          $ text "Preparing Recipes..."
 categoryList _ _ _ =
   H.div ! HA.className "category-list-background" $ text ""
 
