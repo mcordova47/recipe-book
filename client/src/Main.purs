@@ -26,7 +26,6 @@ main url api (State state) = do
   urlSignal <- sampleHash =<< window
 
   -- | Map a signal of URL changes to PageView actions.
-  -- let routeSignal = urlSignal ~> NoOp
   let routeSignal = urlSignal ~> ChangeURL <<< match
 
   -- | Start the app.
