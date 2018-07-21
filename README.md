@@ -35,6 +35,10 @@ DB Migrations
     $ python manage.py makemigrations
     $ python manage.py migrate
 
+Download Data
+
+    $ python .\env\Scripts\django-admin.py dumpdata recipe_book --output .\recipe_book\fixtures\data.json
+
 Connect to Cloud SQL via proxy
 
     $ cloud_sql_proxy -instances=recipe-book-194820:us-east1:recipebook=tcp:3306 -credential_file="./recipe-book-credentials.json"
