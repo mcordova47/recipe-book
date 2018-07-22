@@ -2,7 +2,7 @@ module Test.Main where
 
 import Prelude
 
-import App.Markdown (Inline(..), Markdown(..), markdownParser)
+import App.Markdown (Inline(..), Markdown(..), parse)
 import Control.Monad.Eff (Eff)
 import Data.Either (Either(..))
 import Data.List (List(..), (:))
@@ -13,7 +13,6 @@ import Test.Spec (describe, it)
 import Test.Spec.QuickCheck (QCRunnerEffects, quickCheck)
 import Test.Spec.Reporter.Console (consoleReporter)
 import Test.Spec.Runner (run)
-import Text.Parsing.Simple (parse)
 
 main :: Eff (QCRunnerEffects ()) Unit
 main = run [consoleReporter] do
@@ -21,8 +20,8 @@ main = run [consoleReporter] do
     it "parses tooltip link" $
       quickCheck
         \(LinkText s) (n :: Int) ->
-          parse markdownParser ("{" <> s <> "}[" <> show n <> "]") ===
-            Right ((Paragraph (Link s n : Nil)) : Nil)
+          parse ("{" <> s <> "}[" <> show n <> "]") ===
+            Paragraph (Link s n : Nil) : Nil
 
 newtype LinkText = LinkText String
 
