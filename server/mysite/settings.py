@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import json
+import django_heroku
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -24,7 +25,7 @@ client_secrets = json.load(open(os.path.join(BASE_DIR, 'client_secrets.json'), '
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = client_secrets['SECRET_KEY']
 
-DEBUG = not os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine')
+DEBUG = os.getenv('DEBUG') == 'true'
 
 # SECURITY WARNING: App Engine's security features ensure that it is safe to
 # have ALLOWED_HOSTS = ['*'] when the app is deployed. If you deploy a Django
@@ -82,47 +83,8 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
-# Check to see if MySQLdb is available; if not, have pymysql masquerade as
-# MySQLdb. This is a convenience feature for developers who cannot install
-# MySQLdb locally; when running in production on Google App Engine Standard
-# Environment, MySQLdb will be used.
-try:
-    import MySQLdb  # noqa: F401
-except ImportError:
-    import pymysql
-    pymysql.install_as_MySQLdb()
-
-# [START db_setup]
-if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
-    # Running on production App Engine, so connect to Google Cloud SQL using
-    # the unix socket at /cloudsql/<your-cloudsql-connection string>
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'HOST': '/cloudsql/recipe-book-194820:us-east1:recipebook',
-            'NAME': 'recipebook',
-            'USER': 'admin',
-            'PASSWORD': client_secrets['DB_PASSWORD'],
-        }
-    }
-else:
-    # Running locally so connect to either a local MySQL instance or connect to
-    # Cloud SQL via the proxy. To start the proxy via command line:
-    #
-    #     $ cloud_sql_proxy -instances=[INSTANCE_CONNECTION_NAME]=tcp:3306
-    #
-    # See https://cloud.google.com/sql/docs/mysql-connect-proxy
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'HOST': '127.0.0.1',
-            'PORT': '3306',
-            'NAME': 'recipebook',
-            'USER': 'admin',
-            'PASSWORD': client_secrets['DB_PASSWORD'],
-        }
-    }
-# [END db_setup]
+# Handled by heroku_django
+DATABASES = {}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -152,3 +114,8 @@ CORS_ORIGIN_ALLOW_ALL = DEBUG
 CORS_ORIGIN_WHITELIST = (
     'mcordova47.github.io',
 )
+
+django_heroku.settings(locals())
+
+if DEBUG:
+    del DATABASES['default']['OPTIONS']
