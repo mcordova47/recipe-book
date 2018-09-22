@@ -1,7 +1,7 @@
 var ClientEntry = require('../src/Main.purs');
 var url = window.location.hash;
 var api = process.env.NODE_ENV === 'production'
-  ? 'https://recipe-book-194820.appspot.com/api/'
+  ? 'https://guarded-shore-22541.herokuapp.com/api/'
   : 'http://localhost:8000/api/';
 var initialState = window.__puxLastState || ClientEntry.initialState;
 var app = ClientEntry.main(url)(api)(initialState)();
