@@ -6,7 +6,7 @@ import App.Filter (Filter(..))
 import Control.Alt ((<|>))
 import Data.Maybe (fromMaybe)
 import Pux.Router (end, lit, router)
-import Util.Url (Slug, slug)
+import Util.Url (Slug, slug, unslugify)
 
 data Route
   = Home
@@ -29,3 +29,8 @@ toURL :: Route -> String
 toURL Home = "#/"
 toURL (Recipes _) = "#/recipes/"
 toURL (Recipe slug) = "#/recipes/" <> show slug <> "/"
+
+toTitle :: Route -> String
+toTitle Home = "Recipe Book"
+toTitle (Recipes _) = "Recipes | Recipe Book"
+toTitle (Recipe slug) = unslugify slug <> " | Recipe Book"

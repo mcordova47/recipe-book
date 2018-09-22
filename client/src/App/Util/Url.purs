@@ -1,10 +1,11 @@
-module Util.Url (Slug, slug, slugify) where
+module Util.Url (Slug, slug, slugify, unslugify) where
 
 import Prelude
 
 import Data.Either (either)
-import Data.Maybe (Maybe(..))
-import Data.String (toLower)
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.String (Pattern(..), joinWith, split, toLower, toUpper)
+import Data.String.CodePoints (splitAt)
 import Data.String.Regex as R
 import Data.String.Regex.Flags as RF
 import Pux.Router (Match, parseSegment)
@@ -30,6 +31,17 @@ slugify =
     replaceRegex pat rep str =
       R.regex pat RF.global
         # either (const str) \regex -> R.replace regex rep str
+
+unslugify :: Slug -> String
+unslugify (Slug slug) =
+  split (Pattern "-") slug
+    # map capitalize
+    # joinWith " "
+  where
+    capitalize str = toUpper before <> after
+      where
+        { before, after } =
+          fromMaybe { before: "", after: "" } $ splitAt 1 str
 
 slug :: Match Slug
 slug = parseSegment (Just <<< Slug)
