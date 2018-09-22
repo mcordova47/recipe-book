@@ -3,7 +3,7 @@ module Main where
 import Prelude
 
 import App.Events (AppEffects, Event(..), foldp)
-import App.Routes (match)
+import App.Routes (match, toTitle)
 import App.State (State(..), init)
 import App.Util.History (sampleHash)
 import App.View (view)
@@ -15,6 +15,7 @@ import Pux (CoreEffects, App, start)
 import Pux.DOM.Events (DOMEvent)
 import Pux.Renderer.React (renderToDOM)
 import Signal (constant, (~>))
+import Util.DOM (setDocumentTitle)
 
 type WebApp = App (DOMEvent -> Event) Event State
 
@@ -28,9 +29,13 @@ main url api (State state) = do
   -- | Map a signal of URL changes to PageView actions.
   let routeSignal = urlSignal ~> ChangeURL <<< match
 
+  -- | Set the title based on the route
+  let route = match url
+  setDocumentTitle (toTitle route)
+
   -- | Start the app.
   app <- start
-    { initialState: State state { view = match url }
+    { initialState: State state { view = route }
     , view
     , foldp
     , inputs:
