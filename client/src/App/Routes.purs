@@ -5,12 +5,13 @@ import Prelude
 import App.Filter (Filter(..))
 import Control.Alt ((<|>))
 import Data.Maybe (fromMaybe)
-import Pux.Router (end, int, lit, router)
+import Pux.Router (end, lit, router)
+import Util.Url (Slug, slug)
 
 data Route
   = Home
   | Recipes Filter
-  | Recipe Int
+  | Recipe Slug
 
 match :: String -> Route
 match url = fromMaybe Home $ router url $
@@ -20,11 +21,11 @@ match url = fromMaybe Home $ router url $
   <|>
   Recipes All <$ lit "recipes" <* lit "" <* end
   <|>
-  Recipe <$> (lit "recipes" *> int) <* end
+  Recipe <$> (lit "recipes" *> slug) <* end
   <|>
-  Recipe <$> (lit "recipes" *> int) <* lit "" <* end
+  Recipe <$> (lit "recipes" *> slug) <* lit "" <* end
 
 toURL :: Route -> String
 toURL Home = "#/"
 toURL (Recipes _) = "#/recipes/"
-toURL (Recipe id) = "#/recipes/" <> show id <> "/"
+toURL (Recipe slug) = "#/recipes/" <> show slug <> "/"

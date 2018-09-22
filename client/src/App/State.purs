@@ -15,9 +15,7 @@ import Data.Newtype (class Newtype)
 import Network.RemoteData (RemoteData(..))
 
 newtype FoodId = FoodId Int
-
 derive instance eqFoodId :: Eq FoodId
-
 derive instance ordFoodId :: Ord FoodId
 
 type Ingredient =
@@ -44,13 +42,12 @@ newtype IngredientAmount =
     , amount :: Number
     , unitType :: Measurement
     }
-
 derive instance newtypeIngredientAmount :: Newtype IngredientAmount _
 
 instance decodeJsonIngredientAmount :: DecodeJson IngredientAmount where
   decodeJson json = do
     obj <- decodeJson json
-    ingredient <- obj .? "ingredient" # map FoodId
+    ingredient <- FoodId <$> obj .? "ingredient"
     amount <- obj .? "amount"
     unitType <- obj .? "unit_type" >>= Measurement.parse
     pure $ IngredientAmount { ingredient, amount, unitType }
@@ -85,7 +82,7 @@ instance decodeRecipeComponent :: DecodeJson RecipeComponent where
   decodeJson json = do
     obj <- decodeJson json
     componentType <- obj .? "component_type"
-    id <- obj .? "id" # map FoodId
+    id <- FoodId <$> obj .? "id"
     case componentType of
       "I" -> do
         ingredient <- decodeIngredient json
@@ -104,7 +101,6 @@ newtype State = State
   , tooltip :: Tooltip.State
   , drawerOpened :: Boolean
   }
-
 derive instance newtypeState :: Newtype State _
 
 init :: State

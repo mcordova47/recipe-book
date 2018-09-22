@@ -35,6 +35,7 @@ import Text.Smolder.HTML.Attributes as HA
 import Text.Smolder.Markup (text, (!), (#!))
 import Text.Smolder.SVG as SVG
 import Text.Smolder.SVG.Attributes as SA
+import Util.Url (Slug, slugify)
 
 view :: State -> HTML Event
 view (State { view: route, recipes, tooltip, drawerOpened }) =
@@ -64,24 +65,24 @@ navDrawer opened route recipes =
 recipeNavList :: Routes.Route -> RecipesResponse -> HTML Event
 recipeNavList route (Success recipes) =
   H.ul ! HA.className "nav-drawer__recipe-list" $
-    for_ (listRecipes _.name recipes) $ recipeNavLink route
+    for_ (listRecipes _.name recipes) (recipeNavLink route <<< snd)
 recipeNavList _ _ =
   text ""
 
-recipeNavLink :: Routes.Route -> Tuple FoodId Recipe -> HTML Event
-recipeNavLink route (Tuple (FoodId recipeId) recipe) =
+recipeNavLink :: Routes.Route -> Recipe -> HTML Event
+recipeNavLink route recipe =
   let classNames =
-        if isRecipeSelected route recipeId then
+        if isRecipeSelected route (slugify recipe.name) then
           "nav-drawer__recipe-nav-link nav-drawer__recipe-nav-link--selected"
         else
           "nav-drawer__recipe-nav-link"
   in
     H.li ! HA.className classNames $
-      H.a ! HA.href (toURL (Routes.Recipe recipeId)) $ text recipe.name
+      H.a ! HA.href (toURL (Routes.Recipe (slugify recipe.name))) $ text recipe.name
 
-isRecipeSelected :: Routes.Route -> Int -> Boolean
-isRecipeSelected (Routes.Recipe selectedId) recipeId =
-  selectedId == recipeId
+isRecipeSelected :: Routes.Route -> Slug -> Boolean
+isRecipeSelected (Routes.Recipe selectedSlug) slug =
+  selectedSlug == slug
 isRecipeSelected _ _ =
   false
 
@@ -121,12 +122,12 @@ mainView drawerOpened Routes.Home recipes =
   categoryList drawerOpened All recipes
 mainView drawerOpened (Routes.Recipes filter') recipes =
   categoryList drawerOpened filter' recipes
-mainView drawerOpened (Routes.Recipe recipeId) recipes =
-  scrollContainer drawerOpened $ fromMaybe (text "") $ recipeMainView recipes $ FoodId recipeId
+mainView drawerOpened (Routes.Recipe slug) recipes =
+  scrollContainer drawerOpened $ fromMaybe (text "") $ recipeMainView recipes slug
 
-recipeMainView :: RecipesResponse -> FoodId -> Maybe (HTML Event)
-recipeMainView (Success recipes) recipeId = do
-  recipe <- getRecipe recipeId recipes
+recipeMainView :: RecipesResponse -> Slug -> Maybe (HTML Event)
+recipeMainView (Success recipes) slug = do
+  recipe <- getRecipe slug recipes
   pure $
     H.div ! HA.className "recipe-main-view" $ do
       H.h2 $ text recipe.name
@@ -180,12 +181,12 @@ ingredientView recipes (IngredientAmount { ingredient, amount, unitType }) =
       H.li $ text
         (toString amount <> " " <> show unitType <> " " <> name)
 
-    Just (RecipeComp (FoodId recipeId) { name }) ->
+    Just (RecipeComp _ { name }) ->
       H.li $ do
         text (toString amount <> " " <> show unitType <> " ")
         H.a
           ! HA.className "ingredient-view__recipe-link"
-          ! HA.href (toURL (Routes.Recipe recipeId))
+          ! HA.href (toURL (Routes.Recipe (slugify name)))
           $ text name
 
     Nothing ->
@@ -221,11 +222,11 @@ categoryView recipeMap (NonEmptyList recipes) =
   H.div $ do
     let first = snd $ head recipes
     H.h2 $ text $ first.category
-    H.div ! HA.className "recipe-grid" $ for_ recipes $ recipeView recipeMap
+    H.div ! HA.className "recipe-grid" $ for_ recipes $ recipeView recipeMap <<< snd
 
-recipeView :: Map FoodId RecipeComponent -> Tuple FoodId Recipe -> HTML Event
-recipeView recipes (Tuple (FoodId recipeId) recipe) =
-  H.a ! HA.className "recipe-view-card-link" ! HA.href (toURL (Routes.Recipe recipeId)) $
+recipeView :: Map FoodId RecipeComponent -> Recipe -> HTML Event
+recipeView recipes recipe =
+  H.a ! HA.className "recipe-view-card-link" ! HA.href (toURL (Routes.Recipe (slugify recipe.name))) $
     H.div ! HA.className "recipe-view" $ do
       H.div ! HA.className "recipe-view__title" $ text recipe.name
       H.div ! HA.className "recipe-view__directions" $ text $ Markdown.strip recipe.directions
@@ -299,9 +300,9 @@ getUnitType recipeComp =
     RecipeComp _ { unitType } -> unitType
     IngredientComp _ { unitType } -> unitType
 
-getRecipe :: FoodId -> Map FoodId RecipeComponent -> Maybe Recipe
-getRecipe recipeId recipes = do
-  recipeComp <- Map.lookup recipeId recipes
+getRecipe :: Slug -> Map FoodId RecipeComponent -> Maybe Recipe
+getRecipe slug recipes = do
+  recipeComp <- find (eq slug <<< slugify <<< getRecipeName) recipes
   case recipeComp of
     RecipeComp _ recipe -> pure recipe
     _ -> Nothing
