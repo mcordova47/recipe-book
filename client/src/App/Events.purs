@@ -3,6 +3,7 @@ module App.Events where
 import Prelude
 
 import App.Filter (Filter(..))
+import App.Login as Login
 import App.Routes (toTitle)
 import App.Routes as Routes
 import App.State (FoodId, RecipeComponent(..), State(..))
@@ -29,6 +30,7 @@ data Event
   | ChangeSearch DOMEvent
   | ChangeURL Routes.Route
   | ToggleDrawerState
+  | LoginEvent Login.Event
 
 type AppEffects fx = Tooltip.Effects (ajax :: AJAX, document :: DOCUMENT | fx)
 
@@ -66,6 +68,13 @@ foldp (ChangeURL route) (State state) =
   }
 foldp ToggleDrawerState (State state) =
   noEffects $ State state { drawerOpened = not state.drawerOpened }
+foldp (LoginEvent event) (State s) =
+  let { state, effects } = Login.foldp event s.login
+  in
+    mapEffects LoginEvent
+      { state: State s { login = state }
+      , effects
+      }
 
 toTuple :: RecipeComponent -> Tuple FoodId RecipeComponent
 toTuple rc@(RecipeComp id _) = Tuple id rc

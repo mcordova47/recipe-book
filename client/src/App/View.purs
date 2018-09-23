@@ -5,6 +5,7 @@ import Prelude
 import App.Events (Event(..))
 import App.Filter (Filter(..))
 import App.Loader (loader)
+import App.Login as Login
 import App.Markdown (Markdown(..), Inline(..))
 import App.Markdown as Markdown
 import App.Measurement (Measurement, convertMeasurement)
@@ -38,13 +39,13 @@ import Text.Smolder.SVG.Attributes as SA
 import Util.Url (Slug, slugify)
 
 view :: State -> HTML Event
-view (State { view: route, recipes, tooltip, drawerOpened }) =
+view (s'@(State s)) =
   H.div ! HA.className "main-layout" $ do
-    navDrawer drawerOpened route recipes
+    navDrawer s.drawerOpened s.view s.recipes
     H.div ! HA.className "main-app" $ do
-      header route
-      mainView drawerOpened route recipes
-      mapEvent TooltipEvent $ Tooltip.tooltip tooltip
+      header s.view
+      mainView s'
+      mapEvent TooltipEvent $ Tooltip.tooltip s.tooltip
 
 scrollContainer :: Boolean -> HTML Event -> HTML Event
 scrollContainer drawerOpened html =
@@ -117,13 +118,17 @@ searchIcon =
           ! SA.fill "none"
           $ text ""
 
-mainView :: Boolean -> Routes.Route -> RecipesResponse -> HTML Event
-mainView drawerOpened Routes.Home recipes =
-  categoryList drawerOpened All recipes
-mainView drawerOpened (Routes.Recipes filter') recipes =
-  categoryList drawerOpened filter' recipes
-mainView drawerOpened (Routes.Recipe slug) recipes =
-  scrollContainer drawerOpened $ fromMaybe (text "") $ recipeMainView recipes slug
+mainView :: State -> HTML Event
+mainView (State s) =
+  case s.view of
+    Routes.Home ->
+      categoryList s.drawerOpened All s.recipes
+    Routes.Login _ ->
+      mapEvent LoginEvent (Login.view s.login)
+    Routes.Recipes filter' ->
+      categoryList s.drawerOpened filter' s.recipes
+    Routes.Recipe slug ->
+      scrollContainer s.drawerOpened $ fromMaybe (text "") $ recipeMainView s.recipes slug
 
 recipeMainView :: RecipesResponse -> Slug -> Maybe (HTML Event)
 recipeMainView (Success recipes) slug = do

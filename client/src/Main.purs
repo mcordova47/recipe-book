@@ -23,17 +23,17 @@ type ClientEffects = CoreEffects (AppEffects (dom :: DOM, history :: HISTORY))
 
 main :: String -> String -> State -> Eff ClientEffects WebApp
 main url api (State state) = do
-  -- | Create a signal of URL changes.
+  -- Create a signal of URL changes.
   urlSignal <- sampleHash =<< window
 
-  -- | Map a signal of URL changes to PageView actions.
+  -- Map a signal of URL changes to PageView actions.
   let routeSignal = urlSignal ~> ChangeURL <<< match
 
-  -- | Set the title based on the route
+  -- Set the title based on the route
   let route = match url
   setDocumentTitle (toTitle route)
 
-  -- | Start the app.
+  -- Start the app.
   app <- start
     { initialState: State state { view = route }
     , view

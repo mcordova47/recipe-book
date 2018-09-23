@@ -2,6 +2,7 @@ module App.State where
 
 import Prelude
 
+import App.Login as Login
 import App.Measurement (Measurement)
 import App.Measurement as Measurement
 import App.Routes as Routes
@@ -100,6 +101,7 @@ newtype State = State
   , view :: Routes.Route
   , tooltip :: Tooltip.State
   , drawerOpened :: Boolean
+  , login :: Login.State
   }
 derive instance newtypeState :: Newtype State _
 
@@ -109,4 +111,5 @@ init = State
   , view: Routes.Home
   , tooltip: Tooltip.init
   , drawerOpened: false
+  , login: Login.init
   }
