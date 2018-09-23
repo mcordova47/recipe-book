@@ -7,10 +7,9 @@ import Control.Alt ((<|>))
 import Control.Monad.Eff (Eff)
 import DOM (DOM)
 import DOM.HTML (window)
-import DOM.HTML.History (DocumentTitle(..), URL(..))
-import DOM.HTML.History as H
+import DOM.HTML.Location (setHash)
 import DOM.HTML.Types (HISTORY)
-import DOM.HTML.Window (history)
+import DOM.HTML.Window (location)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Global (decodeURIComponent, encodeURIComponent)
 import Pux.Router (end, lit, param, router)
@@ -42,12 +41,15 @@ match url = fromMaybe Home $ router url $
   <|>
   Recipe <$> (lit "recipes" *> slug) <* lit "" <* end
 
+toHash :: Route -> String
+toHash Home = "/"
+toHash (Login (Just redirect)) = "/login/?redirect=" <> encodeURIComponent redirect
+toHash (Login _) = "/login/"
+toHash (Recipes _) = "/recipes/"
+toHash (Recipe slug) = "/recipes/" <> show slug <> "/"
+
 toURL :: Route -> String
-toURL Home = "#/"
-toURL (Login (Just redirect)) = "#/login/?redirect=" <> encodeURIComponent redirect
-toURL (Login _) = "#/login/"
-toURL (Recipes _) = "#/recipes/"
-toURL (Recipe slug) = "#/recipes/" <> show slug <> "/"
+toURL = (<>) "#" <<< toHash
 
 toTitle :: Route -> String
 toTitle Home = "Recipe Book"
@@ -57,8 +59,6 @@ toTitle (Recipe slug) = unslugify slug <> " | Recipe Book"
 
 setRoute :: forall fx. Route -> Eff ( dom :: DOM, history :: HISTORY | fx) Unit
 setRoute route = do
-  let url = URL (toURL route)
-  hist <- history =<< window
-  state <- H.state hist
-  let title = DocumentTitle (toTitle route)
-  H.pushState state title url hist
+  let hash = toHash route
+  loc <- location =<< window
+  setHash hash loc
