@@ -4,45 +4,57 @@ import Prelude
 
 import App.Filter (Filter(..))
 import App.Login as Login
-import App.Routes (toTitle)
+import App.Routes (Route(..), setRoute, toTitle)
 import App.Routes as Routes
 import App.State (FoodId, RecipeComponent(..), State(..))
 import App.Tooltip as Tooltip
 import Control.Monad.Aff (attempt)
 import Control.Monad.Eff.Class (liftEff)
+import DOM.HTML.Types (HISTORY)
 import Data.Argonaut (decodeJson)
 import Data.Bifunctor (bimap)
 import Data.Either (Either(..))
 import Data.List (List)
 import Data.Map (fromFoldable)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
-import Network.HTTP.Affjax (AJAX, get)
+import Network.HTTP.Affjax (AJAX, affjax, defaultRequest)
+import Network.HTTP.RequestHeader (RequestHeader(..))
 import Network.RemoteData (RemoteData(..))
 import Pux (EffModel, mapEffects, noEffects)
 import Pux.DOM.Events (DOMEvent, targetValue)
 import Util.DOM (DOCUMENT, setDocumentTitle)
 
 data Event
-  = FetchRecipes String
+  = FetchRecipes
+  | Authenticate (Maybe String)
   | ReceiveRecipes (Either String (List RecipeComponent))
   | TooltipEvent Tooltip.Event
   | ChangeSearch DOMEvent
-  | ChangeURL Routes.Route
+  | ChangeURL Route
   | ToggleDrawerState
   | LoginEvent Login.Event
 
-type AppEffects fx = Tooltip.Effects (ajax :: AJAX, document :: DOCUMENT | fx)
+type AppEffects fx = Tooltip.Effects (ajax :: AJAX, document :: DOCUMENT, history :: HISTORY | fx)
 
 foldp :: forall fx. Event -> State -> EffModel State Event (AppEffects fx)
-foldp (FetchRecipes api) (State state) =
+foldp FetchRecipes (State state) =
   { state: State state { recipes = Loading }
   , effects:
       [ do
-          res <- attempt $ get (api <> "recipes/")
+          res <- attempt $ affjax defaultRequest { url = state.api <> "recipes/", headers = [RequestHeader "Authorization" ("JWT " <> fromMaybe "" state.auth)] }
           let recipes = bimap show _.response res >>= decodeJson
           pure $ Just $ ReceiveRecipes recipes
       ]
+  }
+foldp (Authenticate Nothing) state =
+  { state
+  , effects:
+      [liftEff (setRoute (Login Nothing)) *> pure Nothing]
+  }
+foldp (Authenticate jwt) (State state) =
+  { state: State state { auth = jwt }
+  , effects: [pure (Just FetchRecipes)]
   }
 foldp (ReceiveRecipes (Right recipeList)) (State state) =
   let recipes = fromFoldable $ map toTuple $ recipeList

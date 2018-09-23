@@ -11,7 +11,7 @@ import Data.Argonaut (class DecodeJson, Json, decodeJson, (.?))
 import Data.Either (Either(..), hush)
 import Data.List as List
 import Data.Map as Map
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Network.RemoteData (RemoteData(..))
 
@@ -102,6 +102,8 @@ newtype State = State
   , tooltip :: Tooltip.State
   , drawerOpened :: Boolean
   , login :: Login.State
+  , auth :: Maybe String
+  , api :: String
   }
 derive instance newtypeState :: Newtype State _
 
@@ -112,4 +114,6 @@ init = State
   , tooltip: Tooltip.init
   , drawerOpened: false
   , login: Login.init
+  , auth: Nothing
+  , api: ""
   }

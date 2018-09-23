@@ -124,7 +124,7 @@ mainView (State s) =
     Routes.Home ->
       categoryList s.drawerOpened All s.recipes
     Routes.Login _ ->
-      mapEvent LoginEvent (Login.view s.login)
+      mapEvent LoginEvent (Login.view s.api s.login)
     Routes.Recipes filter' ->
       categoryList s.drawerOpened filter' s.recipes
     Routes.Recipe slug ->

@@ -39,10 +39,6 @@ Download Data
 
     $ python .\env\Scripts\django-admin.py dumpdata recipe_book --output .\recipe_book\fixtures\data.json
 
-Connect to Cloud SQL via proxy
-
-    $ cloud_sql_proxy -instances=recipe-book-194820:us-east1:recipebook=tcp:3306 -credential_file="./recipe-book-credentials.json"
-
 ### Webpack dev server
 Dev buid with hot module reloading
 
@@ -53,8 +49,6 @@ The front end is hosted on github pages
 
     $ npm run deploy
 
-The server is hosted on google app engine
+The server is hosted on heroku
 
-    $ pip install -r requirements-vendor.txt -t lib
-    $ python manage.py collectstatic
-    $ gcloud app deploy
+    $ git subtree push --prefix server heroku master

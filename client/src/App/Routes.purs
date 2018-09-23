@@ -4,6 +4,13 @@ import Prelude
 
 import App.Filter (Filter(..))
 import Control.Alt ((<|>))
+import Control.Monad.Eff (Eff)
+import DOM (DOM)
+import DOM.HTML (window)
+import DOM.HTML.History (DocumentTitle(..), URL(..))
+import DOM.HTML.History as H
+import DOM.HTML.Types (HISTORY)
+import DOM.HTML.Window (history)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Global (decodeURIComponent, encodeURIComponent)
 import Pux.Router (end, lit, param, router)
@@ -47,3 +54,11 @@ toTitle Home = "Recipe Book"
 toTitle (Login _) = "Login | Recipe Book"
 toTitle (Recipes _) = "Recipes | Recipe Book"
 toTitle (Recipe slug) = unslugify slug <> " | Recipe Book"
+
+setRoute :: forall fx. Route -> Eff ( dom :: DOM, history :: HISTORY | fx) Unit
+setRoute route = do
+  let url = URL (toURL route)
+  hist <- history =<< window
+  state <- H.state hist
+  let title = DocumentTitle (toTitle route)
+  H.pushState state title url hist

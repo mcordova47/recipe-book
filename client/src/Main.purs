@@ -11,6 +11,8 @@ import Control.Monad.Eff (Eff)
 import DOM (DOM)
 import DOM.HTML (window)
 import DOM.HTML.Types (HISTORY)
+import DOM.HTML.Window (localStorage)
+import DOM.WebStorage.Storage (getItem)
 import Pux (CoreEffects, App, start)
 import Pux.DOM.Events (DOMEvent)
 import Pux.Renderer.React (renderToDOM)
@@ -23,8 +25,10 @@ type ClientEffects = CoreEffects (AppEffects (dom :: DOM, history :: HISTORY))
 
 main :: String -> String -> State -> Eff ClientEffects WebApp
 main url api (State state) = do
+  window' <- window
+
   -- Create a signal of URL changes.
-  urlSignal <- sampleHash =<< window
+  urlSignal <- sampleHash window'
 
   -- Map a signal of URL changes to PageView actions.
   let routeSignal = urlSignal ~> ChangeURL <<< match
@@ -33,13 +37,15 @@ main url api (State state) = do
   let route = match url
   setDocumentTitle (toTitle route)
 
+  jwt <- getItem "AUTH_TOKEN" =<< localStorage window'
+
   -- Start the app.
   app <- start
-    { initialState: State state { view = route }
+    { initialState: State state { view = route, api = api }
     , view
     , foldp
     , inputs:
-        [ constant (FetchRecipes api)
+        [ constant (Authenticate jwt)
         , routeSignal
         ]
     }
