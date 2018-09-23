@@ -96,7 +96,7 @@ view state =
         , password: true
         }
       input
-        { value: st.password
+        { value: st.confirmPassword
         , placeholder: "Confirm Password"
         , onChange: ChangeSUConfirmPassword
         , password: true
