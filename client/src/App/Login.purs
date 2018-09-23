@@ -5,6 +5,7 @@ import Prelude
 import App.Routes (setRoute)
 import App.Routes as R
 import Control.Monad.Aff (attempt)
+import Control.Monad.Aff.Console (CONSOLE, logShow)
 import Control.Monad.Eff.Class (liftEff)
 import DOM (DOM)
 import DOM.HTML (window)
@@ -55,7 +56,7 @@ data Event
   | Signup String
   | ToggleView
 
-foldp :: forall fx. Event -> State -> EffModel State Event ( ajax :: AJAX, dom :: DOM, history :: HISTORY | fx)
+foldp :: forall fx. Event -> State -> EffModel State Event ( ajax :: AJAX, dom :: DOM, history :: HISTORY, console :: CONSOLE | fx)
 foldp ev state@(LoginState st) = case ev of
   ChangeLIUsername event ->
     noEffects $ LoginState st { username = targetValue event }
@@ -67,7 +68,8 @@ foldp ev state@(LoginState st) = case ev of
     { state
     , effects:
         [ do
-            let body = "username" := st.username ~> "password" := st.password
+            let body = "username" := st.username ~> "password" := st.password ~> J.jsonEmptyObject
+            logShow body
             res <- attempt (post (api <> "auth/") body)
             let token = bimap show _.response res >>= decodeToken
             pure $ either (const Nothing) (Just <<< LoggedIn) token
