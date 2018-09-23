@@ -7,7 +7,7 @@ import Control.Alt ((<|>))
 import Control.Monad.Eff (Eff)
 import DOM (DOM)
 import DOM.HTML (window)
-import DOM.HTML.Location (setHash)
+import DOM.HTML.Location (reload, setHash)
 import DOM.HTML.Types (HISTORY)
 import DOM.HTML.Window (location)
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -20,6 +20,10 @@ data Route
   | Login (Maybe String)
   | Recipes Filter
   | Recipe Slug
+
+isLogin :: Route -> Boolean
+isLogin (Login _) = true
+isLogin _ = false
 
 match :: String -> Route
 match url = fromMaybe Home $ router url $
@@ -60,5 +64,8 @@ toTitle (Recipe slug) = unslugify slug <> " | Recipe Book"
 setRoute :: forall fx. Route -> Eff ( dom :: DOM, history :: HISTORY | fx) Unit
 setRoute route = do
   let hash = toHash route
-  loc <- location =<< window
+  window' <- window
+  loc <- location window'
   setHash hash loc
+  loc' <- location window'
+  reload loc'

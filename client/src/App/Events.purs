@@ -4,7 +4,7 @@ import Prelude
 
 import App.Filter (Filter(..))
 import App.Login as Login
-import App.Routes (Route(..), setRoute, toTitle)
+import App.Routes (Route(..), isLogin, setRoute, toTitle)
 import App.Routes as Routes
 import App.State (FoodId, RecipeComponent(..), State(..))
 import App.Tooltip as Tooltip
@@ -47,10 +47,13 @@ foldp FetchRecipes (State state) =
           pure $ Just $ ReceiveRecipes recipes
       ]
   }
-foldp (Authenticate Nothing) state =
+foldp (Authenticate Nothing) state@(State s) =
   { state
   , effects:
-      [liftEff (setRoute (Login Nothing)) *> pure Nothing]
+      [ do
+          when (not (isLogin s.view)) (liftEff (setRoute (Login Nothing)))
+          pure Nothing
+      ]
   }
 foldp (Authenticate jwt) (State state) =
   { state: State state { auth = jwt }
