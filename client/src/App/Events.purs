@@ -46,11 +46,13 @@ foldp FetchRecipes (State state) =
           res <- attempt $ affjax defaultRequest { url = state.api <> "recipes/", headers = [RequestHeader "Authorization" ("JWT " <> fromMaybe "" state.auth)] }
           let recipes = bimap show _.response res >>= decodeJson
               status = _.status <$> res
-          case status of
-            Right (StatusCode 401) -> do
+          case status, state.view of
+            _, Login _ ->
+              pure (Just (ReceiveRecipes recipes))
+            Right (StatusCode 401), _ -> do
               liftEff (setRoute (Login Nothing))
               pure Nothing
-            _ ->
+            _, _ ->
               pure (Just (ReceiveRecipes recipes))
       ]
   }
