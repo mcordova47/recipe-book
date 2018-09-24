@@ -20,6 +20,7 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
 import Network.HTTP.Affjax (AJAX, affjax, defaultRequest)
 import Network.HTTP.RequestHeader (RequestHeader(..))
+import Network.HTTP.StatusCode (StatusCode(..))
 import Network.RemoteData (RemoteData(..))
 import Pux (EffModel, mapEffects, noEffects)
 import Pux.DOM.Events (DOMEvent, targetValue)
@@ -44,7 +45,13 @@ foldp FetchRecipes (State state) =
       [ do
           res <- attempt $ affjax defaultRequest { url = state.api <> "recipes/", headers = [RequestHeader "Authorization" ("JWT " <> fromMaybe "" state.auth)] }
           let recipes = bimap show _.response res >>= decodeJson
-          pure $ Just $ ReceiveRecipes recipes
+              status = _.status <$> res
+          case status of
+            Right (StatusCode 401) -> do
+              liftEff (setRoute (Login Nothing))
+              pure Nothing
+            _ ->
+              pure (Just (ReceiveRecipes recipes))
       ]
   }
 foldp (Authenticate Nothing) state@(State s) =
