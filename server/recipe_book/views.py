@@ -14,8 +14,8 @@ class RecipeComponentViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeComponentSerializer
 
     def get_queryset(self):
-        user = self.request.user.all()
-        return [r for rb in user.recipe_books for r in rb.recipes]
+        recipe_books = self.request.user.recipe_books.all()
+        return [r for rb in recipe_books for r in rb.recipes]
 
 class UserCreate(views.APIView):
     permission_classes = ()
