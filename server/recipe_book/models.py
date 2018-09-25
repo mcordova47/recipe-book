@@ -30,7 +30,7 @@ class RecipeComponent(models.Model):
     component_type = models.CharField(max_length=2, choices=COMPONENTS.items())
     directions = models.TextField(blank=True)
     cups_to_lbs = models.FloatField(null=True, blank=True)
-    book = models.ForeignKey(RecipeBook, related_name='recipes')
+    book = models.ForeignKey(RecipeBook, related_name='recipes', null=True)
 
     def __unicode__(self):
         return u'<{}: {}>'.format(
