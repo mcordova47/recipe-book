@@ -14,7 +14,7 @@ class RecipeComponentViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeComponentSerializer
 
     def get_queryset(self):
-        user = self.request.user
+        user = self.request.user.all()
         return [r for rb in user.recipe_books for r in rb.recipes]
 
 class UserCreate(views.APIView):
