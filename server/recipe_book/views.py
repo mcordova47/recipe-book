@@ -15,7 +15,7 @@ class RecipeComponentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         recipe_books = self.request.user.recipe_books.all()
-        return [r for rb in recipe_books for r in rb.recipes]
+        return [r for rb in recipe_books for r in rb.recipes.all()]
 
 class UserCreate(views.APIView):
     permission_classes = ()
