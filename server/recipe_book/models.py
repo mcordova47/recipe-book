@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 UNITS = [
     ('ITEM', 'ITEM'),
@@ -9,6 +10,10 @@ UNITS = [
     ('OZ', 'OZ'),
     ('GRAM', 'GRAM'),
 ]
+
+class RecipeBook(models.Model):
+    name = models.CharField(max_length=100)
+    users = models.ManyToManyField(User)
 
 
 class RecipeComponent(models.Model):
@@ -25,6 +30,7 @@ class RecipeComponent(models.Model):
     component_type = models.CharField(max_length=2, choices=COMPONENTS.items())
     directions = models.TextField(blank=True)
     cups_to_lbs = models.FloatField(null=True, blank=True)
+    book = models.ForeignKey(RecipeBook, related_name='recipes')
 
     def __unicode__(self):
         return u'<{}: {}>'.format(
