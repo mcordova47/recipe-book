@@ -7,10 +7,10 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register('recipes', RecipeComponentViewSet, base_name='recipes')
-router.register('signup', UserCreate, base_name='signup')
 
 urlpatterns = [
     url(r'^api/', include(router.urls)),
+    url(r'^api/signup/', UserCreate.as_view()),
     url(r'^api/auth/', obtain_jwt_token),
     url(r'^admin/', include(admin.site.urls)),
 ]
