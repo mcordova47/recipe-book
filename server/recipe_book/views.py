@@ -14,7 +14,7 @@ class RecipeComponentViewSet(viewsets.ModelViewSet):
     queryset = RecipeComponent.objects.all()
 
 class UserCreate(views.APIView):
-    authentication_classes = ()
+    permission_classes = ()
 
     def post(self, request, format='json'):
         serializer = UserSerializer(data=request.data)
