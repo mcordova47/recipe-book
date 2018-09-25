@@ -12,7 +12,10 @@ jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 class RecipeComponentViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeComponentSerializer
-    queryset = RecipeComponent.objects.all()
+
+    def get_queryset(self):
+        user = self.request.user
+        return RecipeComponent.objects.filter(book__users=user)
 
 class UserCreate(views.APIView):
     permission_classes = ()
