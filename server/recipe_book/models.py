@@ -13,7 +13,7 @@ UNITS = [
 
 class RecipeBook(models.Model):
     name = models.CharField(max_length=100)
-    users = models.ManyToManyField(User)
+    users = models.ManyToManyField(User, related_name='recipe_books')
 
 
 class RecipeComponent(models.Model):

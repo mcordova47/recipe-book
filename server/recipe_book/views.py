@@ -15,7 +15,7 @@ class RecipeComponentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return RecipeComponent.objects.filter(book__users__id__exact=user.id)
+        return [r for r in rb.recipes for rb in user.recipe_books]
 
 class UserCreate(views.APIView):
     permission_classes = ()
