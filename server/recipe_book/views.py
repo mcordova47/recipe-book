@@ -18,9 +18,8 @@ class UserCreate(views.APIView):
 
     def post(self, request, format='json'):
         serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            if user:
-                payload = jwt_payload_handler(user)
-                token = jwt_encode_handler(payload)
-                return Response({ 'token': token }, status=status.HTTP_201_CREATED)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        payload = jwt_payload_handler(user)
+        token = jwt_encode_handler(payload)
+        return Response({ 'token': token }, status=status.HTTP_201_CREATED)
