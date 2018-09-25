@@ -53,6 +53,7 @@ data Event
   | Login String
   | LoggedIn String
   | Signup String
+  | SignedUp String
   | ToggleView
 
 foldp :: forall fx. Event -> State -> EffModel State Event ( ajax :: AJAX, dom :: DOM, history :: HISTORY | fx)
@@ -92,6 +93,29 @@ foldp ev state@(SignupState st) = case ev of
     noEffects $ SignupState st { confirmPassword = targetValue event }
   ToggleView ->
     noEffects $ LoginState { username: "", password: "" }
+  Signup api ->
+    { state
+    , effects:
+        [ do
+            let
+              body =
+                "username" := st.username ~>
+                "password" := st.password ~>
+                "confirm_password" := st.confirmPassword ~>
+                J.jsonEmptyObject
+            res <- attempt (post (api <> "signup/") body)
+            let token = bimap show _.response res >>= decodeToken
+            pure $ either (const Nothing) (Just <<< SignedUp) token
+        ]
+    }
+  SignedUp token ->
+    { state
+    , effects:
+        [ do
+            liftEff $ setItem "AUTH_TOKEN" token =<< localStorage =<< window
+            liftEff (setRoute R.Home) *> pure Nothing
+        ]
+    }
   _ ->
     noEffects state
 
