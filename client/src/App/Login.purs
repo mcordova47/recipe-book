@@ -146,7 +146,7 @@ view api redirect state =
             }
     SignupState st ->
       H.form
-        ! HA.name "login"
+        ! HA.name "signup"
         #! HE.onSubmit (const (Signup redirect api))
         $ do
           input
