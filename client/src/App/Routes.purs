@@ -29,13 +29,13 @@ match :: String -> Route
 match url = fromMaybe Home $ router url $
   Home <$ end
   <|>
-  Login Nothing <$ lit "login" <* end
-  <|>
-  Login Nothing <$ lit "login" <* lit "" <* end
-  <|>
   Login <<< Just <<< match <<< decodeURIComponent <$> (lit "login" *> param "redirect") <* end
   <|>
   Login <<< Just <<< match <<< decodeURIComponent <$> (lit "login" *> lit "" *> param "redirect") <* end
+  <|>
+  Login Nothing <$ lit "login" <* end
+  <|>
+  Login Nothing <$ lit "login" <* lit "" <* end
   <|>
   Recipes All <$ lit "recipes" <* end
   <|>
