@@ -122,48 +122,56 @@ foldp ev state@(SignupState st) = case ev of
 view :: String -> Maybe Route -> State -> HTML Event
 view api redirect state =
   H.div ! HA.className "login" $ case state of
-    LoginState st -> do
-      input
-        { value: st.username
-        , placeholder: "Username"
-        , onChange: ChangeLIUsername
-        , password: false
-        }
-      input
-        { value: st.password
-        , placeholder: "Password"
-        , onChange: ChangeLIPassword
-        , password: true
-        }
-      button { label: "Log In", onClick: Login redirect api }
-      toggleMessage
-        { message: "Don't have an account yet?"
-        , action: "Sign up"
-        }
-    SignupState st -> do
-      input
-        { value: st.username
-        , placeholder: "Username"
-        , onChange: ChangeSUUsername
-        , password: false
-        }
-      input
-        { value: st.password
-        , placeholder: "Password"
-        , onChange: ChangeSUPassword
-        , password: true
-        }
-      input
-        { value: st.confirmPassword
-        , placeholder: "Confirm Password"
-        , onChange: ChangeSUConfirmPassword
-        , password: true
-        }
-      button { label: "Sign Up", onClick: Signup redirect api }
-      toggleMessage
-        { message: "Already have an account?"
-        , action: "Log In"
-        }
+    LoginState st ->
+      H.form
+        ! HA.name "login"
+        #! HE.onSubmit (const (Login redirect api))
+        $ do
+          input
+            { value: st.username
+            , placeholder: "Username"
+            , onChange: ChangeLIUsername
+            , password: false
+            }
+          input
+            { value: st.password
+            , placeholder: "Password"
+            , onChange: ChangeLIPassword
+            , password: true
+            }
+          button { label: "Log In" }
+          toggleMessage
+            { message: "Don't have an account yet?"
+            , action: "Sign up"
+            }
+    SignupState st ->
+      H.form
+        ! HA.name "login"
+        #! HE.onSubmit (const (Signup redirect api))
+        $ do
+          input
+            { value: st.username
+            , placeholder: "Username"
+            , onChange: ChangeSUUsername
+            , password: false
+            }
+          input
+            { value: st.password
+            , placeholder: "Password"
+            , onChange: ChangeSUPassword
+            , password: true
+            }
+          input
+            { value: st.confirmPassword
+            , placeholder: "Confirm Password"
+            , onChange: ChangeSUConfirmPassword
+            , password: true
+            }
+          button { label: "Sign Up" }
+          toggleMessage
+            { message: "Already have an account?"
+            , action: "Log In"
+            }
 
 type InputProps =
   { value :: String
@@ -182,14 +190,13 @@ input { value, onChange, password, placeholder } =
 
 type ButtonProps =
   { label :: String
-  , onClick :: Event
   }
 
 button :: ButtonProps -> HTML Event
-button { label, onClick } =
+button { label } =
   H.button
     ! HA.className "login__button"
-    #! HE.onClick (const onClick)
+    ! HA.type' "submit"
     $ text label
 
 type ToggleProps =
