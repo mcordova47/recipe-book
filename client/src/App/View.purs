@@ -123,8 +123,8 @@ mainView (State s) =
   case s.view of
     Routes.Home ->
       categoryList s.drawerOpened All s.recipes
-    Routes.Login _ ->
-      mapEvent LoginEvent (Login.view s.api s.login)
+    Routes.Login redirect ->
+      mapEvent LoginEvent (Login.view s.api redirect s.login)
     Routes.Recipes filter' ->
       categoryList s.drawerOpened filter' s.recipes
     Routes.Recipe slug ->
