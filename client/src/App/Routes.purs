@@ -7,7 +7,7 @@ import Control.Alt ((<|>))
 import Control.Monad.Eff (Eff)
 import DOM (DOM)
 import DOM.HTML (window)
-import DOM.HTML.Location (origin, pathname, reload, setHref)
+import DOM.HTML.Location (reload, setHash)
 import DOM.HTML.Types (HISTORY)
 import DOM.HTML.Window (location)
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -63,11 +63,9 @@ toTitle (Recipe slug) = unslugify slug <> " | Recipe Book"
 
 setRoute :: forall fx. Route -> Eff ( dom :: DOM, history :: HISTORY | fx) Unit
 setRoute route = do
-  let hash = toURL route
+  let hash = toHash route
   window' <- window
   loc <- location window'
-  origin' <- origin loc
-  pathname' <- pathname loc
-  setHref (origin' <> pathname' <> hash) loc
+  setHash hash loc
   loc' <- location window'
   reload loc'
