@@ -2,7 +2,7 @@ module App.Login (State, Event, init, foldp, view) where
 
 import Prelude
 
-import App.Routes (setRoute)
+import App.Routes (Route, setRoute)
 import App.Routes as R
 import Control.Monad.Aff (attempt)
 import Control.Monad.Eff.Class (liftEff)
@@ -15,7 +15,7 @@ import Data.Argonaut (Json, (.?), (:=), (~>))
 import Data.Argonaut as J
 import Data.Bifunctor (bimap)
 import Data.Either (Either, either)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Network.HTTP.Affjax (AJAX, post)
 import Pux (EffModel, noEffects)
 import Pux.DOM.Events (DOMEvent, targetValue)
@@ -50,10 +50,10 @@ data Event
   | ChangeSUUsername DOMEvent
   | ChangeSUPassword DOMEvent
   | ChangeSUConfirmPassword DOMEvent
-  | Login String
-  | LoggedIn String
-  | Signup String
-  | SignedUp String
+  | Login (Maybe Route) String
+  | LoggedIn (Maybe Route) String
+  | Signup (Maybe Route) String
+  | SignedUp (Maybe Route) String
   | ToggleView
 
 foldp :: forall fx. Event -> State -> EffModel State Event ( ajax :: AJAX, dom :: DOM, history :: HISTORY | fx)
@@ -64,22 +64,22 @@ foldp ev state@(LoginState st) = case ev of
     noEffects $ LoginState st { password = targetValue event }
   ToggleView ->
     noEffects $ SignupState { username: "", password: "", confirmPassword: "" }
-  Login api ->
+  Login redirect api ->
     { state
     , effects:
         [ do
             let body = "username" := st.username ~> "password" := st.password ~> J.jsonEmptyObject
             res <- attempt (post (api <> "auth/") body)
             let token = bimap show _.response res >>= decodeToken
-            pure $ either (const Nothing) (Just <<< LoggedIn) token
+            pure $ either (const Nothing) (Just <<< LoggedIn redirect) token
         ]
     }
-  LoggedIn token ->
+  LoggedIn redirect token ->
     { state
     , effects:
         [ do
             liftEff $ setItem "AUTH_TOKEN" token =<< localStorage =<< window
-            liftEff (setRoute R.Home) *> pure Nothing
+            liftEff (setRoute (fromMaybe R.Home redirect)) *> pure Nothing
         ]
     }
   _ ->
@@ -93,7 +93,7 @@ foldp ev state@(SignupState st) = case ev of
     noEffects $ SignupState st { confirmPassword = targetValue event }
   ToggleView ->
     noEffects $ LoginState { username: "", password: "" }
-  Signup api ->
+  Signup redirect api ->
     { state
     , effects:
         [ do
@@ -105,22 +105,22 @@ foldp ev state@(SignupState st) = case ev of
                 J.jsonEmptyObject
             res <- attempt (post (api <> "signup/") body)
             let token = bimap show _.response res >>= decodeToken
-            pure $ either (const Nothing) (Just <<< SignedUp) token
+            pure $ either (const Nothing) (Just <<< SignedUp redirect) token
         ]
     }
-  SignedUp token ->
+  SignedUp redirect token ->
     { state
     , effects:
         [ do
             liftEff $ setItem "AUTH_TOKEN" token =<< localStorage =<< window
-            liftEff (setRoute R.Home) *> pure Nothing
+            liftEff (setRoute (fromMaybe R.Home redirect)) *> pure Nothing
         ]
     }
   _ ->
     noEffects state
 
-view :: String -> State -> HTML Event
-view api state =
+view :: String -> Maybe Route -> State -> HTML Event
+view api redirect state =
   H.div ! HA.className "login" $ case state of
     LoginState st -> do
       input
@@ -135,7 +135,7 @@ view api state =
         , onChange: ChangeLIPassword
         , password: true
         }
-      button { label: "Log In", onClick: Login api }
+      button { label: "Log In", onClick: Login redirect api }
       toggleMessage
         { message: "Don't have an account yet?"
         , action: "Sign up"
@@ -159,7 +159,7 @@ view api state =
         , onChange: ChangeSUConfirmPassword
         , password: true
         }
-      button { label: "Sign Up", onClick: Signup api }
+      button { label: "Sign Up", onClick: Signup redirect api }
       toggleMessage
         { message: "Already have an account?"
         , action: "Log In"

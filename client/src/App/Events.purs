@@ -48,7 +48,7 @@ foldp FetchRecipes (State state) =
               status = _.status <$> res
           case status of
             Right (StatusCode 401) | not (isLogin state.view) -> do
-              liftEff (setRoute (Login Nothing))
+              liftEff (setRoute (Login (Just state.view)))
               pure Nothing
             _ ->
               pure (Just (ReceiveRecipes recipes))
@@ -58,7 +58,7 @@ foldp (Authenticate Nothing) state@(State s) =
   { state
   , effects:
       [ do
-          when (not (isLogin s.view)) (liftEff (setRoute (Login Nothing)))
+          when (not (isLogin s.view)) (liftEff (setRoute (Login (Just s.view))))
           pure Nothing
       ]
   }
