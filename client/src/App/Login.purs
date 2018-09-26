@@ -3,7 +3,6 @@ module App.Login (State, Event, init, foldp, view) where
 import Prelude
 
 import App.Routes (Route, setRoute)
-import App.Routes as R
 import Control.Monad.Aff (attempt)
 import Control.Monad.Eff.Class (liftEff)
 import DOM (DOM)
@@ -16,7 +15,7 @@ import Data.Argonaut (Json, (.?), (:=), (~>))
 import Data.Argonaut as J
 import Data.Bifunctor (bimap)
 import Data.Either (Either, either)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..))
 import Network.HTTP.Affjax (AJAX, post)
 import Pux (EffModel, noEffects)
 import Pux.DOM.Events (DOMEvent, targetValue)
@@ -51,10 +50,10 @@ data Event
   | ChangeSUUsername DOMEvent
   | ChangeSUPassword DOMEvent
   | ChangeSUConfirmPassword DOMEvent
-  | Login (Maybe Route) String DOMEvent
-  | LoggedIn (Maybe Route) String
-  | Signup (Maybe Route) String DOMEvent
-  | SignedUp (Maybe Route) String
+  | Login Route String DOMEvent
+  | LoggedIn Route String
+  | Signup Route String DOMEvent
+  | SignedUp Route String
   | ToggleView
 
 foldp :: forall fx. Event -> State -> EffModel State Event ( ajax :: AJAX, dom :: DOM, history :: HISTORY | fx)
@@ -81,7 +80,7 @@ foldp ev state@(LoginState st) = case ev of
     , effects:
         [ do
             liftEff $ setItem "AUTH_TOKEN" token =<< localStorage =<< window
-            liftEff (setRoute (fromMaybe R.Home redirect)) *> pure Nothing
+            liftEff (setRoute redirect) *> pure Nothing
         ]
     }
   _ ->
@@ -116,13 +115,13 @@ foldp ev state@(SignupState st) = case ev of
     , effects:
         [ do
             liftEff $ setItem "AUTH_TOKEN" token =<< localStorage =<< window
-            liftEff (setRoute (fromMaybe R.Home redirect)) *> pure Nothing
+            liftEff (setRoute redirect) *> pure Nothing
         ]
     }
   _ ->
     noEffects state
 
-view :: String -> Maybe Route -> State -> HTML Event
+view :: String -> Route -> State -> HTML Event
 view api redirect state =
   H.div ! HA.className "login" $ case state of
     LoginState st ->

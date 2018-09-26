@@ -10,14 +10,14 @@ import DOM.HTML (window)
 import DOM.HTML.Location (reload, setHash)
 import DOM.HTML.Types (HISTORY)
 import DOM.HTML.Window (location)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (fromMaybe)
 import Global (decodeURIComponent, encodeURIComponent)
 import Pux.Router (end, lit, param, router)
 import Util.Url (Slug, slug, unslugify)
 
 data Route
   = Home
-  | Login (Maybe Route)
+  | Login Route
   | Recipes Filter
   | Recipe Slug
 
@@ -29,13 +29,13 @@ match :: String -> Route
 match url = fromMaybe Home $ router url $
   Home <$ end
   <|>
-  Login <<< Just <<< match <<< decodeURIComponent <$> (lit "login" *> param "redirect") <* end
+  Login <<< match <<< decodeURIComponent <$> (lit "login" *> param "redirect") <* end
   <|>
-  Login <<< Just <<< match <<< decodeURIComponent <$> (lit "login" *> lit "" *> param "redirect") <* end
+  Login <<< match <<< decodeURIComponent <$> (lit "login" *> lit "" *> param "redirect") <* end
   <|>
-  Login Nothing <$ lit "login" <* end
+  Login Home <$ lit "login" <* end
   <|>
-  Login Nothing <$ lit "login" <* lit "" <* end
+  Login Home <$ lit "login" <* lit "" <* end
   <|>
   Recipes All <$ lit "recipes" <* end
   <|>
@@ -47,8 +47,7 @@ match url = fromMaybe Home $ router url $
 
 toHash :: Route -> String
 toHash Home = "/"
-toHash (Login (Just redirect)) = "/login/?redirect=" <> encodeURIComponent (toHash redirect)
-toHash (Login _) = "/login/"
+toHash (Login redirect) = "/login/?redirect=" <> encodeURIComponent (toHash redirect)
 toHash (Recipes _) = "/recipes/"
 toHash (Recipe slug) = "/recipes/" <> show slug <> "/"
 
