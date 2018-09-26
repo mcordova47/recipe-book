@@ -4,7 +4,7 @@ import Prelude
 
 import App.Events (Event(..))
 import App.Filter (Filter(..))
-import App.Loader (loader)
+import App.Loader as Loader
 import App.Login as Login
 import App.Markdown (Markdown(..), Inline(..))
 import App.Markdown as Markdown
@@ -215,7 +215,7 @@ categoryList _ _ Loading =
     $ H.div
       ! HA.className "loader"
       $ do
-        loader
+        Loader.view
         H.div
           ! HA.className "loader__message"
           $ text "Preparing Recipes..."

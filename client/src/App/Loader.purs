@@ -1,4 +1,4 @@
-module App.Loader (loader) where
+module App.Loader (view) where
 
 import Prelude
 
@@ -7,8 +7,8 @@ import Text.Smolder.Markup (text, (!))
 import Text.Smolder.SVG as SVG
 import Text.Smolder.SVG.Attributes as SA
 
-loader :: forall ev. HTML ev
-loader =
+view :: forall ev. HTML ev
+view =
   SVG.svg
     ! SA.width "500"
     ! SA.height "200"
