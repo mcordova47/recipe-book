@@ -7,7 +7,7 @@ import Control.Alt ((<|>))
 import Control.Monad.Eff (Eff)
 import DOM (DOM)
 import DOM.HTML (window)
-import DOM.HTML.Location (origin, pathname, setHref)
+import DOM.HTML.Location (origin, pathname, reload, setHref)
 import DOM.HTML.Types (HISTORY)
 import DOM.HTML.Window (location)
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -69,3 +69,5 @@ setRoute route = do
   origin' <- origin loc
   pathname' <- pathname loc
   setHref (origin' <> pathname' <> hash) loc
+  loc' <- location window'
+  reload loc'
