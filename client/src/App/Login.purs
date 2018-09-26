@@ -7,6 +7,7 @@ import App.Routes as R
 import Control.Monad.Aff (attempt)
 import Control.Monad.Eff.Class (liftEff)
 import DOM (DOM)
+import DOM.Classy.Event (preventDefault)
 import DOM.HTML (window)
 import DOM.HTML.Types (HISTORY)
 import DOM.HTML.Window (localStorage)
@@ -50,9 +51,9 @@ data Event
   | ChangeSUUsername DOMEvent
   | ChangeSUPassword DOMEvent
   | ChangeSUConfirmPassword DOMEvent
-  | Login (Maybe Route) String
+  | Login (Maybe Route) String DOMEvent
   | LoggedIn (Maybe Route) String
-  | Signup (Maybe Route) String
+  | Signup (Maybe Route) String DOMEvent
   | SignedUp (Maybe Route) String
   | ToggleView
 
@@ -64,10 +65,11 @@ foldp ev state@(LoginState st) = case ev of
     noEffects $ LoginState st { password = targetValue event }
   ToggleView ->
     noEffects $ SignupState { username: "", password: "", confirmPassword: "" }
-  Login redirect api ->
+  Login redirect api event ->
     { state
     , effects:
         [ do
+            liftEff (preventDefault event)
             let body = "username" := st.username ~> "password" := st.password ~> J.jsonEmptyObject
             res <- attempt (post (api <> "auth/") body)
             let token = bimap show _.response res >>= decodeToken
@@ -93,10 +95,11 @@ foldp ev state@(SignupState st) = case ev of
     noEffects $ SignupState st { confirmPassword = targetValue event }
   ToggleView ->
     noEffects $ LoginState { username: "", password: "" }
-  Signup redirect api ->
+  Signup redirect api event ->
     { state
     , effects:
         [ do
+            liftEff (preventDefault event)
             let
               body =
                 "username" := st.username ~>
@@ -125,7 +128,7 @@ view api redirect state =
     LoginState st ->
       H.form
         ! HA.name "login"
-        #! HE.onSubmit (const (Login redirect api))
+        #! HE.onSubmit (Login redirect api)
         $ do
           input
             { value: st.username
@@ -147,7 +150,7 @@ view api redirect state =
     SignupState st ->
       H.form
         ! HA.name "signup"
-        #! HE.onSubmit (const (Signup redirect api))
+        #! HE.onSubmit (Signup redirect api)
         $ do
           input
             { value: st.username
