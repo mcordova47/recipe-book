@@ -69,5 +69,3 @@ setRoute route = do
   origin' <- origin loc
   pathname' <- pathname loc
   setHref (origin' <> pathname' <> hash) loc
-  loc' <- location window'
-  reload loc'
