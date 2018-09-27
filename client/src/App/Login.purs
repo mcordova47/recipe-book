@@ -32,17 +32,19 @@ data State
 type LoginState' =
   { username :: String
   , password :: String
+  , isSubmitting :: Boolean
   }
 
 type SignupState' =
   { username :: String
   , password :: String
   , confirmPassword :: String
+  , isSubmitting :: Boolean
   }
 
 init :: State
 init =
-  LoginState { username: "", password: "" }
+  LoginState { username: "", password: "", isSubmitting: false }
 
 data Event
   = ChangeLIUsername DOMEvent
@@ -63,9 +65,9 @@ foldp ev state@(LoginState st) = case ev of
   ChangeLIPassword event ->
     noEffects $ LoginState st { password = targetValue event }
   ToggleView ->
-    noEffects $ SignupState { username: "", password: "", confirmPassword: "" }
+    noEffects $ SignupState { username: "", password: "", confirmPassword: "", isSubmitting: false }
   Login redirect api event ->
-    { state
+    { state: LoginState st { isSubmitting = true }
     , effects:
         [ do
             liftEff (preventDefault event)
@@ -93,9 +95,9 @@ foldp ev state@(SignupState st) = case ev of
   ChangeSUConfirmPassword event ->
     noEffects $ SignupState st { confirmPassword = targetValue event }
   ToggleView ->
-    noEffects $ LoginState { username: "", password: "" }
+    noEffects $ LoginState { username: "", password: "", isSubmitting: false }
   Signup redirect api event ->
-    { state
+    { state: SignupState st { isSubmitting = true }
     , effects:
         [ do
             liftEff (preventDefault event)
@@ -141,7 +143,11 @@ view api redirect state =
             , onChange: ChangeLIPassword
             , password: true
             }
-          button { label: "Log In" }
+          button
+            { label: if st.isSubmitting then "Signing you in..." else "Log In"
+            , isSubmitting: st.isSubmitting
+            }
+          H.hr ! HA.className "login__divider"
           toggleMessage
             { message: "Don't have an account yet?"
             , action: "Sign up"
@@ -169,7 +175,11 @@ view api redirect state =
             , onChange: ChangeSUConfirmPassword
             , password: true
             }
-          button { label: "Sign Up" }
+          button
+            { label: if st.isSubmitting then "Signing you up..." else "Sign Up"
+            , isSubmitting: st.isSubmitting
+            }
+          H.hr ! HA.className "login__divider"
           toggleMessage
             { message: "Already have an account?"
             , action: "Log In"
@@ -192,12 +202,14 @@ input { value, onChange, password, placeholder } =
 
 type ButtonProps =
   { label :: String
+  , isSubmitting :: Boolean
   }
 
 button :: ButtonProps -> HTML Event
-button { label } =
+button { label, isSubmitting } =
   H.button
-    ! HA.className "login__button"
+    ! HA.className
+        (if isSubmitting then "login__button login__button--submitting" else "login__button")
     ! HA.type' "submit"
     $ text label
 

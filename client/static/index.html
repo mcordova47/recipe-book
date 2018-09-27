@@ -330,17 +330,36 @@
       .login__button {
         background: #ffc107;
         color: white;
-        border: none; /*2px solid #ffc107; */
+        border: 2px solid #ffc107;
         border-radius: 2px;
-        padding: 10px 15px;
+        padding: 8px 15px;
         cursor: pointer;
-        font-size: 14px;
-        font-weight: 700;
+        font-size: 16px;
+        font-weight: 500;
         width: 260px;
+        border: 2px solid #ffc107;
+        font-family: Roboto;
+      }
+
+      .login__button--submitting {
+        background: linear-gradient(to right, #ffc107, #ffc107 40%, #fbcf48, #ffc107 60%, #ffc107);
+        background-position-x: -50%;
+        background-repeat: repeat;
+        background-size: 200%;
+        animation-name: loading-shine;
+        animation-duration: 2s;
+        animation-iteration-count: infinite;
+      }
+
+      @keyframes loading-shine {
+        0% { background-position-x: 150%; }
+        60% { background-position-x: -50%; }
+        100% { background-position-x: -50%; }
       }
 
       .login__toggle {
         margin-top: 10px;
+        font-size: 14px;
       }
 
       .login__toggle__text {
@@ -350,6 +369,13 @@
       .login__toggle__link {
         color: #1976D2;
         cursor: pointer;
+      }
+
+      .login__divider {
+        width: 260px;
+        border-top: 1px solid #bbbbbb;
+        border-bottom: none;
+        margin: 18px auto 10px;
       }
     </style>
   </head>
