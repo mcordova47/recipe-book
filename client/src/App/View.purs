@@ -155,13 +155,16 @@ recipeMainView NotAsked _ _ =
 
 editModal :: Recipe -> Routes.AccessMode -> HTML Event
 editModal recipe Routes.ReadMode =
-  H.div ! HA.className "floating-button" $
-    H.i
-      ! HA.className "material-icons"
-      #! HE.onClick (const ToggleEditMode)
-      $ text "edit"
+  H.div
+    ! HA.className "floating-button"
+    #! HE.onClick (const ToggleEditMode)
+    $ H.i ! HA.className "material-icons" $ text "edit"
 editModal recipe Routes.EditMode =
-  H.div ! HA.className "floating-button floating-button--card" $ text ""
+  H.div ! HA.className "floating-button floating-button--card" $
+    H.div
+      ! HA.className "close-button"
+      #! HE.onClick (const ToggleEditMode)
+      $ H.i ! HA.className "material-icons" $ text "close"
 
 recipePlaceholderView :: HTML Event
 recipePlaceholderView =
