@@ -9,6 +9,7 @@ import App.Login as Login
 import App.Markdown (Markdown(..), Inline(..))
 import App.Markdown as Markdown
 import App.Measurement (Measurement, convertMeasurement)
+import App.RecipeEditor as RecipeEditor
 import App.Routes (toURL)
 import App.Routes as Routes
 import App.State (FoodId(..), IngredientAmount(..), Recipe, RecipeComponent(..), State(..), RecipesResponse)
@@ -131,11 +132,11 @@ mainView (State s) =
       scrollContainer s.drawerOpened $ fromMaybe (text "") $ recipeMainView s.recipes mode slug
 
 recipeMainView :: RecipesResponse -> Routes.AccessMode -> Slug -> Maybe (HTML Event)
-recipeMainView (Success recipes) mode slug = do
+recipeMainView (Success recipes) accessMode slug = do
   recipe <- getRecipe slug recipes
   pure $
     H.div ! HA.className "recipe-main-view" $ do
-      editModal recipe mode
+      RecipeEditor.view { recipe, accessMode }
       H.h2 $ text recipe.name
       H.div $ do
         H.h3 $ text "Ingredients"
@@ -152,19 +153,6 @@ recipeMainView (Failure err) _ _ =
       $ text err
 recipeMainView NotAsked _ _ =
   Nothing
-
-editModal :: Recipe -> Routes.AccessMode -> HTML Event
-editModal recipe Routes.ReadMode =
-  H.div
-    ! HA.className "floating-button"
-    #! HE.onClick (const ToggleEditMode)
-    $ H.i ! HA.className "material-icons" $ text "edit"
-editModal recipe Routes.EditMode =
-  H.div ! HA.className "floating-button floating-button--card" $
-    H.div
-      ! HA.className "close-button"
-      #! HE.onClick (const ToggleEditMode)
-      $ H.i ! HA.className "material-icons" $ text "close"
 
 recipePlaceholderView :: HTML Event
 recipePlaceholderView =
