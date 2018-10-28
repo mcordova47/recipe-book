@@ -25,8 +25,9 @@ view { recipe, accessMode } =
         #! HE.onClick ToggleEditMode
         $ H.i ! HA.className "material-icons" $ text "edit"
     EditMode ->
-      H.div ! HA.className "floating-button floating-button--card" $
-        H.div
-          ! HA.className "close-button"
-          #! HE.onClick ToggleEditMode
-          $ H.i ! HA.className "material-icons" $ text "close"
+      H.div ! HA.className "floating-button floating-button--card" $ do
+        H.div ! HA.className "recipe-editor__header" $
+          H.div
+            ! HA.className "close-button"
+            #! HE.onClick ToggleEditMode
+            $ H.i ! HA.className "material-icons" $ text "close"

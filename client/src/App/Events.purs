@@ -105,7 +105,7 @@ foldp (ToggleEditMode event) state@(State { view }) =
       let { state, effects } = updateRoute state $ Recipe EditMode recipe
       in { state, effects: effects <> [liftEff (stopPropagation event) *> pure Nothing] }
     Recipe EditMode recipe ->
-      let { state, effects } = updateRoute state $ Recipe EditMode recipe
+      let { state, effects } = updateRoute state $ Recipe ReadMode recipe
       in { state, effects: effects <> [liftEff (stopPropagation event) *> pure Nothing] }
     _ ->
       noEffects state
