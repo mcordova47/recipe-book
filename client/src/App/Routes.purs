@@ -13,6 +13,9 @@ import DOM.HTML.Window (location)
 import Data.Maybe (fromMaybe)
 import Global (decodeURIComponent, encodeURIComponent)
 import Pux.Router (end, lit, param, router)
+import Text.Smolder.HTML as H
+import Text.Smolder.HTML.Attributes as HA
+import Text.Smolder.Markup (Markup, (!))
 import Util.Url (Slug, slug, unslugify)
 
 data Route
@@ -81,3 +84,7 @@ setRoute' refresh route = do
   when refresh do
     loc' <- location window'
     reload loc'
+
+link :: forall e. Route -> Markup e -> Markup e
+link route =
+  H.a ! HA.href (toURL route)

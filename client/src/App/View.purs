@@ -10,7 +10,7 @@ import App.Markdown (Markdown(..), Inline(..))
 import App.Markdown as Markdown
 import App.Measurement (Measurement, convertMeasurement)
 import App.RecipeEditor as RecipeEditor
-import App.Routes (toURL)
+import App.Routes (link)
 import App.Routes as Routes
 import App.State (FoodId(..), IngredientAmount(..), Recipe, RecipeComponent(..), State(..), RecipesResponse)
 import App.Tooltip as Tooltip
@@ -80,7 +80,7 @@ recipeNavLink route recipe =
           "nav-drawer__recipe-nav-link"
   in
     H.li ! HA.className classNames $
-      H.a ! HA.href (toURL (Routes.Recipe Routes.ReadMode (slugify recipe.name))) $ text recipe.name
+      link (Routes.Recipe Routes.ReadMode $ slugify recipe.name) $ text recipe.name
 
 isRecipeSelected :: Routes.Route -> Slug -> Boolean
 isRecipeSelected (Routes.Recipe _ selectedSlug) slug =
@@ -93,7 +93,7 @@ header route =
   H.div ! HA.className "header" $ do
     H.div ! HA.className "menu" #! HE.onClick (const ToggleDrawerState) $
       H.i ! HA.className "material-icons" $ text "menu"
-    H.a ! HA.href (toURL Routes.Home) ! HA.className "header__title" $ text "Recipe Book"
+    link (Routes.Home) ! HA.className "header__title" $ text "Recipe Book"
     H.div ! HA.className "header__search" $
       H.div ! HA.className "header__search__input" $ do
         H.div
@@ -191,9 +191,8 @@ ingredientView recipes (IngredientAmount { ingredient, amount, unitType }) =
     Just (RecipeComp _ { name }) ->
       H.li $ do
         text (toString amount <> " " <> show unitType <> " ")
-        H.a
+        link (Routes.Recipe Routes.ReadMode $ slugify name)
           ! HA.className "ingredient-view__recipe-link"
-          ! HA.href (toURL (Routes.Recipe Routes.ReadMode (slugify name)))
           $ text name
 
     Nothing ->
@@ -233,7 +232,7 @@ categoryView recipeMap (NonEmptyList recipes) =
 
 recipeView :: Map FoodId RecipeComponent -> Recipe -> HTML Event
 recipeView recipes recipe =
-  H.a ! HA.className "recipe-view-card-link" ! HA.href (toURL (Routes.Recipe Routes.ReadMode (slugify recipe.name))) $
+  link (Routes.Recipe Routes.ReadMode $ slugify recipe.name) ! HA.className "recipe-view-card-link" $
     H.div ! HA.className "recipe-view" $ do
       H.div ! HA.className "recipe-view__title" $ text recipe.name
       H.div ! HA.className "recipe-view__directions" $ text $ Markdown.strip recipe.directions

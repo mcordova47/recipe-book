@@ -2,31 +2,28 @@ module App.RecipeEditor where
 
 import Prelude
 
-import App.Events (Event(..))
-import App.Routes (AccessMode(EditMode, ReadMode))
+import App.Routes (AccessMode(..), Route(..), link)
 import App.State (Recipe)
-import Pux.DOM.Events as HE
 import Pux.DOM.HTML (HTML)
 import Text.Smolder.HTML as H
 import Text.Smolder.HTML.Attributes as HA
-import Text.Smolder.Markup (text, (!), (#!))
+import Text.Smolder.Markup (text, (!))
+import Util.Url (slugify)
 
 type Props =
   { recipe :: Recipe
   , accessMode :: AccessMode
   }
 
-view :: Props -> HTML Event
+view :: forall e. Props -> HTML e
 view { recipe, accessMode } =
   case accessMode of
     ReadMode ->
-      H.div
+      link (Recipe EditMode $ slugify recipe.name)
         ! HA.className "floating-button"
-        #! HE.onClick (const ToggleEditMode)
         $ H.i ! HA.className "material-icons" $ text "edit"
     EditMode ->
       H.div ! HA.className "floating-button floating-button--card" $
-        H.div
+        link (Recipe ReadMode $ slugify recipe.name)
           ! HA.className "close-button"
-          #! HE.onClick (const ToggleEditMode)
           $ H.i ! HA.className "material-icons" $ text "close"

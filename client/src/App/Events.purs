@@ -4,7 +4,7 @@ import Prelude
 
 import App.Filter (Filter(..))
 import App.Login as Login
-import App.Routes (AccessMode(..), Route(..), isLogin, setRoute, setRoute', toTitle)
+import App.Routes (Route(Login), isLogin, setRoute, toTitle)
 import App.Routes as Routes
 import App.State (FoodId, RecipeComponent(..), State(State))
 import App.Tooltip as Tooltip
@@ -35,7 +35,6 @@ data Event
   | ChangeURL Route
   | ToggleDrawerState
   | LoginEvent Login.Event
-  | ToggleEditMode
 
 type AppEffects fx = Tooltip.Effects (ajax :: AJAX, document :: DOCUMENT, history :: HISTORY | fx)
 
@@ -98,24 +97,6 @@ foldp (LoginEvent event) (State s) =
       { state: State s { login = state }
       , effects
       }
-foldp ToggleEditMode state@(State { view }) =
-  case view of
-    Recipe ReadMode recipe ->
-      updateRoute state $ Recipe EditMode recipe
-    Recipe EditMode recipe ->
-      updateRoute state $ Recipe ReadMode recipe
-    _ ->
-      noEffects state
-
-updateRoute :: forall fx. State -> Route -> EffModel State Event (AppEffects fx)
-updateRoute (State state) route =
-  { state: State state { view = route }
-  , effects:
-      [ do
-          liftEff $ setRoute' false route
-          pure Nothing
-      ]
-  }
 
 toTuple :: RecipeComponent -> Tuple FoodId RecipeComponent
 toTuple rc@(RecipeComp id _) = Tuple id rc
