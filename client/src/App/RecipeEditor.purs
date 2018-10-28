@@ -22,11 +22,11 @@ view { recipe, accessMode } =
     ReadMode ->
       H.div
         ! HA.className "floating-button"
-        #! HE.onClick (const ToggleEditMode)
+        #! HE.onClick ToggleEditMode
         $ H.i ! HA.className "material-icons" $ text "edit"
     EditMode ->
       H.div ! HA.className "floating-button floating-button--card" $
         H.div
           ! HA.className "close-button"
-          #! HE.onClick (const ToggleEditMode)
+          #! HE.onClick ToggleEditMode
           $ H.i ! HA.className "material-icons" $ text "close"

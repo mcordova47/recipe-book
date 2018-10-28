@@ -10,6 +10,7 @@ import App.State (FoodId, RecipeComponent(..), State(State))
 import App.Tooltip as Tooltip
 import Control.Monad.Aff (attempt)
 import Control.Monad.Eff.Class (liftEff)
+import DOM.Classy.Event (stopPropagation)
 import DOM.HTML.Types (HISTORY)
 import Data.Argonaut (decodeJson)
 import Data.Bifunctor (bimap)
@@ -35,7 +36,7 @@ data Event
   | ChangeURL Route
   | ToggleDrawerState
   | LoginEvent Login.Event
-  | ToggleEditMode
+  | ToggleEditMode DOMEvent
 
 type AppEffects fx = Tooltip.Effects (ajax :: AJAX, document :: DOCUMENT, history :: HISTORY | fx)
 
@@ -98,12 +99,14 @@ foldp (LoginEvent event) (State s) =
       { state: State s { login = state }
       , effects
       }
-foldp ToggleEditMode state@(State { view }) =
+foldp (ToggleEditMode event) state@(State { view }) =
   case view of
     Recipe ReadMode recipe ->
-      updateRoute state $ Recipe EditMode recipe
+      let { state, effects } = updateRoute state $ Recipe EditMode recipe
+      in { state, effects: effects <> [liftEff (stopPropagation event) *> pure Nothing] }
     Recipe EditMode recipe ->
-      updateRoute state $ Recipe ReadMode recipe
+      let { state, effects } = updateRoute state $ Recipe EditMode recipe
+      in { state, effects: effects <> [liftEff (stopPropagation event) *> pure Nothing] }
     _ ->
       noEffects state
 
