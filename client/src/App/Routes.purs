@@ -19,7 +19,11 @@ data Route
   = Home
   | Login Route
   | Recipes Filter
-  | Recipe Slug
+  | Recipe AccessMode Slug
+
+data AccessMode
+  = ReadMode
+  | EditMode
 
 isLogin :: Route -> Boolean
 isLogin (Login _) = true
@@ -41,15 +45,20 @@ match url = fromMaybe Home $ router url $
   <|>
   Recipes All <$ lit "recipes" <* lit "" <* end
   <|>
-  Recipe <$> (lit "recipes" *> slug) <* end
+  Recipe ReadMode <$> (lit "recipes" *> slug) <* end
   <|>
-  Recipe <$> (lit "recipes" *> slug) <* lit "" <* end
+  Recipe ReadMode <$> (lit "recipes" *> slug) <* lit "" <* end
+  <|>
+  Recipe EditMode <$> (lit "recipes" *> slug <* lit "edit") <* end
+  <|>
+  Recipe EditMode <$> (lit "recipes" *> slug <* lit "edit") <* lit "" <* end
 
 toHash :: Route -> String
 toHash Home = "/"
 toHash (Login redirect) = "/login/?redirect=" <> encodeURIComponent (toHash redirect)
 toHash (Recipes _) = "/recipes/"
-toHash (Recipe slug) = "/recipes/" <> show slug <> "/"
+toHash (Recipe ReadMode slug) = "/recipes/" <> show slug <> "/"
+toHash (Recipe EditMode slug) = "/recipes/" <> show slug <> "/edit/"
 
 toURL :: Route -> String
 toURL = (<>) "#" <<< toHash
@@ -58,7 +67,7 @@ toTitle :: Route -> String
 toTitle Home = "Recipe Book"
 toTitle (Login _) = "Login | Recipe Book"
 toTitle (Recipes _) = "Recipes | Recipe Book"
-toTitle (Recipe slug) = unslugify slug <> " | Recipe Book"
+toTitle (Recipe _ slug) = unslugify slug <> " | Recipe Book"
 
 setRoute :: forall fx. Route -> Eff ( dom :: DOM, history :: HISTORY | fx) Unit
 setRoute route = do

@@ -79,10 +79,10 @@ recipeNavLink route recipe =
           "nav-drawer__recipe-nav-link"
   in
     H.li ! HA.className classNames $
-      H.a ! HA.href (toURL (Routes.Recipe (slugify recipe.name))) $ text recipe.name
+      H.a ! HA.href (toURL (Routes.Recipe Routes.ReadMode (slugify recipe.name))) $ text recipe.name
 
 isRecipeSelected :: Routes.Route -> Slug -> Boolean
-isRecipeSelected (Routes.Recipe selectedSlug) slug =
+isRecipeSelected (Routes.Recipe _ selectedSlug) slug =
   selectedSlug == slug
 isRecipeSelected _ _ =
   false
@@ -127,14 +127,15 @@ mainView (State s) =
       mapEvent LoginEvent (Login.view s.api redirect s.login)
     Routes.Recipes filter' ->
       categoryList s.drawerOpened filter' s.recipes
-    Routes.Recipe slug ->
-      scrollContainer s.drawerOpened $ fromMaybe (text "") $ recipeMainView s.recipes slug
+    Routes.Recipe mode slug ->
+      scrollContainer s.drawerOpened $ fromMaybe (text "") $ recipeMainView s.recipes mode slug
 
-recipeMainView :: RecipesResponse -> Slug -> Maybe (HTML Event)
-recipeMainView (Success recipes) slug = do
+recipeMainView :: RecipesResponse -> Routes.AccessMode -> Slug -> Maybe (HTML Event)
+recipeMainView (Success recipes) mode slug = do
   recipe <- getRecipe slug recipes
   pure $
     H.div ! HA.className "recipe-main-view" $ do
+      editModal recipe mode
       H.h2 $ text recipe.name
       H.div $ do
         H.h3 $ text "Ingredients"
@@ -142,15 +143,21 @@ recipeMainView (Success recipes) slug = do
       H.div $ do
         H.h3 $ text "Directions"
         recipeDirections recipes recipe
-recipeMainView Loading _ =
+recipeMainView Loading _ _ =
   Just recipePlaceholderView
-recipeMainView (Failure err) _ =
+recipeMainView (Failure err) _ _ =
   Just $
     H.div
       ! HA.className "error-message"
       $ text err
-recipeMainView _ _ =
+recipeMainView NotAsked _ _ =
   Nothing
+
+editModal :: Recipe -> Routes.AccessMode -> HTML Event
+editModal recipe Routes.ReadMode =
+  H.div ! HA.className "floating-button" $ text ""
+editModal recipe Routes.EditMode =
+  H.div ! HA.className "floating-button floating-button--card" $ text ""
 
 recipePlaceholderView :: HTML Event
 recipePlaceholderView =
@@ -191,7 +198,7 @@ ingredientView recipes (IngredientAmount { ingredient, amount, unitType }) =
         text (toString amount <> " " <> show unitType <> " ")
         H.a
           ! HA.className "ingredient-view__recipe-link"
-          ! HA.href (toURL (Routes.Recipe (slugify name)))
+          ! HA.href (toURL (Routes.Recipe Routes.ReadMode (slugify name)))
           $ text name
 
     Nothing ->
@@ -231,7 +238,7 @@ categoryView recipeMap (NonEmptyList recipes) =
 
 recipeView :: Map FoodId RecipeComponent -> Recipe -> HTML Event
 recipeView recipes recipe =
-  H.a ! HA.className "recipe-view-card-link" ! HA.href (toURL (Routes.Recipe (slugify recipe.name))) $
+  H.a ! HA.className "recipe-view-card-link" ! HA.href (toURL (Routes.Recipe Routes.ReadMode (slugify recipe.name))) $
     H.div ! HA.className "recipe-view" $ do
       H.div ! HA.className "recipe-view__title" $ text recipe.name
       H.div ! HA.className "recipe-view__directions" $ text $ Markdown.strip recipe.directions
