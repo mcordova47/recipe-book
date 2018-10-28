@@ -405,9 +405,9 @@
       }
 
       .floating-button {
-        position: absolute;
+        position: fixed;
         right: 25px;
-        top: 20px;
+        top: 70px;
         height: 50px;
         width: 50px;
         box-shadow: 0 0 9px 0px #00000047;
@@ -415,6 +415,7 @@
         cursor: pointer;
         background: #ffc107;
         z-index: 1;
+        transition: all 0.2s ease;
       }
 
       .floating-button i {
@@ -430,7 +431,6 @@
         background: white;
         right: calc(50% - 350px);
         cursor: default;
-        transition: all 0.3s ease;
       }
 
       .close-button {
