@@ -101,23 +101,21 @@ foldp (LoginEvent event) (State s) =
 foldp ToggleEditMode state@(State { view }) =
   case view of
     Recipe ReadMode recipe ->
-      { state
-      , effects:
-          [ do
-              liftEff $ setRoute' false $ Recipe EditMode recipe
-              pure Nothing
-          ]
-      }
+      updateRoute state $ Recipe EditMode recipe
     Recipe EditMode recipe ->
-      { state
-      , effects:
-          [ do
-              liftEff $ setRoute' false $ Recipe ReadMode recipe
-              pure Nothing
-          ]
-      }
+      updateRoute state $ Recipe ReadMode recipe
     _ ->
       noEffects state
+
+updateRoute :: forall fx. State -> Route -> EffModel State Event (AppEffects fx)
+updateRoute (State state) route =
+  { state: State state { view = route }
+  , effects:
+      [ do
+          liftEff $ setRoute' false route
+          pure Nothing
+      ]
+  }
 
 toTuple :: RecipeComponent -> Tuple FoodId RecipeComponent
 toTuple rc@(RecipeComp id _) = Tuple id rc
