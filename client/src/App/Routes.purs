@@ -70,10 +70,14 @@ toTitle (Recipes _) = "Recipes | Recipe Book"
 toTitle (Recipe _ slug) = unslugify slug <> " | Recipe Book"
 
 setRoute :: forall fx. Route -> Eff ( dom :: DOM, history :: HISTORY | fx) Unit
-setRoute route = do
+setRoute = setRoute' true
+
+setRoute' :: forall fx. Boolean -> Route -> Eff ( dom :: DOM, history :: HISTORY | fx) Unit
+setRoute' refresh route = do
   let hash = toHash route
   window' <- window
   loc <- location window'
   setHash hash loc
-  loc' <- location window'
-  reload loc'
+  when refresh do
+    loc' <- location window'
+    reload loc'

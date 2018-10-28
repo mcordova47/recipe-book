@@ -4,7 +4,7 @@ import Prelude
 
 import App.Filter (Filter(..))
 import App.Login as Login
-import App.Routes (AccessMode(..), Route(..), isLogin, setRoute, toTitle)
+import App.Routes (AccessMode(..), Route(..), isLogin, setRoute, setRoute', toTitle)
 import App.Routes as Routes
 import App.State (FoodId, RecipeComponent(..), State(State))
 import App.Tooltip as Tooltip
@@ -104,7 +104,7 @@ foldp ToggleEditMode state@(State { view }) =
       { state
       , effects:
           [ do
-              liftEff $ setRoute $ Recipe EditMode recipe
+              liftEff $ setRoute' false $ Recipe EditMode recipe
               pure Nothing
           ]
       }
@@ -112,7 +112,7 @@ foldp ToggleEditMode state@(State { view }) =
       { state
       , effects:
           [ do
-              liftEff $ setRoute $ Recipe ReadMode recipe
+              liftEff $ setRoute' false $ Recipe ReadMode recipe
               pure Nothing
           ]
       }
