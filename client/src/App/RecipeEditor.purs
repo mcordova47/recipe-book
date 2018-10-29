@@ -4,6 +4,7 @@ import Prelude
 
 import App.Routes (AccessMode(EditMode, ReadMode))
 import App.State (Recipe)
+import Data.Number.Format (toString)
 import Pux.DOM.Events (DOMEvent)
 import Pux.DOM.Events as HE
 import Pux.DOM.HTML (HTML)
@@ -33,8 +34,10 @@ view { recipe, accessMode, onToggleEditMode } =
             ! HA.className "close-button"
             #! HE.onClick onToggleEditMode
             $ H.i ! HA.className "material-icons" $ text "close"
-        textInput { value: "Sheet Pan Salmon", label: "RECIPE NAME" }
-        textArea { value: "Blah Blah Blah", label: "DIRECTIONS" }
+        textInput { value: recipe.name, label: "RECIPE NAME" }
+        textInput { value: recipe.category, label: "CATEGORY" }
+        numberInput { value: recipe.amount, label: "YIELD" }  -- TODO: Place a measurement input next to this
+        textArea { value: recipe.directions, label: "DIRECTIONS" }
 
 textInput :: forall e. { value :: String, label :: String } -> HTML e
 textInput { value, label } =
@@ -56,6 +59,18 @@ textArea { value, label } =
         H.textarea
           ! HA.className "recipe-editor__form-group__input"
           $ text value
+    }
+
+numberInput :: forall e. { value :: Number, label :: String } -> HTML e
+numberInput { value, label } =
+  formGroup
+    { value
+    , label
+    , input:
+        H.input
+          ! HA.type' "number"
+          ! HA.className "recipe-editor__form-group__input"
+          ! HA.value (toString value)
     }
 
 formGroup :: forall e. { label :: String, value :: String, input :: HTML e } -> HTML e
