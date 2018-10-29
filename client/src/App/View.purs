@@ -136,7 +136,7 @@ recipeMainView (Success recipes) accessMode slug = do
   recipe <- getRecipe slug recipes
   pure $
     H.div ! HA.className "recipe-main-view" $ do
-      RecipeEditor.view { recipe, accessMode }
+      RecipeEditor.view { recipe, accessMode, onToggleEditMode: ToggleEditMode }
       H.h2 $ text recipe.name
       H.div $ do
         H.h3 $ text "Ingredients"
