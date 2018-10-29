@@ -34,7 +34,7 @@ view { recipe, accessMode, onToggleEditMode } =
             #! HE.onClick onToggleEditMode
             $ H.i ! HA.className "material-icons" $ text "close"
         textInput { value: "Sheet Pan Salmon", label: "RECIPE NAME" }
-        textInput { value: "Blah Blah Blah", label: "DIRECTIONS" }
+        textArea { value: "Blah Blah Blah", label: "DIRECTIONS" }
 
 textInput :: forall e. { value :: String, label :: String } -> HTML e
 textInput { value, label } =
