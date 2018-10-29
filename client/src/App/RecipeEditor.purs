@@ -42,8 +42,7 @@ view { recipe, accessMode, onToggleEditMode } =
 textInput :: forall e. { value :: String, label :: String } -> HTML e
 textInput { value, label } =
   formGroup
-    { value
-    , label
+    { label
     , input:
         H.input
           ! HA.className "recipe-editor__form-group__input"
@@ -53,8 +52,7 @@ textInput { value, label } =
 textArea :: forall e. { value :: String, label :: String } -> HTML e
 textArea { value, label } =
   formGroup
-    { value
-    , label
+    { label
     , input:
         H.textarea
           ! HA.className "recipe-editor__form-group__input"
@@ -64,8 +62,7 @@ textArea { value, label } =
 numberInput :: forall e. { value :: Number, label :: String } -> HTML e
 numberInput { value, label } =
   formGroup
-    { value
-    , label
+    { label
     , input:
         H.input
           ! HA.type' "number"
@@ -73,10 +70,8 @@ numberInput { value, label } =
           ! HA.value (toString value)
     }
 
-formGroup :: forall e. { label :: String, value :: String, input :: HTML e } -> HTML e
-formGroup { label, value, input } =
+formGroup :: forall e. { label :: String, input :: HTML e } -> HTML e
+formGroup { label, input } =
   H.div ! HA.className "recipe-editor__form-group" $ do
     H.div ! HA.className "recipe-editor__form-group__label" $ text label
     input
-      ! HA.className "recipe-editor__form-group__input"
-      ! HA.value value
