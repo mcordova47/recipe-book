@@ -6,17 +6,18 @@ import App.Filter (Filter(..))
 import App.Login as Login
 import App.Routes (AccessMode(..), Route(..), isLogin, setRoute, setRoute', toTitle)
 import App.Routes as Routes
-import App.State (FoodId, RecipeComponent(..), State(State))
+import App.State (State(State))
 import App.Tooltip as Tooltip
+import Types.Recipe (FoodId, RecipeComponent(..))
+import Types.Recipe as R
+
 import Control.Monad.Aff (attempt)
 import Control.Monad.Eff.Class (liftEff)
 import DOM.Classy.Event (stopPropagation)
 import DOM.HTML.Types (HISTORY)
-import Data.Argonaut (decodeJson)
+import Data.Argonaut.Generic.Aeson (decodeJson)
 import Data.Bifunctor (bimap)
 import Data.Either (Either(..))
-import Data.List (List)
-import Data.Map (fromFoldable)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
 import Network.HTTP.Affjax (AJAX, affjax, defaultRequest)
@@ -30,7 +31,7 @@ import Util.DOM (DOCUMENT, setDocumentTitle)
 data Event
   = FetchRecipes
   | Authenticate (Maybe String)
-  | ReceiveRecipes (Either String (List RecipeComponent))
+  | ReceiveRecipes (Either String (Array R.Recipe))
   | TooltipEvent Tooltip.Event
   | ChangeSearch DOMEvent
   | ChangeURL Route
@@ -68,10 +69,8 @@ foldp (Authenticate jwt) (State state) =
   { state: State state { auth = jwt }
   , effects: [pure (Just FetchRecipes)]
   }
-foldp (ReceiveRecipes (Right recipeList)) (State state) =
-  let recipes = fromFoldable $ map toTuple $ recipeList
-  in
-    noEffects $ State state { recipes = Success recipes }
+foldp (ReceiveRecipes (Right recipes)) (State state) =
+  noEffects $ State state { recipes = Success recipes }
 foldp (ReceiveRecipes (Left err)) (State state) =
   noEffects $ State state { recipes = Failure err }
 foldp (TooltipEvent event) (State state) =
@@ -121,5 +120,5 @@ updateRoute (State state) route =
   }
 
 toTuple :: RecipeComponent -> Tuple FoodId RecipeComponent
-toTuple rc@(RecipeComp id _) = Tuple id rc
-toTuple rc@(IngredientComp id _) = Tuple id rc
+toTuple rc@(RecipeComp (R.Recipe r)) = Tuple r.id rc
+toTuple rc@(IngredientComp (R.Ingredient i)) = Tuple i.id rc

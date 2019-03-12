@@ -8,26 +8,23 @@ import App.Loader as Loader
 import App.Login as Login
 import App.Markdown (Markdown(..), Inline(..))
 import App.Markdown as Markdown
-import App.Measurement (Measurement, convertMeasurement)
 import App.RecipeEditor as RecipeEditor
 import App.Routes (link)
 import App.Routes as Routes
-import App.State (FoodId(..), IngredientAmount(..), Recipe, RecipeComponent(..), State(..), RecipesResponse)
+import App.State (RecipesResponse, State(..))
 import App.Tooltip as Tooltip
+import App.Util.Measurement (convertMeasurement, showMeasurement)
 import CSS (CSS, Size, backgroundColor, borderRadius, height, margin, px, rgb, width)
-import Data.Filterable (filterMap)
+import Data.Array (cons, filter, groupBy)
 import Data.Foldable (foldl, for_)
 import Data.Function (on)
-import Data.List (List, groupBy, sortBy, find)
-import Data.List.Types (NonEmptyList(..))
-import Data.Map (Map)
-import Data.Map as Map
+import Data.List (find)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Newtype (unwrap)
-import Data.NonEmpty (head)
+import Data.NonEmpty (NonEmpty, (:|))
 import Data.Number.Format (fixed, toString, toStringWith)
 import Data.String (Pattern(..), contains, toLower)
-import Data.Tuple (Tuple(..), snd)
+import Data.Tuple (Tuple(Tuple))
 import Network.RemoteData (RemoteData(..))
 import Pux.DOM.Events as HE
 import Pux.DOM.HTML (HTML, mapEvent)
@@ -37,6 +34,8 @@ import Text.Smolder.HTML.Attributes as HA
 import Text.Smolder.Markup (text, (!), (#!))
 import Text.Smolder.SVG as SVG
 import Text.Smolder.SVG.Attributes as SA
+import Types.Measurement (Measurement)
+import Types.Recipe (FoodId(..), Ingredient(..), IngredientAmount(..), Recipe(..), RecipeComponent(..))
 import Util.Url (Slug, slugify)
 
 view :: State -> HTML Event
@@ -67,12 +66,12 @@ navDrawer opened route recipes =
 recipeNavList :: Routes.Route -> RecipesResponse -> HTML Event
 recipeNavList route (Success recipes) =
   H.ul ! HA.className "nav-drawer__recipe-list" $
-    for_ (listRecipes _.name recipes) (recipeNavLink route <<< snd)
+    for_ recipes (recipeNavLink route)
 recipeNavList _ _ =
   text ""
 
 recipeNavLink :: Routes.Route -> Recipe -> HTML Event
-recipeNavLink route recipe =
+recipeNavLink route (Recipe recipe) =
   let classNames =
         if isRecipeSelected route (slugify recipe.name) then
           "nav-drawer__recipe-nav-link nav-drawer__recipe-nav-link--selected"
@@ -133,17 +132,17 @@ mainView (State s) =
 
 recipeMainView :: RecipesResponse -> Routes.AccessMode -> Slug -> Maybe (HTML Event)
 recipeMainView (Success recipes) accessMode slug = do
-  recipe <- getRecipe slug recipes
+  recipe@(Recipe { name, ingredients }) <- getRecipe slug recipes
   pure $
     H.div ! HA.className "recipe-main-view" $ do
       RecipeEditor.view { recipe, accessMode, onToggleEditMode: ToggleEditMode }
-      H.h2 $ text recipe.name
+      H.h2 $ text name
       H.div $ do
         H.h3 $ text "Ingredients"
-        H.ul ! HA.className "ingredient-list" $ for_ recipe.ingredients $ ingredientView recipes
+        H.ul ! HA.className "ingredient-list" $ for_ ingredients ingredientView
       H.div $ do
         H.h3 $ text "Directions"
-        recipeDirections recipes recipe
+        recipeDirections recipe
 recipeMainView Loading _ _ =
   Just recipePlaceholderView
 recipeMainView (Failure err) _ _ =
@@ -181,22 +180,19 @@ uniBorderRadius :: forall a. Size a -> CSS
 uniBorderRadius size =
   borderRadius size size size size
 
-ingredientView :: Map FoodId RecipeComponent -> IngredientAmount -> HTML Event
-ingredientView recipes (IngredientAmount { ingredient, amount, unitType }) =
-  case Map.lookup ingredient recipes of
-    Just (IngredientComp _ { name }) ->
+ingredientView :: IngredientAmount -> HTML Event
+ingredientView (IngredientAmount { ingredient, amount, unitType }) =
+  case ingredient of
+    IngredientComp (Ingredient { name }) ->
       H.li $ text
-        (toString amount <> " " <> show unitType <> " " <> name)
+        (toString amount <> " " <> showMeasurement unitType <> " " <> name)
 
-    Just (RecipeComp _ { name }) ->
+    RecipeComp (Recipe { name }) ->
       H.li $ do
-        text (toString amount <> " " <> show unitType <> " ")
+        text (toString amount <> " " <> showMeasurement unitType <> " ")
         link (Routes.Recipe Routes.ReadMode $ slugify name)
           ! HA.className "ingredient-view__recipe-link"
           $ text name
-
-    Nothing ->
-      text ""
 
 categoryList :: Boolean -> Filter -> RecipesResponse -> HTML Event
 categoryList drawerOpened filter' (Success recipes) =
@@ -205,7 +201,7 @@ categoryList drawerOpened filter' (Success recipes) =
       H.div ! HA.className "category-list" $
         for_
           (groupRecipes (filterRecipes filter' recipes))
-          (categoryView recipes)
+          categoryView
 categoryList _ _ (Failure err) =
   H.div
     ! HA.className "category-list-background"
@@ -223,108 +219,97 @@ categoryList _ _ Loading =
 categoryList _ _ _ =
   H.div ! HA.className "category-list-background" $ text ""
 
-categoryView :: Map FoodId RecipeComponent -> NonEmptyList (Tuple FoodId Recipe) -> HTML Event
-categoryView recipeMap (NonEmptyList recipes) =
+categoryView :: NonEmpty Array Recipe -> HTML Event
+categoryView (recipe@(Recipe { category }) :| recipes) =
   H.div $ do
-    let first = snd $ head recipes
-    H.h2 $ text $ first.category
-    H.div ! HA.className "recipe-grid" $ for_ recipes $ recipeView recipeMap <<< snd
+    H.h2 $ text $ category
+    H.div ! HA.className "recipe-grid" $ for_ (cons recipe recipes) recipeView
 
-recipeView :: Map FoodId RecipeComponent -> Recipe -> HTML Event
-recipeView recipes recipe =
-  link (Routes.Recipe Routes.ReadMode $ slugify recipe.name) ! HA.className "recipe-view-card-link" $
+recipeView :: Recipe -> HTML Event
+recipeView (Recipe { name, directions, ingredients }) =
+  link (Routes.Recipe Routes.ReadMode $ slugify name) ! HA.className "recipe-view-card-link" $
     H.div ! HA.className "recipe-view" $ do
-      H.div ! HA.className "recipe-view__title" $ text recipe.name
-      H.div ! HA.className "recipe-view__directions" $ text $ Markdown.strip recipe.directions
-      H.div ! HA.className "recipe-view__cost" $ text $ formatCost $ getCost recipes recipe.ingredients
+      H.div ! HA.className "recipe-view__title" $ text name
+      H.div ! HA.className "recipe-view__directions" $ text $ Markdown.strip directions
+      H.div ! HA.className "recipe-view__cost" $ text $ formatCost $ getCost ingredients
 
-recipeDirections :: Map FoodId RecipeComponent -> Recipe -> HTML Event
-recipeDirections recipes recipe =
+recipeDirections :: Recipe -> HTML Event
+recipeDirections recipe@(Recipe { directions }) =
   H.div ! HA.className "recipe-directions" $
-    for_ (Markdown.parse recipe.directions) $
-      markdownToHtml recipes recipe
+    for_ (Markdown.parse directions) $
+      markdownToHtml recipe
 
-markdownToHtml :: Map FoodId RecipeComponent -> Recipe -> Markdown -> HTML Event
-markdownToHtml recipes recipe (Paragraph inlines) =
-  H.p $ for_ inlines $ inlineToHtml recipes recipe
+markdownToHtml :: Recipe -> Markdown -> HTML Event
+markdownToHtml recipe (Paragraph inlines) =
+  H.p $ for_ inlines $ inlineToHtml recipe
 
-inlineToHtml :: Map FoodId RecipeComponent -> Recipe -> Inline -> HTML Event
-inlineToHtml _ _ Space =
+inlineToHtml :: Recipe -> Inline -> HTML Event
+inlineToHtml _ Space =
   text " "
-inlineToHtml _ _ (Word str) =
+inlineToHtml _ (Word str) =
   text str
-inlineToHtml _ _ (Bold str) =
+inlineToHtml _ (Bold str) =
   H.b $ text str
-inlineToHtml _ _ (Italics str) =
+inlineToHtml _ (Italics str) =
   H.em $ text str
-inlineToHtml recipes recipe (Link label recipeId) =
-  recipeLink recipes recipe.ingredients label recipeId
+inlineToHtml (Recipe { ingredients }) (Link label recipeId) =
+  recipeLink ingredients label recipeId
     # fromMaybe (text label)
 
-recipeLink :: Map FoodId RecipeComponent -> List IngredientAmount -> String -> Int -> Maybe (HTML Event)
-recipeLink recipes ingredients label id = do
-  IngredientAmount { ingredient, amount, unitType } <- find ((==) (FoodId id) <<< _.ingredient <<< unwrap) ingredients
-  recipeComp <- Map.lookup ingredient recipes
-  let name = getRecipeName recipeComp
-  pure $ mapEvent TooltipEvent $ Tooltip.label label (toString amount <> " " <> show unitType <> " " <> name)
+recipeLink :: Array IngredientAmount -> String -> Int -> Maybe (HTML Event)
+recipeLink ingredients label id = do
+  IngredientAmount { ingredient, amount, unitType } <- find ((==) (FoodId id) <<< ingredientId <<< _.ingredient <<< unwrap) ingredients
+  let name = getRecipeName ingredient
+  pure $ mapEvent TooltipEvent $ Tooltip.label label (toString amount <> " " <> showMeasurement unitType <> " " <> name)
+  where
+    ingredientId = case _ of
+      IngredientComp (Ingredient { id }) -> id
+      RecipeComp (Recipe { id }) -> id
 
-listRecipes :: forall a. Ord a => (Recipe -> a) -> Map FoodId RecipeComponent -> List (Tuple FoodId Recipe)
-listRecipes accessor recipes =
-  recipes
-    # Map.values
-    # filterMap toRecipe
-    # sortBy (compare `on` (accessor <<< snd))
+groupRecipes :: Array Recipe -> Array (NonEmpty Array Recipe)
+groupRecipes =
+  groupBy ((==) `on` (_.category <<< unwrap))
 
-groupRecipes :: Map FoodId RecipeComponent -> List (NonEmptyList (Tuple FoodId Recipe))
-groupRecipes recipes =
-  recipes
-    # listRecipes _.category
-    # groupBy ((==) `on` (_.category <<< snd))
-
-filterRecipes :: Filter -> Map FoodId RecipeComponent -> Map FoodId RecipeComponent
+filterRecipes :: Filter -> Array Recipe -> Array Recipe
 filterRecipes All = id
 filterRecipes (Search term) =
-  Map.filter (contains (Pattern (toLower term)) <<< toLower <<< getRecipeName)
+  filter (contains (Pattern (toLower term)) <<< toLower <<< _.name <<< unwrap)
 
-getCost :: Map FoodId RecipeComponent -> List IngredientAmount -> Number
-getCost recipes =
-  let convert from to ratio amount = fromMaybe 0.0 $ convertMeasurement from to ratio amount
-  in
-    foldl (\total (IngredientAmount { ingredient, amount, unitType: iaUnit }) ->
-      case Map.lookup ingredient recipes of
-        Just (IngredientComp _ { unitCost, unitType, cupsToLbs, amount: unitAmount }) ->
-          total + convert iaUnit unitType cupsToLbs amount * unitCost / unitAmount
-        Just (RecipeComp _ { ingredients, unitType, cupsToLbs, amount: unitAmount }) ->
-          total + convert iaUnit unitType cupsToLbs amount * getCost recipes ingredients / unitAmount
-        Nothing ->
-          0.0
-      ) 0.0
+getCost :: Array IngredientAmount -> Number
+getCost =
+  foldl getIngredientCost 0.0
+    where
+      getIngredientCost total (IngredientAmount ia) =
+        case ia.ingredient of
+          IngredientComp (Ingredient { unitCost, unitType, cupsToLbs, amount }) ->
+            total + convert ia.unitType unitType cupsToLbs ia.amount * unitCost / amount
+          RecipeComp (Recipe { ingredients, unitType, cupsToLbs, amount }) ->
+            total + convert ia.unitType unitType cupsToLbs ia.amount * getCost ingredients / amount
+      convert from to ratio =
+        fromMaybe 0.0 <<< convertMeasurement from to ratio
 
 getUnitType :: RecipeComponent -> Measurement
 getUnitType recipeComp =
   case recipeComp of
-    RecipeComp _ { unitType } -> unitType
-    IngredientComp _ { unitType } -> unitType
+    RecipeComp (Recipe { unitType }) -> unitType
+    IngredientComp (Ingredient { unitType }) -> unitType
 
-getRecipe :: Slug -> Map FoodId RecipeComponent -> Maybe Recipe
-getRecipe slug recipes = do
-  recipeComp <- find (eq slug <<< slugify <<< getRecipeName) recipes
-  case recipeComp of
-    RecipeComp _ recipe -> pure recipe
-    _ -> Nothing
+getRecipe :: Slug -> Array Recipe -> Maybe Recipe
+getRecipe slug = do
+  find (eq slug <<< slugify <<< _.name <<< unwrap)
 
 getRecipeName :: RecipeComponent -> String
 getRecipeName recipeComp =
   case recipeComp of
-    RecipeComp _ { name } -> name
-    IngredientComp _ { name } -> name
+    RecipeComp (Recipe { name }) -> name
+    IngredientComp (Ingredient { name }) -> name
 
 formatCost :: Number -> String
 formatCost cost =
   "$" <> toStringWith (fixed 2) cost
 
 toRecipe :: RecipeComponent -> Maybe (Tuple FoodId Recipe)
-toRecipe (RecipeComp recipeId recipe) = Just $ Tuple recipeId recipe
+toRecipe (RecipeComp recipe@(Recipe { id })) = Just $ Tuple id recipe
 toRecipe _ = Nothing
 
 searchTerm :: Routes.Route -> String
