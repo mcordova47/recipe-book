@@ -1,5 +1,7 @@
 # recipe-book
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/630061e6-1346-42c6-92cb-91891e2e1f03/deploy-status)](https://app.netlify.com/sites/myrecipebook/deploys)
+
 ## A UI for Managing Recipes
 
 ### Features
