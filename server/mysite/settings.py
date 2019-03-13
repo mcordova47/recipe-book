@@ -111,6 +111,7 @@ CORS_ORIGIN_ALLOW_ALL = DEBUG
 
 CORS_ORIGIN_WHITELIST = (
     'mcordova47.github.io',
+    'https://nostalgic-ride-eca6f9.netlify.com',
 )
 
 django_heroku.settings(locals())
