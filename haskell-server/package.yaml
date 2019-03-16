@@ -84,7 +84,9 @@ dependencies:
 - purescript-bridge
 - servant
 - servant-server
+- text
 - warp
+- wai-cors
 
 library:
   source-dirs: src

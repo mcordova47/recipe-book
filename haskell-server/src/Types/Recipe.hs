@@ -9,6 +9,7 @@ module Types.Recipe
 import Protolude
 
 import Data.Aeson (ToJSON)
+import Servant.API (FromHttpApiData)
 
 import Types.Measurement (Measurement)
 
@@ -53,3 +54,4 @@ newtype FoodId =
     FoodId Int
     deriving (Eq, Show, Generic)
     deriving newtype (Num, ToJSON)
+    deriving newtype (FromHttpApiData, Num, ToJSON)
