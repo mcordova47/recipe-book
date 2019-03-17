@@ -53,5 +53,4 @@ data RecipeComponent
 newtype FoodId =
     FoodId Int
     deriving (Eq, Show, Generic)
-    deriving newtype (Num, ToJSON)
     deriving newtype (FromHttpApiData, Num, ToJSON)
