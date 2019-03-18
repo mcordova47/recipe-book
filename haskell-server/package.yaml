@@ -64,6 +64,7 @@ default-extensions:
 - PolyKinds
 - QuasiQuotes
 - RankNTypes
+- RecordWildCards
 - ScopedTypeVariables
 - StandaloneDeriving
 - TemplateHaskell
@@ -80,10 +81,13 @@ dependencies:
 - aeson
 - base
 - directory
+- lens
+- mtl
 - protolude
 - purescript-bridge
 - servant
 - servant-server
+- simple-jwt
 - text
 - warp
 - wai-cors
@@ -92,7 +96,7 @@ library:
   source-dirs: src
 
 executables:
-  recipe-book-exe:
+  api:
     main: Main.hs
     source-dirs: app
     ghc-options:
@@ -101,7 +105,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - recipe-book
-  bridge-exe:
+  bridge:
     main: Main.hs
     source-dirs: bridge
     ghc-options:

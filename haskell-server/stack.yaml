@@ -38,6 +38,9 @@ packages:
 # using the same syntax as the packages field.
 # (e.g., acme-missiles-0.3)
 # extra-deps: []
+extra-deps:
+- git: https://github.com/collegevine/simple-jwt.git
+  commit: e77cab7b0be12c08f74aecd371031e9149e7d835
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

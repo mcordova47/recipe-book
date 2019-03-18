@@ -1,13 +1,9 @@
-module API (RecipeAPI) where
+module API (API) where
 
-import Servant.API (Capture, Get, JSON, (:<|>), (:>))
+import Servant.API ((:<|>), (:>))
 
-import Types.Recipe (FoodId, Recipe)
+import API.Auth (AuthAPI)
+import API.Recipe (RecipeAPI)
 
-type RecipeAPI =
-    "api" :> "recipes" :>
-      (
-        Get '[JSON] [Recipe]
-        :<|>
-        Capture "recipeId" FoodId :> Get '[JSON] Recipe
-      )
+type API =
+    "api" :> (RecipeAPI :<|> AuthAPI)

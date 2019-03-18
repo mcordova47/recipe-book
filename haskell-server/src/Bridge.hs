@@ -4,6 +4,7 @@ import Protolude
 
 import System.Directory (doesDirectoryExist, removeDirectoryRecursive)
 
+import JWT (Token)
 import Language.PureScript.Bridge
     ( Language(..)
     , SumType
@@ -14,6 +15,11 @@ import Language.PureScript.Bridge
     , writePSTypes
     )
 
+import Types.Auth
+    ( AuthToken
+    , LoginReq
+    , SignupReq
+    )
 import Types.Measurement
     ( Measurement
     , VolumeMeasurement
@@ -44,6 +50,10 @@ types =
     , mkEqSumType (Proxy @IngredientAmount)
     , mkEqSumType (Proxy @Recipe)
     , mkEqSumType (Proxy @RecipeComponent)
+    , mkSumType (Proxy @AuthToken)
+    , mkSumType (Proxy @LoginReq)
+    , mkSumType (Proxy @SignupReq)
+    , mkEqSumType (Proxy @Token)
     ]
     where
         mkEqSumType p =
