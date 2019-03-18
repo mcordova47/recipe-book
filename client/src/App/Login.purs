@@ -3,7 +3,6 @@ module App.Login (State, Event, init, foldp, view) where
 import Prelude
 
 import App.Routes (Route, setRoute)
-
 import Control.Monad.Eff.Class (liftEff)
 import DOM (DOM)
 import DOM.Classy.Event (preventDefault)
@@ -13,9 +12,9 @@ import DOM.HTML.Window (localStorage)
 import DOM.WebStorage.Storage (setItem)
 import Data.Argonaut (Json, (.?))
 import Data.Argonaut as J
-
 import Data.Either (Either, either)
 import Data.Maybe (Maybe(..))
+import JWT (Token(..))
 import Network.Auth (login, signup)
 import Network.HTTP.Affjax (AJAX)
 import Pux (EffModel, noEffects)
@@ -77,11 +76,11 @@ foldp ev state@(LoginState st@{ username, password }) = case ev of
             pure $ either (const Nothing) (Just <<< LoggedIn redirect) token
         ]
     }
-  LoggedIn redirect (AuthToken token) ->
+  LoggedIn redirect (AuthToken (Token { getToken })) ->
     { state
     , effects:
         [ do
-            liftEff $ setItem "AUTH_TOKEN" token =<< localStorage =<< window
+            liftEff $ setItem "AUTH_TOKEN" getToken =<< localStorage =<< window
             liftEff $ setRoute redirect
             pure Nothing
         ]
@@ -107,11 +106,11 @@ foldp ev state@(SignupState st@{ username, password, confirmPassword }) = case e
             pure $ either (const Nothing) (Just <<< SignedUp redirect) token
         ]
     }
-  SignedUp redirect (AuthToken token) ->
+  SignedUp redirect (AuthToken (Token { getToken })) ->
     { state
     , effects:
         [ do
-            liftEff $ setItem "AUTH_TOKEN" token =<< localStorage =<< window
+            liftEff $ setItem "AUTH_TOKEN" getToken =<< localStorage =<< window
             liftEff $ setRoute redirect
             pure Nothing
         ]

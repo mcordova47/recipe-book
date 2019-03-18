@@ -11,15 +11,16 @@ import Protolude
 import Control.Lens.TH (makeLenses)
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
-import JWT (AUD, ISS, Secret, TokenSupport(..))
-import Servant.API (FromHttpApiData)
+import JWT (AUD, ISS, Secret, Token(..), TokenSupport(..))
+import Servant.API (FromHttpApiData(..))
 
--- TODO: Remove and switch to JWT.Token
 newtype AuthToken =
-    AuthToken Text
+    AuthToken Token
     deriving (Show, Generic)
     deriving anyclass (ToJSON)
-    deriving newtype (FromHttpApiData)
+
+instance FromHttpApiData AuthToken where
+    parseUrlPiece = pure . AuthToken . Token
 
 data LoginReq =
     LoginReq
@@ -38,8 +39,8 @@ data SignupReq =
 
 newtype UserId =
     UserId { unUserId :: Int }
-    deriving (Show, Generic)
-    deriving anyclass (ToJSON)
+    deriving (Eq, Show, Generic)
+    deriving anyclass (FromJSON, ToJSON)
 
 data JWTContext =
     JWTContext

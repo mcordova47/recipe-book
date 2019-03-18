@@ -4,22 +4,30 @@ import Protolude
 
 import Control.Monad.Reader (ReaderT)
 import JWT (Token, buildSimpleJWT)
-import Servant (Handler, ServerT)
+import Servant (Handler, ServerT, err404)
 import Servant.API ((:<|>)(..))
 
 import API.Auth (AuthAPI)
-import Types.Auth (JWTContext, LoginReq, SignupReq, UserId(..))
+import Types.Auth (JWTContext, LoginReq(..), SignupReq(..), UserId(..))
 
 authServer :: ServerT AuthAPI (ReaderT JWTContext Handler)
 authServer =
     login :<|> signup
     where
         login :: LoginReq -> ReaderT JWTContext Handler Token
-        login _ = do
-            let userId = UserId { unUserId = 1 }
-            buildSimpleJWT userId (show $ unUserId userId)
+        login LoginReq{..} = do
+            if username == "admin" && password == "admin" then
+                let userId = UserId { unUserId = 1 }
+                in buildSimpleJWT userId (show $ unUserId userId)
+            else
+                -- TODO: Look up correct error
+                throwError err404
 
         signup :: SignupReq -> ReaderT JWTContext Handler Token
-        signup _ = do
-            let userId = UserId { unUserId = 1 }
-            buildSimpleJWT userId (show $ unUserId userId)
+        signup SignupReq{..} = do
+            if password == confirmPassword then
+                let userId = UserId { unUserId = 2 }
+                in buildSimpleJWT userId (show $ unUserId userId)
+            else
+                -- TODO: Look up correct error
+                throwError err404

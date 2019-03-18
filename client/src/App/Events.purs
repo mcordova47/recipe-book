@@ -46,7 +46,7 @@ foldp FetchRecipes (State state) =
   { state: State state { recipes = Loading }
   , effects:
       [ do
-          res <- attempt $ affjax defaultRequest { url = state.api <> "recipes/", headers = [RequestHeader "Authorization" ("JWT " <> fromMaybe "" state.auth)] }
+          res <- attempt $ affjax defaultRequest { url = state.api <> "recipes/", headers = [RequestHeader "Authorization" $ fromMaybe "" state.auth] }
           let recipes = bimap show _.response res >>= decodeJson
               status = _.status <$> res
           case status of

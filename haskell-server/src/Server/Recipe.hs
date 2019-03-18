@@ -3,11 +3,12 @@ module Server.Recipe (recipeServer) where
 import Protolude
 
 import Control.Monad.Reader (ReaderT)
-import Servant (Handler, ServerT, err404)
+import Servant (Handler, ServerT, err401, err403, err404)
 import Servant.API ((:<|>)(..))
 
 import API.Recipe (RecipeAPI)
-import Types.Auth (JWTContext)
+import Auth (validateJWT)
+import Types.Auth (JWTContext, UserId(..))
 import Types.Measurement (Measurement(..), VolumeMeasurement(..))
 import Types.Recipe
     ( FoodId
@@ -17,18 +18,25 @@ import Types.Recipe
     )
 
 recipeServer :: ServerT RecipeAPI (ReaderT JWTContext Handler)
-recipeServer _ =
+recipeServer authToken =
     listRecipes :<|> getRecipe
     where
         listRecipes :: ReaderT JWTContext Handler [Recipe]
         listRecipes =
-            pure recipes
+            validateJWT authToken >>= \case
+                Left _ -> throwError err401
+                Right userId | userId == UserId 1 -> pure recipes
+                _ -> pure []
 
         getRecipe :: FoodId -> ReaderT JWTContext Handler Recipe
         getRecipe fid =
-            case find ((==) fid . id) recipes of
-                Just r -> pure r
-                Nothing -> throwError err404
+            validateJWT authToken >>= \case
+                Left _ -> throwError err401
+                Right userId | userId == UserId 1 ->
+                    case find ((==) fid . id) recipes of
+                        Nothing -> throwError err404
+                        Just r -> pure r
+                _ -> throwError err403
 
 recipes :: [Recipe]
 recipes =

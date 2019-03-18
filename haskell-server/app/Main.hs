@@ -12,12 +12,9 @@ import Types.Auth (JWTContext(..))
 main :: IO ()
 main = do
     port <- fromMaybe 8081 . (>>= readMaybe) <$> lookupEnv "PORT"
-    jwtSecret <- getEnv "JWT_SECRET"
-    jwtAUD <- getEnv "JWT_AUD"
-    jwtISS <- getEnv "JWT_ISS"
-    let _jcSecret = Secret { getSecret = jwtSecret }
-    let _jcAUD = AUD { getAUD = jwtAUD }
-    let _jcISS = ISS { getISS = jwtISS }
+    _jcSecret <- Secret <$> getEnv "JWT_SECRET"
+    _jcAUD <- AUD <$> getEnv "JWT_AUD"
+    _jcISS <- ISS <$> getEnv "JWT_ISS"
     let jwtContext = JWTContext {..}
     putStrLn $ "Starting server on port " ++ show port ++ "..."
     run port $ app jwtContext

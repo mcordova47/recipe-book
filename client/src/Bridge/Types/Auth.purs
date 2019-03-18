@@ -7,19 +7,20 @@ import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(SProxy))
+import JWT (Token)
 import Prim (String)
 
 import Prelude
 import Data.Generic (class Generic)
 
 newtype AuthToken =
-    AuthToken String
+    AuthToken Token
 
 derive instance genericAuthToken :: Generic AuthToken
 derive instance newtypeAuthToken :: Newtype AuthToken _
 
 --------------------------------------------------------------------------------
-_AuthToken :: Iso' AuthToken String
+_AuthToken :: Iso' AuthToken Token
 _AuthToken = _Newtype
 --------------------------------------------------------------------------------
 newtype LoginReq =

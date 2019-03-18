@@ -89,6 +89,7 @@ dependencies:
 - servant-server
 - simple-jwt
 - text
+- time
 - warp
 - wai-cors
 
