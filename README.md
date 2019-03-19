@@ -40,7 +40,7 @@ Download Data
     $ python .\env\Scripts\django-admin.py dumpdata recipe_book --output .\recipe_book\fixtures\data.json
 
 ### Webpack dev server
-Dev buid with hot module reloading
+Dev build with hot module reloading
 
       $ npm start
 
