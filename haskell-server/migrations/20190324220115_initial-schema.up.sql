@@ -7,7 +7,7 @@ CREATE TABLE recipe_components (
 );
 
 CREATE TABLE ingredients (
-    unit_cost money NOT NULL,  -- CHECK (unit_cost > 0)
+    unit_cost money NOT NULL,
     UNIQUE (id)
 ) INHERITS (recipe_components);
 
