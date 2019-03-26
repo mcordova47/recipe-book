@@ -1,21 +1,23 @@
 CREATE TABLE recipe_components (
-    id serial PRIMARY KEY UNIQUE,
-    name text NOT NULL UNIQUE,
+    id serial PRIMARY KEY,
+    name text NOT NULL,
     unit_type text NOT NULL,
     amount numeric NOT NULL CHECK (amount > 0),
     cups_to_lbs numeric CHECK (cups_to_lbs > 0)
 );
 
 CREATE TABLE ingredients (
-    unit_cost money NOT NULL,
-    UNIQUE (id)
-) INHERITS (recipe_components);
+    id serial PRIMARY KEY,
+    recipe_component integer NOT NULL REFERENCES recipe_components(id) UNIQUE,
+    unit_cost money NOT NULL
+);
 
 CREATE TABLE recipes (
+    id serial PRIMARY KEY,
+    recipe_component integer NOT NULL REFERENCES recipe_components(id) UNIQUE,
     category text NOT NULL,
-    directions text NOT NULL,
-    UNIQUE (id)
-) INHERITS (recipe_components);
+    directions text NOT NULL
+);
 
 CREATE TABLE recipe_ingredients (
     id serial PRIMARY KEY,

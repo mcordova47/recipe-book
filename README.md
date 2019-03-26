@@ -3,6 +3,7 @@
 ## A UI for Managing Recipes
 
 ### Features
+
 * List view of all recipes by category
 * Detail views of each recipe
 * Filter recipes with the search box
@@ -12,42 +13,44 @@
 * Side-panel to quickly scan for recipes
 
 ### TODO
+
 * View for editing recipes
 * View for editing ingredients
 * Multi-user support
 
 ## Development
-The front end is written using [Purescript](http://www.purescript.org/) with [purescript-pux](http://purescript-pux.org/).  The server side is written with Python and Django.
 
-### Django Server
-Set up virtual environment
+The front end is written in [Purescript](http://www.purescript.org/) with [purescript-pux](http://purescript-pux.org/).  The server side is written in [Haskell](https://www.haskell.org/).
 
-    $ virtualenv env
-    $ env/Scripts/activate
-    $ pip install -r requirements.txt
+### Server
 
-Run django server
+Run server
 
-    $ python manage.py runserver
+    $ stack build --exec api
 
 DB Migrations
 
-    $ python manage.py makemigrations
-    $ python manage.py migrate
+Migrations are handled with [golang-migrate](https://github.com/golang-migrate/migrate)
 
-Download Data
+    $ migrate -path /path/to/server/migrations -database $env:DATABASE_URL up
 
-    $ python .\env\Scripts\django-admin.py dumpdata recipe_book --output .\recipe_book\fixtures\data.json
+### Client
 
-### Webpack dev server
+Generate PureScript types
+
+    $ stack build --exec bridge
+
+Install dependencies
+
+    $ npm install
+
 Dev build with hot module reloading
 
       $ npm start
 
 ## Production
-The front end is hosted on github pages
 
-    $ npm run deploy
+The front end is hosted on netlify.  Builds are deployed on each commit to master.
 
 The server is hosted on heroku
 
