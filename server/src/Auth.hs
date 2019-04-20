@@ -3,9 +3,9 @@ module Auth (AuthError(..), validateJWT) where
 import Protolude hiding (exp)
 
 import Data.Time.Clock.POSIX (getPOSIXTime)
-import JWT (TokenInfo(..), decodeJWT)
+import JWT (TokenInfo(..), TokenSupport, decodeJWT)
 
-import Types.Auth (AuthToken(..), JWTContext, UserId)
+import Types.Auth (AuthToken(..), UserId)
 
 data AuthError
     = InvalidToken
@@ -14,7 +14,8 @@ data AuthError
     deriving (Show)
 
 validateJWT ::
-    ( MonadReader JWTContext m
+    ( MonadReader r m
+    , TokenSupport r
     , MonadIO m
     )
     => Maybe AuthToken

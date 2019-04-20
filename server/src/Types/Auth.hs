@@ -4,15 +4,18 @@ module Types.Auth
     , LoginReq(..)
     , SignupReq(..)
     , UserId(..)
+    , mkJWTContext
     ) where
 
 import Protolude
 
 import Control.Lens.TH (makeLenses)
+import Control.Monad.IO.Class (MonadIO)
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
-import JWT (AUD, ISS, Secret, Token(..), TokenSupport(..))
+import JWT (AUD(..), ISS(..), Secret(..), Token(..), TokenSupport(..))
 import Servant.API (FromHttpApiData(..))
+import System.Environment (getEnv)
 
 newtype AuthToken =
     AuthToken Token
@@ -56,3 +59,10 @@ instance TokenSupport JWTContext where
     secret = jcSecret
     envAUD = jcAUD
     envISS = jcISS
+
+mkJWTContext :: MonadIO m => m JWTContext
+mkJWTContext = do
+    _jcSecret <- liftIO $ Secret <$> getEnv "JWT_SECRET"
+    _jcAUD <- liftIO $ AUD <$> getEnv "JWT_AUD"
+    _jcISS <- liftIO $ ISS <$> getEnv "JWT_ISS"
+    pure JWTContext {..}

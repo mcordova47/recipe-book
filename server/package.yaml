@@ -6,9 +6,7 @@ author: "Author name here"
 maintainer: "mcordova47@gmail.com"
 copyright: "2019 Marc Cordova"
 
-extra-source-files:
-- README.md
-- ChangeLog.md
+# extra-source-files:
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
@@ -83,6 +81,8 @@ dependencies:
 - directory
 - lens
 - mtl
+- persistent
+- persistent-template
 - protolude
 - purescript-bridge
 - servant
