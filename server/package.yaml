@@ -78,18 +78,24 @@ default-extensions:
 dependencies:
 - aeson
 - base
+- bytestring
 - directory
+- esqueleto
 - lens
+- monad-logger
 - mtl
 - persistent
+- persistent-postgresql
 - persistent-template
 - protolude
 - purescript-bridge
+- resource-pool
 - servant
 - servant-server
 - simple-jwt
 - text
 - time
+- unliftio
 - warp
 - wai-cors
 

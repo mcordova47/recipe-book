@@ -6,9 +6,12 @@ import Control.Monad.Reader (MonadReader)
 import JWT (TokenSupport)
 import Servant.Server (ServantErr)
 
+import Types.Sql (HasSqlPool)
+
 type AppM r m =
     ( MonadReader r m
     , TokenSupport r
+    , HasSqlPool r
     , MonadIO m
     , MonadError ServantErr m
     )
