@@ -6,10 +6,12 @@ import Protolude
 
 import Database.Persist.TH (mkPersist, persistLowerCase, share, sqlSettings)
 
+import Types.Measurement (Measurement)
+
 share [mkPersist sqlSettings] [persistLowerCase|
 RecipeComponentEntity sql=recipe_components
     name Text
-    unitType Text
+    unitType Measurement
     amount Double
     cupsToLbs Double Maybe
 IngredientEntity sql=ingredients
@@ -25,6 +27,6 @@ RecipeIngredientEntity sql=recipe_ingredients
     recipe RecipeEntityId
     ingredient RecipeComponentEntityId
     amount Double
-    unitType Text
+    unitType Measurement
     UniqueRecipeIngredient recipe ingredient
 |]

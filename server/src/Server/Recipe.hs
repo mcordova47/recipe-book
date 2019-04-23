@@ -7,11 +7,12 @@ import Servant.API ((:<|>)(..))
 
 import API.Recipe (RecipeAPI)
 import Auth (validateJWT)
+import qualified Handlers.Recipe as H
 import Types (AppM)
 import Types.Auth (UserId(..))
 import Types.Measurement (Measurement(..), VolumeMeasurement(..))
 import Types.Recipe
-    ( FoodId
+    ( FoodId(..)
     , IngredientAmount(..)
     , Recipe(..)
     , RecipeComponent(..)
@@ -25,7 +26,7 @@ recipeServer authToken =
         listRecipes =
             validateJWT authToken >>= \case
                 Left _ -> throwError err401
-                Right userId | userId == UserId 1 -> pure recipes
+                Right userId | userId == UserId 1 -> H.listRecipes
                 _ -> pure []
 
         getRecipe :: AppM r m => FoodId -> m Recipe
