@@ -79,6 +79,7 @@ dependencies:
 - aeson
 - base
 - bytestring
+- containers
 - directory
 - esqueleto
 - lens
