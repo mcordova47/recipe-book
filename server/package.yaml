@@ -25,6 +25,7 @@ ghc-options:
 - -Wincomplete-uni-patterns
 - -Wredundant-constraints
 - -Wimplicit-prelude
+- -optP-Wno-nonportable-include-path
 
 default-extensions:
 - AllowAmbiguousTypes
