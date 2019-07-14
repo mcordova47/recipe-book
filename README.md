@@ -57,3 +57,7 @@ The front end is hosted on netlify.  Builds are deployed on each commit to maste
 The server is hosted on heroku
 
     $ git subtree push --prefix server heroku master
+
+If this fails, may need to:
+
+    $ git push heroku `git subtree split --prefix website master`:master --force
