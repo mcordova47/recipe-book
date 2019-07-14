@@ -3,7 +3,8 @@ module App.RecipeEditor (Props, view) where
 import Prelude
 
 import App.Routes (AccessMode(EditMode, ReadMode))
-import App.State (Recipe)
+import Types.Recipe (Recipe(..))
+
 import Data.Number.Format (toString)
 import Pux.DOM.Events (DOMEvent)
 import Pux.DOM.Events as HE
@@ -19,7 +20,7 @@ type Props e =
   }
 
 view :: forall e. Props e -> HTML e
-view { recipe, accessMode, onToggleEditMode } =
+view { recipe: Recipe r, accessMode, onToggleEditMode } =
   case accessMode of
     ReadMode ->
       H.div
@@ -34,10 +35,10 @@ view { recipe, accessMode, onToggleEditMode } =
             ! HA.className "close-button"
             #! HE.onClick onToggleEditMode
             $ H.i ! HA.className "material-icons" $ text "close"
-        textInput { value: recipe.name, label: "RECIPE NAME" }
-        textInput { value: recipe.category, label: "CATEGORY" }
-        numberInput { value: recipe.amount, label: "YIELD" }  -- TODO: Place a measurement input next to this
-        textArea { value: recipe.directions, label: "DIRECTIONS" }
+        textInput { value: r.name, label: "RECIPE NAME" }
+        textInput { value: r.category, label: "CATEGORY" }
+        numberInput { value: r.amount, label: "YIELD" }  -- TODO: Place a measurement input next to this
+        textArea { value: r.directions, label: "DIRECTIONS" }
 
 textInput :: forall e. { value :: String, label :: String } -> HTML e
 textInput { value, label } =

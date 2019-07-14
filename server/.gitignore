@@ -1,0 +1,4 @@
+.stack-work/
+recipe-book.cabal
+*~
+env.ps1

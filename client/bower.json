@@ -17,7 +17,8 @@
     "purescript-numbers": "^5.0.0",
     "purescript-dom-classy": "^2.1.0",
     "purescript-argonaut": "^3.1.0",
-    "purescript-filterable": "^2.4.1"
+    "purescript-filterable": "^2.4.1",
+    "purescript-argonaut-generic-codecs": "^6.0.4"
   },
   "resolutions": {
     "purescript-aff": "^3.0.0"
