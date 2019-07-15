@@ -79,6 +79,7 @@ default-extensions:
 dependencies:
 - aeson
 - base
+- bcrypt
 - bytestring
 - containers
 - directory

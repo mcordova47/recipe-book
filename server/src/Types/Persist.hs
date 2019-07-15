@@ -29,4 +29,9 @@ RecipeIngredientEntity sql=recipe_ingredients
     amount Double
     unitType Measurement
     UniqueRecipeIngredient recipe ingredient
+
+UserEntity sql=users
+    username Text
+    password Text
+    superuser Bool
 |]
