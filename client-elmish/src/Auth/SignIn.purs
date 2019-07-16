@@ -1,4 +1,4 @@
-module App (view) where
+module Auth.SignIn (view) where
 
 import Prelude
 

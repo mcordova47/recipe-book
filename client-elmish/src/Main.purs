@@ -4,7 +4,9 @@ import Prelude
 
 import Effect (Effect)
 import Elmish (boot)
-import App (view)
+
+import Auth.SignIn (view)
+-- import Auth.SignUp (view)
 
 main :: Effect Unit
 main = do
