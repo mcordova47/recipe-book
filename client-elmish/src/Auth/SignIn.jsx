@@ -10,6 +10,8 @@ import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 
+import { Theme } from '/src/Theme'
+
 const useStyles = makeStyles(theme => ({
   '@global': {
     body: {
@@ -33,61 +35,69 @@ const useStyles = makeStyles(theme => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
+  link: {
+    color: theme.palette.link,
+  },
 }))
 
-export const SignIn = () => {
+export const SignIn = () =>
+    <Theme>
+        <SignInBody />
+    </Theme>
+
+export const SignInBody = () => {
   const classes = useStyles()
   return (
     <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign in
-        </Typography>
-        <form className={classes.form} noValidate>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="username"
-            label="Username"
-            name="username"
-            autoComplete="username"
-            autoFocus
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
-            Sign In
-          </Button>
-          <Grid container justify="flex-end">
-            <Grid item>
-              <Link href="#" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
+        <CssBaseline />
+        <div className={classes.paper}>
+            <Avatar className={classes.avatar}>
+                <LockOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+                Sign in
+            </Typography>
+            <form className={classes.form} noValidate>
+            <TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                id="username"
+                label="Username"
+                name="username"
+                autoComplete="username"
+                autoFocus
+            />
+            <TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+            />
+            <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                className={classes.submit}
+            >
+                Sign In
+            </Button>
+            <Grid container justify="flex-end">
+                <Grid item>
+                <Link href="#" variant="body2" className={classes.link}>
+                    {"Don't have an account? Sign Up"}
+                </Link>
+                </Grid>
             </Grid>
-          </Grid>
-        </form>
-      </div>
+            </form>
+        </div>
     </Container>
   )
 }
