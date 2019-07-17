@@ -41,9 +41,9 @@ const useStyles = makeStyles(theme => ({
 }))
 
 export const SignIn = () =>
-    <Theme>
-        <SignInBody />
-    </Theme>
+  <Theme>
+    <SignInBody />
+  </Theme>
 
 export const SignInBody = () => {
   const classes = useStyles()
@@ -91,7 +91,7 @@ export const SignInBody = () => {
             </Button>
             <Grid container justify="flex-end">
                 <Grid item>
-                <Link href="#" variant="body2" className={classes.link}>
+                <Link href="#signup" variant="body2" className={classes.link}>
                     {"Don't have an account? Sign Up"}
                 </Link>
                 </Grid>

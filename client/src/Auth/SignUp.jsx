@@ -10,6 +10,8 @@ import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 
+import { Theme } from '/src/Theme'
+
 const useStyles = makeStyles(theme => ({
   '@global': {
     body: {
@@ -38,7 +40,12 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export const SignUp = () => {
+export const SignUp = () =>
+  <Theme>
+    <SignUpBody />
+  </Theme>
+
+export const SignUpBody = () => {
   const classes = useStyles()
   return (
     <Container component="main" maxWidth="xs">
@@ -99,7 +106,7 @@ export const SignUp = () => {
           </Button>
           <Grid container justify="flex-end">
             <Grid item>
-              <Link href="#" variant="body2" className={classes.link}>
+              <Link href="#login" variant="body2" className={classes.link}>
                 Already have an account? Sign in
               </Link>
             </Grid>
