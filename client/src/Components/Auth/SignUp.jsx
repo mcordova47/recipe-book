@@ -106,7 +106,7 @@ export const SignUpBody = ({ signInUrl }) => {
           </Button>
           <Grid container justify="flex-end">
             <Grid item>
-              <Link href={`#${signInUrl}`} variant="body2" className={classes.link}>
+              <Link href={signInUrl} variant="body2" className={classes.link}>
                 Already have an account? Sign in
               </Link>
             </Grid>

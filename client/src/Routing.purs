@@ -24,13 +24,19 @@ data Route
     | NotFound
 derive instance genericRoute :: Generic Route _
 
+routesDef :: forall syntax. Syntax syntax => syntax PathInfo Route
+routesDef =
+    (Ctor :: Ctor "SignIn") <|:|> seg "login" *|> end
+    <|||>
+    (Ctor :: Ctor "SignUp") <|:|> seg "signup" *|> end
+
 onRouteChange :: (Route -> Effect Unit) -> Effect Unit
 onRouteChange handler =
     onHashChange (handler <<< parseUrl)
 
 printUrl :: Route -> String
 printUrl =
-    fromMaybe "/" <<< map fromPathInfo <<< printRoute routesDef
+    fromPathInfo <<< fromMaybe (PathInfo [] Object.empty) <<< printRoute routesDef
 
 parseUrl :: String -> Route
 parseUrl =
@@ -38,7 +44,7 @@ parseUrl =
 
 fromPathInfo :: PathInfo -> String
 fromPathInfo (PathInfo pathSegments _) =
-    "/" <> intercalate "/" pathSegments
+    "#/" <> intercalate "/" pathSegments
 
 toPathInfo :: String -> PathInfo
 toPathInfo url =
@@ -46,12 +52,6 @@ toPathInfo url =
     where
         pathSegments =
             drop 1 $ split (Pattern "/") url
-
-routesDef :: forall syntax. Syntax syntax => syntax PathInfo Route
-routesDef =
-    (Ctor :: Ctor "SignIn") <|:|> seg "login" *|> end
-    <|||>
-    (Ctor :: Ctor "SignUp") <|:|> seg "signup" *|> end
 
 onHashChange :: (String -> Effect Unit) -> Effect Unit
 onHashChange =
