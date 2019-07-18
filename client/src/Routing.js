@@ -1,10 +1,6 @@
 exports.onHashChange_ = function (handler) {
-    handler(currentRoute())()
+    handler(location.hash)()
     window.addEventListener('hashchange', function () {
-        handler(currentRoute())()
+        handler(location.hash)()
     })
-}
-
-function currentRoute() {
-    return location.hash.replace(/^#/, '')
 }
