@@ -6,5 +6,5 @@ exports.onHashChange_ = function (handler) {
 }
 
 function currentRoute() {
-    return location.hash.substr(1)
+    return location.hash.replace(/^#/, '')
 }

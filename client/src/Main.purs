@@ -3,9 +3,8 @@ module Main where
 import Prelude
 
 import Effect (Effect)
-import Elmish (boot)
 
-import Routing (runRouter)
+import Router (runRouter)
 
 main :: Effect Unit
 main =

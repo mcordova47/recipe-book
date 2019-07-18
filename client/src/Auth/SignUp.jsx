@@ -40,12 +40,12 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export const SignUp = () =>
+export const SignUp = ({ signInUrl }) =>
   <Theme>
-    <SignUpBody />
+    <SignUpBody signInUrl={signInUrl} />
   </Theme>
 
-export const SignUpBody = () => {
+export const SignUpBody = ({ signInUrl }) => {
   const classes = useStyles()
   return (
     <Container component="main" maxWidth="xs">
@@ -106,7 +106,7 @@ export const SignUpBody = () => {
           </Button>
           <Grid container justify="flex-end">
             <Grid item>
-              <Link href="#login" variant="body2" className={classes.link}>
+              <Link href={`#${signInUrl}`} variant="body2" className={classes.link}>
                 Already have an account? Sign in
               </Link>
             </Grid>
