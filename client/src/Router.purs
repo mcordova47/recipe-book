@@ -5,8 +5,8 @@ import Prelude
 import Effect (Effect)
 import Elmish (boot)
 
-import Auth.SignIn as SignIn
-import Auth.SignUp as SignUp
+import Components.Auth.SignIn as SignIn
+import Components.Auth.SignUp as SignUp
 import Routing (Route(..), onRouteChange)
 
 runRouter :: Effect Unit

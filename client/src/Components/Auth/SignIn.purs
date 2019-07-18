@@ -1,9 +1,10 @@
-module Auth.SignUp (def) where
+module Components.Auth.SignIn (def) where
 
 import Prelude
 
 import Elmish (ComponentDef, DispatchMsgFn, ReactComponent, ReactElement, createElement')
-import Routing (Route(SignIn), printUrl)
+
+import Routing (Route(SignUp), printUrl)
 
 def :: forall m. ComponentDef m Unit Unit
 def =
@@ -15,10 +16,10 @@ def =
 view :: Unit -> DispatchMsgFn Unit -> ReactElement
 view _ _ =
     createElement' view_
-        { signInUrl: printUrl SignIn
+        { signUpUrl: printUrl SignUp
         }
 
 foreign import view_ ::
     ReactComponent
-        { signInUrl :: String
+        { signUpUrl :: String
         }
