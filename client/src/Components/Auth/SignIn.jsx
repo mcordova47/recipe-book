@@ -77,7 +77,7 @@ export const SignInBody = ({ signUpUrl }) => {
           </Button>
           <Grid container justify="flex-end">
             <Grid item>
-              <Link href={signUpUrl} variant="body2">
+              <Link href={signUpUrl}>
                 Don't have an account? Sign Up
               </Link>
             </Grid>
