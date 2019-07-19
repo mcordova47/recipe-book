@@ -32,12 +32,18 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export const SignIn = ({ signUpUrl }) =>
+export const SignIn = ({ signUpUrl, username, password, onChangeUsername, onChangePassword }) =>
   <Theme>
-    <SignInBody signUpUrl={signUpUrl} />
+    <SignInBody
+      signUpUrl={signUpUrl}
+      username={username}
+      password={password}
+      onChangeUsername={onChangeUsername}
+      onChangePassword={onChangePassword}
+    />
   </Theme>
 
-export const SignInBody = ({ signUpUrl }) => {
+export const SignInBody = ({ signUpUrl, username, password, onChangeUsername, onChangePassword }) => {
   const classes = useStyles()
   return (
     <Container component="main" maxWidth="xs">
@@ -57,6 +63,8 @@ export const SignInBody = ({ signUpUrl }) => {
             label="Username"
             name="username"
             autoFocus
+            value={username}
+            onChange={e => onChangeUsername(e.target.value)}
           />
           <Input
             margin="normal"
@@ -66,6 +74,8 @@ export const SignInBody = ({ signUpUrl }) => {
             label="Password"
             type="password"
             autoComplete="current-password"
+            value={password}
+            onChange={e => onChangePassword(e.target.value)}
           />
           <Button
             type="submit"

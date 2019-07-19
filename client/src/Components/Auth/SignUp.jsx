@@ -32,12 +32,20 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export const SignUp = ({ signInUrl }) =>
+export const SignUp = ({ signInUrl, username, password, confirmPassword, onChangeUsername, onChangePassword, onChangeConfirmPassword }) =>
   <Theme>
-    <SignUpBody signInUrl={signInUrl} />
+    <SignUpBody
+      signInUrl={signInUrl}
+      username={username}
+      password={password}
+      confirmPassword={confirmPassword}
+      onChangeUsername={onChangeUsername}
+      onChangePassword={onChangePassword}
+      onChangeConfirmPassword={onChangeConfirmPassword}
+    />
   </Theme>
 
-export const SignUpBody = ({ signInUrl }) => {
+export const SignUpBody = ({ signInUrl, username, password, confirmPassword, onChangeUsername, onChangePassword, onChangeConfirmPassword }) => {
   const classes = useStyles()
   return (
     <Container component="main" maxWidth="xs">
@@ -57,6 +65,8 @@ export const SignUpBody = ({ signInUrl }) => {
                 fullWidth
                 label="Username"
                 name="username"
+                value={username}
+                onChange={e => onChangeUsername(e.target.value)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -67,6 +77,8 @@ export const SignUpBody = ({ signInUrl }) => {
                 label="Password"
                 type="password"
                 autoComplete="current-password"
+                value={password}
+                onChange={e => onChangePassword(e.target.value)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -77,6 +89,8 @@ export const SignUpBody = ({ signInUrl }) => {
                 label="Confirm Password"
                 type="password"
                 autoComplete="current-password"
+                value={confirmPassword}
+                onChange={e => onChangeConfirmPassword(e.target.value)}
               />
             </Grid>
           </Grid>
