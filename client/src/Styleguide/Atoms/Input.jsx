@@ -14,7 +14,7 @@ export const Input = ({ margin, required, fullWidth, label, name, autoComplete, 
     autoFocus={autoFocus}
     type={type}
     value={value}
-    onChange={onChange}
+    onChange={e => onChange(e.target.value)}
   />
 
 Input.propTypes = {
@@ -26,6 +26,6 @@ Input.propTypes = {
   autoComplete: PropTypes.string,
   autoFocus: PropTypes.bool,
   type: PropTypes.string,
-  value: PropTypes.string,
-  onChange: PropTypes.func,
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
 }

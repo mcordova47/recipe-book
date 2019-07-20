@@ -1,4 +1,5 @@
 import React from 'react'
+import CssBaseline from '@material-ui/core/CssBaseline'
 import amber from '@material-ui/core/colors/amber'
 import lightBlue from '@material-ui/core/colors/lightBlue'
 import { ThemeProvider } from '@material-ui/styles'
@@ -31,6 +32,7 @@ const Body = ({ children }) => {
   useStyles()
   return (
     <React.Fragment>
+      <CssBaseline />
       {children}
     </React.Fragment>
   )

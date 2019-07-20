@@ -9,13 +9,13 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export const Link = ({ href, className, children }) => {
-  const classes = useStyles()
+export const Link = ({ href, children }) => {
+  const className = useStyles().link
   return (
     <CoreLink
       href={href}
       variant="body2"
-      className={`${classes.link} ${className}`}
+      className={className}
     >
       {children}
     </CoreLink>
@@ -24,6 +24,5 @@ export const Link = ({ href, className, children }) => {
 
 Link.propTypes = {
   href: PropTypes.string.isRequired,
-  className: PropTypes.string,
   children: PropTypes.node.isRequired,
 }
