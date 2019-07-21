@@ -9,6 +9,7 @@ import Styleguide.Atoms.Button (button)
 import Styleguide.Atoms.Typography (typography)
 import Styleguide.Layout.Card (card)
 import Types.Recipe (Recipe(..))
+import Util.Recipes (calculateCost)
 
 type Props =
     { recipe :: Recipe
@@ -16,7 +17,7 @@ type Props =
     }
 
 recipeCard :: Props -> ReactElement
-recipeCard { recipe: Recipe { name, directions }, viewRecipe } =
+recipeCard { recipe: r@(Recipe { name, directions }), viewRecipe } =
     card
         { content:
             [ typography
@@ -41,19 +42,11 @@ recipeCard { recipe: Recipe { name, directions }, viewRecipe } =
                 }
                 $ formatUsd costPerServing
             ]
-        , actions:
-            [ button
-                { size: "small"
-                , color: "primary"
-                , onClick: viewRecipe
-                -- , variant: "text"
-                }
-                "View Recipe"
-            ]
+        , onClick: viewRecipe
         }
     where
-        -- TODO: Calculate cost
-        costPerServing = 1.5
+        -- TODO: Calculate cost per serving (instead of per recipe)
+        costPerServing = calculateCost r
 
 formatUsd :: Number -> String
 formatUsd n =

@@ -6,13 +6,17 @@ import Data.Array (replicate)
 import Data.Maybe (Maybe(..))
 import Elmish (handle, ComponentDef, DispatchMsgFn, ReactElement)
 
+import Components.Layout (layout)
 import Components.Recipes.Card (recipeCard)
-import Styleguide.Layout.Container (container)
 import Styleguide.Layout.Grid (grid, gridItem)
-import Styleguide.Layout.Paper (paper)
-import Styleguide.Theme (theme)
 import Types.Measurement (Measurement(..), VolumeMeasurement(..))
-import Types.Recipe (FoodId(..), Recipe(..))
+import Types.Recipe
+    ( FoodId(..)
+    , Ingredient(..)
+    , IngredientAmount(..)
+    , Recipe(..)
+    , RecipeComponent(..)
+    )
 
 type State =
     { recipes :: Array Recipe
@@ -38,7 +42,20 @@ initialState =
                 { id: FoodId 1
                 , name: "Lentil Chili"
                 , category: "Main"
-                , ingredients: []
+                , ingredients:
+                    [ IngredientAmount
+                        { ingredient: IngredientComp $ Ingredient
+                            { id: FoodId 2
+                            , name: "Crushed Tomatoes"
+                            , unitCost: 1.5
+                            , unitType: Volume Cups
+                            , amount: 2.0
+                            , cupsToLbs: Nothing
+                            }
+                        , amount: 1.0
+                        , unitType: Volume Cups
+                        }
+                    ]
                 , unitType: Volume Cups
                 , amount: 5.0
                 , directions: "Yummy vegan instant pot chili featuring red lentils, fire-roasted tomatoes, walnuts, black beans, pumpkin, chipotles, and all the good toppings. I LOVE THIS ONE."
@@ -47,24 +64,18 @@ initialState =
 
 view :: State -> DispatchMsgFn Message -> ReactElement
 view { recipes } dispatch =
-    theme {}
-        [ container
-            { component: "main"
+    layout
+        [ grid
+            { spacing: 2
             }
-            [ paper {}
-                [ grid
-                    { spacing: 2
+            $ recipes <#> \recipe -> gridItem
+                { xs: 12
+                , sm: 6
+                , md: 4
+                }
+                [ recipeCard
+                    { recipe
+                    , viewRecipe: handle dispatch NoOp
                     }
-                    $ recipes <#> \recipe -> gridItem
-                        { xs: 12
-                        , sm: 6
-                        , md: 4
-                        }
-                        [ recipeCard
-                            { recipe
-                            , viewRecipe: handle dispatch NoOp
-                            }
-                        ]
                 ]
-            ]
         ]

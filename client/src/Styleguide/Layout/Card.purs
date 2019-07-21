@@ -1,6 +1,6 @@
 module Styleguide.Layout.Card (CardProps, card) where
 
-import Elmish (ReactElement, createElement')
+import Elmish (JsCallback0, ReactElement, createElement')
 import Elmish.React.Import
     ( ImportedReactComponent
     , ImportedReactComponentConstructor
@@ -13,6 +13,7 @@ type CardProps r =
 
 type OptCardProps r =
     ( actions :: Array ReactElement
+    , onClick :: JsCallback0
     | r
     )
 
