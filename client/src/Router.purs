@@ -8,6 +8,7 @@ import Elmish (ComponentDef, boot)
 
 import Components.Auth.SignIn as SignIn
 import Components.Auth.SignUp as SignUp
+import Components.Recipes as Recipes
 import Routing (Route(..), onRouteChange)
 
 runRouter :: Effect Unit
@@ -21,6 +22,8 @@ route route' =
             mountComponent SignIn.def
         SignUp ->
             mountComponent SignUp.def
+        Recipes ->
+            mountComponent Recipes.def
         NotFound ->
             mountComponent SignIn.def
 

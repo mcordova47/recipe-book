@@ -114,6 +114,7 @@ view { username, password, confirmPassword } dispatch =
                         , fullWidth: true
                         , color: "primary"
                         , margin: [3, 0, 2]
+                        , variant: "contained"
                         }
                         "Sign Up"
                     , grid

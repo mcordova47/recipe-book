@@ -2,22 +2,12 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import CoreGrid from '@material-ui/core/Grid'
 
-export const Grid = ({ justify, children }) =>
-  <CoreGrid container justify={justify}>
-    {children}
-  </CoreGrid>
+export const Grid = (props) =>
+  <CoreGrid container {...props} />
 
-Grid.propTypes = {
-  justify: PropTypes.string,
-  children: PropTypes.node.isRequired,
-}
+Grid.propTypes = CoreGrid.propTypes
 
-export const GridItem = ({ justify, children }) =>
-  <CoreGrid item justify={justify}>
-    {children}
-  </CoreGrid>
+export const GridItem = (props) =>
+  <CoreGrid item {...props} />
 
-GridItem.propTypes = {
-  justify: PropTypes.string,
-  children: PropTypes.node.isRequired,
-}
+GridItem.propTypes = CoreGrid.propTypes

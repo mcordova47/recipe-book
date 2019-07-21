@@ -3,6 +3,7 @@ module Routing
     , onRouteChange
     , parseUrl
     , printUrl
+    , setRoute
     ) where
 
 import Prelude
@@ -21,6 +22,7 @@ import Foreign.Object as Object
 data Route
     = SignIn
     | SignUp
+    | Recipes
     | NotFound
 derive instance genericRoute :: Generic Route _
 
@@ -29,6 +31,8 @@ routesDef =
     (Ctor :: Ctor "SignIn") <|:|> seg "login" *|> end
     <|||>
     (Ctor :: Ctor "SignUp") <|:|> seg "signup" *|> end
+    <|||>
+    (Ctor :: Ctor "Recipes") <|:|> seg "recipes" *|> end
 
 onRouteChange :: (Route -> Effect Unit) -> Effect Unit
 onRouteChange handler =
@@ -58,3 +62,13 @@ onHashChange =
     runEffectFn1 onHashChange_
 
 foreign import onHashChange_ :: EffectFn1 (String -> Effect Unit) Unit
+
+setRoute :: Route -> Effect Unit
+setRoute =
+    setHash <<< printUrl
+
+setHash :: String -> Effect Unit
+setHash =
+    runEffectFn1 setHash_
+
+foreign import setHash_ :: EffectFn1 String Unit

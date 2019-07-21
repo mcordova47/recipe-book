@@ -5,7 +5,13 @@ You can edit this file as you like.
 { name =
     "my-project"
 , dependencies =
-    [ "console", "effect", "elmish", "intertwine", "psci-support" ]
+    [ "console"
+    , "effect"
+    , "elmish"
+    , "formatters"
+    , "intertwine"
+    , "psci-support"
+    ]
 , packages =
     ./packages.dhall
 , sources =

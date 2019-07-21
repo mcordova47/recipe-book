@@ -2,15 +2,16 @@ module Components.Auth.SignIn (Message, def) where
 
 import Prelude
 
+import Effect.Class (class MonadEffect, liftEffect)
 import Elmish
     ( ComponentDef
     , DispatchMsgFn
     , ReactElement
-    , Transition
+    , Transition(..)
     , handle
     )
 
-import Routing (Route(SignUp))
+import Routing (Route(Recipes, SignUp), setRoute)
 import Styleguide.Atoms.Avatar (avatar)
 import Styleguide.Atoms.Button (button)
 import Styleguide.Atoms.Form (form)
@@ -32,8 +33,9 @@ data Message
     = ChangeUsername String
     | ChangePassword String
     | Submit
+    | NoOp
 
-def :: forall m. ComponentDef m Message State
+def :: forall m. MonadEffect m => ComponentDef m Message State
 def =
     { init: pure initialState
     , update
@@ -46,13 +48,16 @@ initialState =
     , password: ""
     }
 
-update :: forall m. State -> Message -> Transition m Message State
+update :: forall m. MonadEffect m => State -> Message -> Transition m Message State
 update state msg = case msg of
     ChangeUsername username ->
         pure state { username = username }
     ChangePassword password ->
         pure state { password = password }
     Submit ->
+        Transition state
+            [liftEffect $ setRoute Recipes *> pure NoOp]
+    NoOp ->
         pure state
 
 view :: State -> DispatchMsgFn Message -> ReactElement
@@ -98,6 +103,7 @@ view { username, password } dispatch =
                         , fullWidth: true
                         , color: "primary"
                         , margin: [3, 0, 2]
+                        , variant: "contained"
                         }
                         "Sign In"
                     , grid

@@ -5,6 +5,12 @@ import Elmish.React.Import (EmptyProps, ImportedReactComponent, ImportedReactCom
 
 type OptGridProps r =
     ( justify :: String
+    , spacing :: Int
+    , xs :: Int
+    , sm :: Int
+    , md :: Int
+    , lg :: Int
+    , xl :: Int
     | r
     )
 

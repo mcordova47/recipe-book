@@ -1,7 +1,5 @@
 module Styleguide.Atoms.Button (ButtonProps, OptButtonProps, button) where
 
-import Prelude
-
 import Elmish (JsCallback0, createElement)
 import Elmish.React.Import (ImportedReactComponent, ImportedReactComponentConstructorWithContent)
 
@@ -14,6 +12,8 @@ type OptButtonProps r =
     ( fullWidth :: Boolean
     , color :: String
     , margin :: Array Int
+    , size :: String
+    , variant :: String
     | r
     )
 
