@@ -5,7 +5,6 @@ import Prelude
 import Data.Formatter.Number (Formatter(..), format)
 import Elmish (JsCallback0, ReactElement)
 
-import Styleguide.Atoms.Button (button)
 import Styleguide.Atoms.Typography (typography)
 import Styleguide.Layout.Card (card)
 import Types.Recipe (Recipe(..))
@@ -40,13 +39,10 @@ recipeCard { recipe: r@(Recipe { name, directions }), viewRecipe } =
                 , variant: "subtitle2"
                 , key: "cost"
                 }
-                $ formatUsd costPerServing
+                $ formatUsd $ calculateCost r  -- TODO: Calculate cost per serving (instead of per recipe)
             ]
         , onClick: viewRecipe
         }
-    where
-        -- TODO: Calculate cost per serving (instead of per recipe)
-        costPerServing = calculateCost r
 
 formatUsd :: Number -> String
 formatUsd n =
