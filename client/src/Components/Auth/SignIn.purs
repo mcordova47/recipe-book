@@ -3,7 +3,6 @@ module Components.Auth.SignIn (Message, def) where
 import Prelude
 
 import Data.Either (Either(..))
-import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Elmish
     ( ComponentDef
@@ -13,6 +12,7 @@ import Elmish
     , handle
     )
 
+import JWT (Token(..))
 import Network.Auth (login)
 import Routing (Route(Recipes, SignUp), setRoute)
 import Styleguide.Atoms.Avatar (avatar)
@@ -26,7 +26,10 @@ import Styleguide.Layout.Container (container)
 import Styleguide.Layout.Grid (grid, gridItem)
 import Styleguide.Layout.Paper (paper)
 import Styleguide.Theme (theme)
-import Types.Auth (LoginReq(..))
+import Types.AppM (AppM)
+import Types.Auth (AuthToken(..), LoginReq(..))
+import Util.LocalStorage as LocalStorage
+import Util.LocalStorage (Key(KAuthToken))
 
 type State =
     { username :: String
@@ -39,7 +42,7 @@ data Message
     | Submit
     | NoOp
 
-def :: ComponentDef Aff Message State
+def :: ComponentDef AppM Message State
 def =
     { init: pure initialState
     , update
@@ -52,7 +55,7 @@ initialState =
     , password: ""
     }
 
-update :: State -> Message -> Transition Aff Message State
+update :: State -> Message -> Transition AppM Message State
 update state msg = case msg of
     ChangeUsername username ->
         pure state { username = username }
@@ -63,11 +66,12 @@ update state msg = case msg of
     NoOp ->
         pure state
 
-signIn :: LoginReq -> Aff Message
+signIn :: LoginReq -> AppM Message
 signIn req = do
     res <- login "http://localhost:8081/api/" req
     case res of
-        Right _ ->
+        Right (AuthToken (Token { getToken })) -> do
+            liftEffect $ LocalStorage.setItem KAuthToken getToken
             liftEffect $ setRoute Recipes
         Left _ ->
             pure unit

@@ -22,6 +22,7 @@ import Styleguide.Layout.Container (container)
 import Styleguide.Layout.Grid (grid, gridItem)
 import Styleguide.Layout.Paper (paper)
 import Styleguide.Theme (theme)
+import Types.AppM (AppM)
 
 type State =
     { username :: String
@@ -35,7 +36,7 @@ data Message
     | ChangeConfirmPassword String
     | Submit
 
-def :: forall m. ComponentDef m Message State
+def :: ComponentDef AppM Message State
 def =
     { init: pure initialState
     , update
@@ -49,7 +50,7 @@ initialState =
     , confirmPassword: ""
     }
 
-update :: forall m. State -> Message -> Transition m Message State
+update :: State -> Message -> Transition AppM Message State
 update state msg = case msg of
     ChangeUsername username ->
         pure state { username = username }

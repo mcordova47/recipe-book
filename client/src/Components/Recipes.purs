@@ -9,6 +9,7 @@ import Elmish (handle, ComponentDef, DispatchMsgFn, ReactElement)
 import Components.Layout (layout)
 import Components.Recipes.Card (recipeCard)
 import Styleguide.Layout.Grid (grid, gridItem)
+import Types.AppM (AppM)
 import Types.Measurement (Measurement(..), VolumeMeasurement(..))
 import Types.Recipe
     ( FoodId(..)
@@ -25,7 +26,7 @@ type State =
 data Message
     = NoOp
 
-def :: forall m. ComponentDef m Message State
+def :: ComponentDef AppM Message State
 def =
     { init: pure initialState
     , update: \_ _ -> pure initialState
