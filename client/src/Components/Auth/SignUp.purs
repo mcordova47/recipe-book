@@ -6,11 +6,15 @@ import Elmish
     ( ComponentDef
     , DispatchMsgFn
     , ReactElement
-    , Transition
+    , Transition(..)
     , handle
     )
 
-import Routing (Route(SignIn))
+import Data.Either (Either(..))
+import JWT (Token(..))
+import Effect.Class (liftEffect)
+import Network.Auth (signup)
+import Routing (Route(Recipes, SignIn), setRoute)
 import Styleguide.Atoms.Avatar (avatar)
 import Styleguide.Atoms.Button (button)
 import Styleguide.Atoms.Form (form)
@@ -23,6 +27,9 @@ import Styleguide.Layout.Grid (grid, gridItem)
 import Styleguide.Layout.Paper (paper)
 import Styleguide.Theme (theme)
 import Types.AppM (AppM)
+import Types.Auth (AuthToken(..), SignupReq(..))
+import Util.LocalStorage as LocalStorage
+import Util.LocalStorage (Key(KAuthToken))
 
 type State =
     { username :: String
@@ -35,6 +42,7 @@ data Message
     | ChangePassword String
     | ChangeConfirmPassword String
     | Submit
+    | NoOp
 
 def :: ComponentDef AppM Message State
 def =
@@ -59,7 +67,20 @@ update state msg = case msg of
     ChangeConfirmPassword confirmPassword ->
         pure state { confirmPassword = confirmPassword }
     Submit ->
+        Transition state [signUp $ SignupReq state]
+    NoOp ->
         pure state
+
+signUp :: SignupReq -> AppM Message
+signUp req = do
+    res <- signup "http://localhost:8081/api/" req
+    case res of
+        Right (AuthToken (Token { getToken })) -> do
+            liftEffect $ LocalStorage.setItem KAuthToken getToken
+            liftEffect $ setRoute Recipes
+        Left _ ->
+            pure unit
+    pure NoOp
 
 view :: State -> DispatchMsgFn Message -> ReactElement
 view { username, password, confirmPassword } dispatch =
