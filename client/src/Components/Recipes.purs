@@ -2,22 +2,17 @@ module Components.Recipes (Message, def) where
 
 import Prelude
 
-import Data.Array (replicate)
-import Data.Maybe (Maybe(..))
-import Elmish (handle, ComponentDef, DispatchMsgFn, ReactElement)
+import Data.Either (Either(..))
+import Effect.Class (liftEffect)
+import Effect.Class.Console (logShow)
+import Elmish (handle, ComponentDef, DispatchMsgFn, ReactElement, Transition(..))
 
 import Components.Layout (layout)
 import Components.Recipes.Card (recipeCard)
+import Network.Recipes (listRecipes)
 import Styleguide.Layout.Grid (grid, gridItem)
 import Types.AppM (AppM)
-import Types.Measurement (Measurement(..), VolumeMeasurement(..))
-import Types.Recipe
-    ( FoodId(..)
-    , Ingredient(..)
-    , IngredientAmount(..)
-    , Recipe(..)
-    , RecipeComponent(..)
-    )
+import Types.Recipe (Recipe)
 
 type State =
     { recipes :: Array Recipe
@@ -25,43 +20,36 @@ type State =
 
 data Message
     = NoOp
+    | LoadRecipes (Array Recipe)
 
 def :: ComponentDef AppM Message State
 def =
-    { init: pure initialState
-    , update: \_ _ -> pure initialState
+    { init: Transition initialState [initialCmd]
+    , update
     , view
     }
 
+initialCmd :: AppM Message
+initialCmd = do
+    recipes <- listRecipes "http://localhost:8081/api/"
+    case recipes of
+        Right rs ->
+            pure $ LoadRecipes rs
+        Left err -> do
+            liftEffect $ logShow err
+            pure NoOp
+
 initialState :: State
 initialState =
-    { recipes: replicate 5 chili
+    { recipes: []
     }
-    where
-        chili =
-            Recipe
-                { id: FoodId 1
-                , name: "Lentil Chili"
-                , category: "Main"
-                , ingredients:
-                    [ IngredientAmount
-                        { ingredient: IngredientComp $ Ingredient
-                            { id: FoodId 2
-                            , name: "Crushed Tomatoes"
-                            , unitCost: 1.5
-                            , unitType: Volume Cups
-                            , amount: 2.0
-                            , cupsToLbs: Nothing
-                            }
-                        , amount: 1.0
-                        , unitType: Volume Cups
-                        }
-                    ]
-                , unitType: Volume Cups
-                , amount: 5.0
-                , directions: "Yummy vegan instant pot chili featuring red lentils, fire-roasted tomatoes, walnuts, black beans, pumpkin, chipotles, and all the good toppings. I LOVE THIS ONE."
-                , cupsToLbs: Nothing
-                }
+
+update :: State -> Message -> Transition AppM Message State
+update state msg = case msg of
+    NoOp ->
+        pure state
+    LoadRecipes recipes ->
+        pure state { recipes = recipes }
 
 view :: State -> DispatchMsgFn Message -> ReactElement
 view { recipes } dispatch =

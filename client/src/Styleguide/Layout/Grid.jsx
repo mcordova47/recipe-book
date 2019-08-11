@@ -1,5 +1,4 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import CoreGrid from '@material-ui/core/Grid'
 
 export const Grid = (props) =>
