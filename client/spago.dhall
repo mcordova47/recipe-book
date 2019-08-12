@@ -14,6 +14,7 @@ You can edit this file as you like.
     , "formatters"
     , "intertwine"
     , "psci-support"
+    , "stringutils"
     ]
 , packages =
     ./packages.dhall

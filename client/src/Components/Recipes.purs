@@ -10,9 +10,11 @@ import Elmish (handle, ComponentDef, DispatchMsgFn, ReactElement, Transition(..)
 import Components.Layout (layout)
 import Components.Recipes.Card (recipeCard)
 import Network.Recipes (listRecipes)
+import Routing as Routing
+import Routing (setRoute)
 import Styleguide.Layout.Grid (grid, gridItem)
 import Types.AppM (AppM)
-import Types.Recipe (Recipe)
+import Types.Recipe (FoodId(..), Recipe(..))
 
 type State =
     { recipes :: Array Recipe
@@ -21,6 +23,7 @@ type State =
 data Message
     = NoOp
     | LoadRecipes (Array Recipe)
+    | ViewRecipe FoodId
 
 def :: ComponentDef AppM Message State
 def =
@@ -50,6 +53,8 @@ update state msg = case msg of
         pure state
     LoadRecipes recipes ->
         pure state { recipes = recipes }
+    ViewRecipe (FoodId recipeId) ->
+        Transition state [liftEffect $ setRoute (Routing.Recipe recipeId) *> pure NoOp]
 
 view :: State -> DispatchMsgFn Message -> ReactElement
 view { recipes } dispatch =
@@ -57,14 +62,14 @@ view { recipes } dispatch =
         [ grid
             { spacing: 2
             }
-            $ recipes <#> \recipe -> gridItem
+            $ recipes <#> \recipe@(Recipe r) -> gridItem
                 { xs: 12
                 , sm: 6
                 , md: 4
                 }
                 [ recipeCard
                     { recipe
-                    , viewRecipe: handle dispatch NoOp
+                    , viewRecipe: handle dispatch (ViewRecipe r.id)
                     }
                 ]
         ]

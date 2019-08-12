@@ -1,7 +1,7 @@
 module Styleguide.Atoms.Typography (OptTypographyProps, TypographyProps, typography) where
 
 import Elmish (createElement)
-import Elmish.React.Import (EmptyProps, ImportedReactComponent, ImportedReactComponentConstructorWithContent)
+import Elmish.React.Import (ImportedReactComponent, ImportedReactComponentConstructorWithContent)
 
 type TypographyProps r =
     ( component :: String
@@ -12,6 +12,8 @@ type TypographyProps r =
 type OptTypographyProps r =
     ( color :: String
     , gutterBottom :: Boolean
+    , align :: String
+    , display :: String
     | r
     )
 

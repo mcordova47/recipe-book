@@ -11,8 +11,8 @@ import Prelude
 import Data.Array (drop)
 import Data.Foldable (intercalate)
 import Data.Generic.Rep (class Generic)
-import Data.Intertwine (Ctor(..), class Syntax, (<|:|>), (<|||>), (*|>))
-import Data.Intertwine.Route (PathInfo(..), end, parseRoute, printRoute, seg)
+import Data.Intertwine (Ctor(..), class Syntax, (<|:|>), (<|||>), (*|>), (<|*))
+import Data.Intertwine.Route (PathInfo(..), end, parseRoute, printRoute, seg, segValue)
 import Data.Maybe (fromMaybe)
 import Data.String (Pattern(..), split)
 import Effect (Effect)
@@ -23,6 +23,7 @@ data Route
     = SignIn
     | SignUp
     | Recipes
+    | Recipe Int
     | NotFound
 derive instance genericRoute :: Generic Route _
 
@@ -33,6 +34,8 @@ routesDef =
     (Ctor :: Ctor "SignUp") <|:|> seg "signup" *|> end
     <|||>
     (Ctor :: Ctor "Recipes") <|:|> seg "recipes" *|> end
+    <|||>
+    (Ctor :: Ctor "Recipe") <|:|> seg "recipes" *|> segValue <|* end
 
 onRouteChange :: (Route -> Effect Unit) -> Effect Unit
 onRouteChange handler =
