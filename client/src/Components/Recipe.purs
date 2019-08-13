@@ -16,7 +16,8 @@ import Network.Recipes (listRecipes)
 import Styleguide.Atoms.Typography (typography)
 import Styleguide.Layout.Container (container)
 import Types.AppM (AppM)
-import Types.Recipe (FoodId, Recipe(..))
+import Types.Recipe (FoodId, Ingredient(..), IngredientAmount(..), Recipe(..), RecipeComponent(..))
+import Util.Measurement (showMeasurement)
 
 type State =
     { recipes :: Array Recipe
@@ -79,6 +80,10 @@ view recipeId { recipes } dispatch =
                         , display: "block"
                         }
                         "Ingredients"
+                    , container
+                        { component: "ul"
+                        }
+                        $ ingredientView <$> r.ingredients
                     , typography
                         { component: "h5"
                         , variant: "h5"
@@ -103,3 +108,12 @@ view recipeId { recipes } dispatch =
             find ((==) recipeId <<< recipeId') recipes
         recipeId' (Recipe r) =
             r.id
+        ingredientView (IngredientAmount { amount, unitType, ingredient }) =
+            typography
+                { component: "li"
+                , variant: "body1"
+                }
+                $ show amount <> " " <> showMeasurement unitType <> " " <> recipeComponentName ingredient
+        recipeComponentName rc = case rc of
+            IngredientComp (Ingredient { name }) -> name
+            RecipeComp (Recipe { name }) -> name

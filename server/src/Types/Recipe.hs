@@ -41,7 +41,7 @@ data IngredientAmount =
 
 data RecipeIngredient =
     RecipeIngredient
-        { riRecipe :: FoodId
+        { riRecipe :: RecipeId
         , riIngredient :: FoodId
         , riAmount :: Double
         , riUnitType :: Measurement
@@ -67,3 +67,8 @@ newtype FoodId =
     FoodId Int
     deriving (Eq, Ord, Show, Generic)
     deriving newtype (FromHttpApiData, Num, ToJSON)
+
+newtype RecipeId =
+    RecipeId Int
+    deriving (Eq, Ord, Show, Generic)
+    deriving newtype (ToJSON)

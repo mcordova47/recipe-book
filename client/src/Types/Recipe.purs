@@ -2,7 +2,8 @@
 module Types.Recipe where
 
 import Data.Argonaut (class DecodeJson, decodeJson, (.:))
-import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson)
+import Data.Argonaut.Decode.Generic.Rep (genericDecodeJson, genericDecodeJsonWith)
+import Data.Argonaut.Types.Generic.Rep (defaultEncoding)
 import Data.Lens (Iso', Prism', prism')
 import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Maybe (Maybe(..))
@@ -42,7 +43,22 @@ derive instance genericIngredient :: Generic Ingredient _
 derive instance newtypeIngredient :: Newtype Ingredient _
 
 instance decodeJsonIngredient :: DecodeJson Ingredient where
-  decodeJson = genericDecodeJson
+  decodeJson json = do
+    o <- decodeJson json
+    id <- FoodId <$> o .: "id"
+    name <- o .: "name"
+    unitCost <- o .: "unitCost"
+    unitType <- o .: "unitType"
+    amount <- o .: "amount"
+    cupsToLbs <- o .: "cupsToLbs"
+    pure $ Ingredient
+      { id
+      , name
+      , unitCost
+      , unitType
+      , amount
+      , cupsToLbs
+      }
 
 --------------------------------------------------------------------------------
 _Ingredient :: Iso' Ingredient { id :: FoodId, name :: String, unitCost :: Number, unitType :: Measurement, amount :: Number, cupsToLbs :: Maybe Number}
@@ -61,7 +77,16 @@ derive instance genericIngredientAmount :: Generic IngredientAmount _
 derive instance newtypeIngredientAmount :: Newtype IngredientAmount _
 
 instance decodeJsonIngredientAmount :: DecodeJson IngredientAmount where
-  decodeJson = genericDecodeJson
+  decodeJson json = do
+    o <- decodeJson json
+    amount <- o .: "amount"
+    ingredient <- o .: "ingredient"
+    unitType <- o .: "unitType"
+    pure $ IngredientAmount
+      { ingredient
+      , unitType
+      , amount
+      }
 
 --------------------------------------------------------------------------------
 _IngredientAmount :: Iso' IngredientAmount { ingredient :: RecipeComponent, amount :: Number, unitType :: Measurement}
@@ -120,7 +145,7 @@ derive instance eqRecipeComponent :: Eq RecipeComponent
 derive instance genericRecipeComponent :: Generic RecipeComponent _
 
 instance decodeJsonRecipeComponent :: DecodeJson RecipeComponent where
-  decodeJson = genericDecodeJson
+  decodeJson = genericDecodeJsonWith defaultEncoding { valuesKey = "contents", unwrapSingleArguments = true }
 
 --------------------------------------------------------------------------------
 _IngredientComp :: Prism' RecipeComponent Ingredient

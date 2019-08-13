@@ -11,7 +11,6 @@ import Data.Either (Either(..))
 import Effect.Aff (Aff, attempt)
 import Effect.Class (liftEffect)
 
-import Types.Auth (AuthToken, LoginReq, SignupReq)
 import Types.Recipe (Recipe)
 import Util.LocalStorage as LocalStorage
 import Util.LocalStorage (Key(KAuthToken))

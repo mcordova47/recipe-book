@@ -14,21 +14,25 @@ RecipeComponentEntity sql=recipe_components
     unitType Measurement
     amount Double
     cupsToLbs Double Maybe
+    deriving Show
 IngredientEntity sql=ingredients
     recipeComponent RecipeComponentEntityId
     unitCost Double
     UniqueIngredientRecipeComponent recipeComponent
+    deriving Show
 RecipeEntity sql=recipes
     recipeComponent RecipeComponentEntityId
     category Text
     directions Text
     UniqueRecipeRecipeComponent recipeComponent
+    deriving Show
 RecipeIngredientEntity sql=recipe_ingredients
     recipe RecipeEntityId
     ingredient RecipeComponentEntityId
     amount Double
     unitType Measurement
     UniqueRecipeIngredient recipe ingredient
+    deriving Show
 
 UserEntity sql=users
     username Text
