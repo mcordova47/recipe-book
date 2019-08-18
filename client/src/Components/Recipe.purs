@@ -22,44 +22,47 @@ import Types.Recipe (FoodId(..), Ingredient(..), IngredientAmount(..), Recipe(..
 import Util.Measurement (showMeasurement)
 
 type State =
-    { recipes :: Array Recipe
+    { recipe :: Maybe Recipe
     }
 
 data Message
     = NoOp
-    | LoadRecipes (Array Recipe)
+    | LoadRecipe (Maybe Recipe)
 
 def :: FoodId -> ComponentDef AppM Message State
 def recipeId =
-    { init: Transition initialState [initialCmd]
+    { init: Transition initialState [initialCmd recipeId]
     , update
-    , view: view recipeId
+    , view
     }
 
-initialCmd :: AppM Message
-initialCmd = do
+initialCmd :: FoodId -> AppM Message
+initialCmd recipeId = do
     recipes <- listRecipes "http://localhost:8081/api/"
     case recipes of
         Right rs ->
-            pure $ LoadRecipes rs
+            pure $ LoadRecipe $ find ((==) recipeId <<< recipeId') rs
         Left err -> do
             liftEffect $ logShow err
             pure NoOp
+    where
+        recipeId' (Recipe r) =
+            r.id
 
 initialState :: State
 initialState =
-    { recipes: []
+    { recipe: Nothing
     }
 
 update :: State -> Message -> Transition AppM Message State
 update state msg = case msg of
     NoOp ->
         pure state
-    LoadRecipes recipes ->
-        pure state { recipes = recipes }
+    LoadRecipe recipe ->
+        pure state { recipe = recipe }
 
-view :: FoodId -> State -> DispatchMsgFn Message -> ReactElement
-view recipeId { recipes } dispatch =
+view :: State -> DispatchMsgFn Message -> ReactElement
+view { recipe } dispatch =
     case recipe of
         Just (Recipe r) ->
             layout
@@ -74,6 +77,13 @@ view recipeId { recipes } dispatch =
                         , display: "block"
                         }
                         r.name
+                    , typography
+                        { component: "p"
+                        , variant: "subtitle1"
+                        , gutterBottom: true
+                        , align: "left"
+                        }
+                        r.description
                     , typography
                         { component: "h5"
                         , variant: "h5"
@@ -106,10 +116,6 @@ view recipeId { recipes } dispatch =
         Nothing ->
             layout "Couldn't find recipe"
     where
-        recipe =
-            find ((==) recipeId <<< recipeId') recipes
-        recipeId' (Recipe r) =
-            r.id
         ingredientView (IngredientAmount { amount, unitType, ingredient }) =
             typography
                 { component: "li"
