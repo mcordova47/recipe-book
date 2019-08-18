@@ -16,7 +16,8 @@ data Recipe =
         , unitType :: Measurement
         , amount :: Double
         , directions :: Text
-        , description :: Text
+        , description :: Maybe Text
+        , servings :: Maybe Int
         , cupsToLbs :: Maybe Double
         }
         deriving (Eq, Show, Generic, ToJSON)

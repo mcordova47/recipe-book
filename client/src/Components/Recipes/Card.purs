@@ -3,6 +3,8 @@ module Components.Recipes.Card (recipeCard) where
 import Prelude
 
 import Data.Formatter.Number (Formatter(..), format)
+import Data.Int (toNumber)
+import Data.Maybe (fromMaybe, maybe)
 import Elmish (JsCallback0, ReactElement)
 
 import Styleguide.Atoms.Typography (typography)
@@ -16,7 +18,7 @@ type Props =
     }
 
 recipeCard :: Props -> ReactElement
-recipeCard { recipe: r@(Recipe { name, description }), viewRecipe } =
+recipeCard { recipe: r@(Recipe { name, description, servings }), viewRecipe } =
     card
         { content:
             [ typography
@@ -33,13 +35,13 @@ recipeCard { recipe: r@(Recipe { name, description }), viewRecipe } =
                 , gutterBottom: true
                 , key: "description"
                 }
-                description
+                $ fromMaybe " " description
             , typography
                 { component: "h3"
                 , variant: "subtitle2"
                 , key: "cost"
                 }
-                $ formatUsd $ calculateCost r  -- TODO: Calculate cost per serving (instead of per recipe)
+                $ maybe "N/A" (formatUsd <<< (calculateCost r / _) <<< toNumber) servings
             ]
         , onClick: viewRecipe
         }

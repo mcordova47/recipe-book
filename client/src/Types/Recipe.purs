@@ -102,7 +102,8 @@ newtype Recipe =
     , unitType :: Measurement
     , amount :: Number
     , directions :: String
-    , description :: String
+    , description :: Maybe String
+    , servings :: Maybe Int
     , cupsToLbs :: Maybe Number
     }
 
@@ -121,6 +122,7 @@ instance decodeJsonRecipe :: DecodeJson Recipe where
     amount <- o .: "amount"
     directions <- o .: "directions"
     description <- o .: "description"
+    servings <- o .: "servings"
     cupsToLbs <- o .: "cupsToLbs"
     pure $ Recipe
       { id
@@ -131,6 +133,7 @@ instance decodeJsonRecipe :: DecodeJson Recipe where
       , amount
       , directions
       , description
+      , servings
       , cupsToLbs
       }
 

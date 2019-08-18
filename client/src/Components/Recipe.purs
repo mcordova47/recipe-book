@@ -4,7 +4,7 @@ import Prelude
 
 import Data.Either (Either(..))
 import Data.Foldable (find)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String.Utils (lines)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (logShow)
@@ -83,7 +83,7 @@ view { recipe } dispatch =
                         , gutterBottom: true
                         , align: "left"
                         }
-                        r.description
+                        $ fromMaybe " " r.description
                     , typography
                         { component: "h5"
                         , variant: "h5"
