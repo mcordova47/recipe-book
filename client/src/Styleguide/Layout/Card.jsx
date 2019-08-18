@@ -5,8 +5,8 @@ import CardContent from '@material-ui/core/CardContent'
 import CardActions from '@material-ui/core/CardActions'
 import CardActionArea from '@material-ui/core/CardActionArea'
 
-export const Card = ({ content, actions, onClick }) =>
-  <CoreCard>
+export const Card = ({ content, actions, onClick, raised }) =>
+  <CoreCard raised={raised}>
     {onClick
       ? (
         <CardActionArea onClick={onClick}>
@@ -31,4 +31,5 @@ Card.propTypes = {
   content: PropTypes.node.isRequired,
   actions: PropTypes.node,
   onClick: PropTypes.func,
+  raised: PropTypes.bool,
 }

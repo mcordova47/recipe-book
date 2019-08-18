@@ -14,6 +14,7 @@ type CardProps r =
 type OptCardProps r =
     ( actions :: Array ReactElement
     , onClick :: JsCallback0
+    , raised :: Boolean
     | r
     )
 
