@@ -9,14 +9,16 @@ import Data.String.Utils (lines)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (logShow)
 import Elmish (ComponentDef, DispatchMsgFn, ReactElement, Transition(..))
-import Elmish.React.DOM (fragment)
+import Elmish.React.DOM (fragment, text)
 
 import Components.Layout (layout)
 import Network.Recipes (listRecipes)
+import Routing as R
+import Styleguide.Atoms.Link (linkTo)
 import Styleguide.Atoms.Typography (typography)
 import Styleguide.Layout.Container (container)
 import Types.AppM (AppM)
-import Types.Recipe (FoodId, Ingredient(..), IngredientAmount(..), Recipe(..), RecipeComponent(..))
+import Types.Recipe (FoodId(..), Ingredient(..), IngredientAmount(..), Recipe(..), RecipeComponent(..))
 import Util.Measurement (showMeasurement)
 
 type State =
@@ -113,7 +115,11 @@ view recipeId { recipes } dispatch =
                 { component: "li"
                 , variant: "body1"
                 }
-                $ show amount <> " " <> showMeasurement unitType <> " " <> recipeComponentName ingredient
+                [ text $ show amount <> " " <> showMeasurement unitType <> " "
+                , recipeComponentName ingredient
+                ]
         recipeComponentName rc = case rc of
-            IngredientComp (Ingredient { name }) -> name
-            RecipeComp (Recipe { name }) -> name
+            IngredientComp (Ingredient { name }) ->
+                text name
+            RecipeComp (Recipe { id: FoodId id', name }) ->
+                linkTo (R.Recipe id') name
