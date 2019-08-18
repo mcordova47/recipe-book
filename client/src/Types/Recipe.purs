@@ -102,6 +102,7 @@ newtype Recipe =
     , unitType :: Measurement
     , amount :: Number
     , directions :: String
+    , description :: String
     , cupsToLbs :: Maybe Number
     }
 
@@ -119,6 +120,7 @@ instance decodeJsonRecipe :: DecodeJson Recipe where
     unitType <- o .: "unitType"
     amount <- o .: "amount"
     directions <- o .: "directions"
+    description <- o .: "description"
     cupsToLbs <- o .: "cupsToLbs"
     pure $ Recipe
       { id
@@ -128,13 +130,9 @@ instance decodeJsonRecipe :: DecodeJson Recipe where
       , unitType
       , amount
       , directions
+      , description
       , cupsToLbs
       }
-
-
---------------------------------------------------------------------------------
-_Recipe :: Iso' Recipe { id :: FoodId, name :: String, category :: String, ingredients :: Array IngredientAmount, unitType :: Measurement, amount :: Number, directions :: String, cupsToLbs :: Maybe Number}
-_Recipe = _Newtype
 
 --------------------------------------------------------------------------------
 data RecipeComponent =

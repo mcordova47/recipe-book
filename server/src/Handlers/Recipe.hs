@@ -104,6 +104,7 @@ listRecipeComponents = do
                 , unitType = recipeComponentEntityUnitType rc
                 , amount = recipeComponentEntityAmount rc
                 , directions = recipeEntityDirections r
+                , description = recipeEntityDescription r
                 , cupsToLbs = recipeComponentEntityCupsToLbs rc
                 }
             )

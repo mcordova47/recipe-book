@@ -24,6 +24,7 @@ RecipeEntity sql=recipes
     recipeComponent RecipeComponentEntityId
     category Text
     directions Text
+    description Text
     UniqueRecipeRecipeComponent recipeComponent
     deriving Show
 RecipeIngredientEntity sql=recipe_ingredients

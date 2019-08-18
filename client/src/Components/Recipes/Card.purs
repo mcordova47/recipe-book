@@ -16,7 +16,7 @@ type Props =
     }
 
 recipeCard :: Props -> ReactElement
-recipeCard { recipe: r@(Recipe { name, directions }), viewRecipe } =
+recipeCard { recipe: r@(Recipe { name, description }), viewRecipe } =
     card
         { content:
             [ typography
@@ -31,9 +31,9 @@ recipeCard { recipe: r@(Recipe { name, directions }), viewRecipe } =
                 , variant: "body2"
                 , color: "textSecondary"
                 , gutterBottom: true
-                , key: "directions"
+                , key: "description"
                 }
-                directions
+                description
             , typography
                 { component: "h3"
                 , variant: "subtitle2"
