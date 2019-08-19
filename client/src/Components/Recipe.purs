@@ -127,7 +127,13 @@ view { recipe } dispatch =
                             }
                         ]
                     , gridItem
+                        { xs: 0
+                        , md: 2
+                        }
+                        ""
+                    , gridItem
                         { xs: 12
+                        , md: 8
                         }
                         [ typography
                             { component: "h5"
