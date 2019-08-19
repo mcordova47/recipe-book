@@ -21,6 +21,7 @@ import Styleguide.Icons.Photo (photoOutlinedIcon)
 import Styleguide.Layout.Card (cardImage)
 import Styleguide.Layout.Container (container)
 import Styleguide.Layout.Grid (grid, gridItem)
+import Styleguide.Surfaces.Paper (paper)
 import Types.AppM (AppM)
 import Types.Recipe (FoodId(..), Ingredient(..), IngredientAmount(..), Recipe(..), RecipeComponent(..))
 import Util.Measurement (showMeasurement)
@@ -100,17 +101,23 @@ view { recipe } dispatch =
                             { xs: 12
                             , md: 6
                             }
-                            [ cardImage
-                                { image: fromMaybe "" r.image
-                                , title: r.name
-                                , placeholder:
-                                    container
-                                        { component: "div"
-                                        }
-                                        [ photoOutlinedIcon { fontSize: "large", color: "action" }
-                                        ]
-                                , height: 300.0
+                            [ paper
+                                { square: false
+                                , elevation: 0
+                                , overflow: "hidden"
                                 }
+                                [ cardImage
+                                    { image: fromMaybe "" r.image
+                                    , title: r.name
+                                    , placeholder:
+                                        container
+                                            { component: "div"
+                                            }
+                                            [ photoOutlinedIcon { fontSize: "large", color: "action" }
+                                            ]
+                                    , height: 300.0
+                                    }
+                                ]
                             ]
                     , gridItem
                         { xs: 12
