@@ -15,6 +15,10 @@ type OptCardProps r =
     ( actions :: Array ReactElement
     , onClick :: JsCallback0
     , raised :: Boolean
+    , image :: String
+    , imageTitle :: String
+    , imagePlaceholder :: ReactElement
+    , imageHeight :: Number
     | r
     )
 

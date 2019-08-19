@@ -18,6 +18,7 @@ data Recipe =
         , directions :: Text
         , description :: Maybe Text
         , servings :: Maybe Int
+        , image :: Maybe Text
         , cupsToLbs :: Maybe Double
         }
         deriving (Eq, Show, Generic, ToJSON)
