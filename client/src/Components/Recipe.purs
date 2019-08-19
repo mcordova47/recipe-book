@@ -14,9 +14,13 @@ import Elmish.React.DOM (fragment, text)
 import Components.Layout (layout)
 import Network.Recipes (listRecipes)
 import Routing as R
+import Styleguide.Atoms.Divider (divider)
 import Styleguide.Atoms.Link (linkTo)
 import Styleguide.Atoms.Typography (typography)
+import Styleguide.Icons.Photo (photoOutlinedIcon)
+import Styleguide.Layout.Card (cardImage)
 import Styleguide.Layout.Container (container)
+import Styleguide.Layout.Grid (grid, gridItem)
 import Types.AppM (AppM)
 import Types.Recipe (FoodId(..), Ingredient(..), IngredientAmount(..), Recipe(..), RecipeComponent(..))
 import Util.Measurement (showMeasurement)
@@ -68,49 +72,85 @@ view { recipe } dispatch =
             layout
                 [ container
                     { component: "div"
+                    , maxWidth: "md"
                     }
-                    [ typography
-                        { component: "h4"
-                        , variant: "h4"
-                        , gutterBottom: true
-                        , align: "left"
-                        , display: "block"
+                    [ grid
+                        { spacing: 2
                         }
-                        r.name
-                    , typography
-                        { component: "p"
-                        , variant: "subtitle1"
-                        , gutterBottom: true
-                        , align: "left"
-                        }
-                        $ fromMaybe " " r.description
-                    , typography
-                        { component: "h5"
-                        , variant: "h5"
-                        , gutterBottom: true
-                        , align: "left"
-                        , display: "block"
-                        }
-                        "Ingredients"
-                    , container
-                        { component: "ul"
-                        }
-                        $ ingredientView <$> r.ingredients
-                    , typography
-                        { component: "h5"
-                        , variant: "h5"
-                        , gutterBottom: true
-                        , align: "left"
-                        , display: "block"
-                        }
-                        "Directions"
-                    , fragment
-                        $ typography
-                            { component: "p"
-                            , variant: "body1"
+                        [ gridItem
+                            { xs: 12
+                            , md: 6
                             }
-                            <$>
-                            lines r.directions
+                            [ typography
+                                { component: "h4"
+                                , variant: "h4"
+                                , gutterBottom: true
+                                , align: "center"
+                                , display: "block"
+                                }
+                                r.name
+                            , typography
+                                { component: "p"
+                                , variant: "subtitle1"
+                                , align: "center"
+                                }
+                                $ fromMaybe " " r.description
+                            ]
+                        , gridItem
+                            { xs: 12
+                            , md: 6
+                            }
+                            [ cardImage
+                                { image: fromMaybe "" r.image
+                                , title: r.name
+                                , placeholder:
+                                    container
+                                        { component: "div"
+                                        }
+                                        [ photoOutlinedIcon { fontSize: "large", color: "action" }
+                                        ]
+                                , height: 300.0
+                                }
+                            ]
+                    , gridItem
+                        { xs: 12
+                        }
+                        [ divider
+                            { variant: "middle"
+                            }
+                        ]
+                    , gridItem
+                        { xs: 12
+                        }
+                        [ typography
+                            { component: "h5"
+                            , variant: "h5"
+                            , gutterBottom: true
+                            , align: "left"
+                            , display: "block"
+                            }
+                            "Ingredients"
+                            , container
+                                { component: "ul"
+                                }
+                                $ ingredientView <$> r.ingredients
+                            , typography
+                                { component: "h5"
+                                , variant: "h5"
+                                , gutterBottom: true
+                                , align: "left"
+                                , display: "block"
+                                }
+                                "Directions"
+                            , fragment
+                                $ typography
+                                    { component: "p"
+                                    , variant: "body1"
+                                    }
+                                    <$>
+                                    lines r.directions
+                            ]
+                        ]
                     ]
                 ]
         Nothing ->

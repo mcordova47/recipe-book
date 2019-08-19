@@ -54,7 +54,7 @@ Card.propTypes = {
   imageHeight: PropTypes.number,
 }
 
-const CardImage = ({ image, title, placeholder, height }) =>
+export const CardImage = ({ image, title, placeholder, height }) =>
   image
     ? (
       <CardMedia
