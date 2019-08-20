@@ -2,9 +2,7 @@ module Components.Recipes.Card (recipeCard) where
 
 import Prelude
 
-import Data.Formatter.Number (Formatter(..), format)
-import Data.Int (toNumber)
-import Data.Maybe (fromMaybe, maybe)
+import Data.Maybe (fromMaybe)
 import Elmish (JsCallback0, ReactElement)
 
 import Styleguide.Atoms.Typography (typography)
@@ -12,7 +10,7 @@ import Styleguide.Icons.Photo (photoOutlinedIcon)
 import Styleguide.Layout.Card (card)
 import Styleguide.Layout.Container (container)
 import Types.Recipe (Recipe(..))
-import Util.Recipes (calculateCost)
+import Util.Recipes (showCostPerServing)
 
 type Props =
     { recipe :: Recipe
@@ -43,7 +41,7 @@ recipeCard { recipe: r@(Recipe { name, description, servings, image }), viewReci
                 , variant: "subtitle2"
                 , key: "cost"
                 }
-                $ maybe "N/A" (formatUsd <<< (calculateCost r / _) <<< toNumber) servings
+                $ showCostPerServing "N/A" r
             ]
         , onClick: viewRecipe
         , image: fromMaybe "" image
@@ -55,18 +53,4 @@ recipeCard { recipe: r@(Recipe { name, description, servings, image }), viewReci
                 [ photoOutlinedIcon { fontSize: "large", color: "action" }
                 ]
         , imageHeight: 250.0
-        }
-
-formatUsd :: Number -> String
-formatUsd n =
-    "$" <> format usdFormatter n
-
-usdFormatter :: Formatter
-usdFormatter =
-    Formatter
-        { comma: true
-        , before: 0
-        , after: 2
-        , abbreviations: false
-        , sign: false
         }

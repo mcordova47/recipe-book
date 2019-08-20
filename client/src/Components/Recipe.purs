@@ -4,7 +4,7 @@ import Prelude
 
 import Data.Either (Either(..))
 import Data.Foldable (find)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.String.Utils (lines)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (logShow)
@@ -14,9 +14,17 @@ import Elmish.React.DOM (fragment, text)
 import Components.Layout (layout)
 import Network.Recipes (listRecipes)
 import Routing as R
+import Styleguide.Atoms.Avatar (avatar)
 import Styleguide.Atoms.Divider (divider)
 import Styleguide.Atoms.Link (linkTo)
+import StyleGuide.Atoms.List (list)
+import StyleGuide.Atoms.ListItem (listItem)
+import StyleGuide.Atoms.ListItemAvatar (listItemAvatar)
+import StyleGuide.Atoms.ListItemText (listItemText)
 import Styleguide.Atoms.Typography (typography)
+import Styleguide.Icons.Alarm (alarmIcon)
+import Styleguide.Icons.AttachMoney (attachMoneyIcon)
+import Styleguide.Icons.Restaurant (restaurantIcon)
 import Styleguide.Icons.Photo (photoOutlinedIcon)
 import Styleguide.Layout.Card (cardImage)
 import Styleguide.Layout.Container (container)
@@ -25,6 +33,7 @@ import Styleguide.Surfaces.Paper (paper)
 import Types.AppM (AppM)
 import Types.Recipe (FoodId(..), Ingredient(..), IngredientAmount(..), Recipe(..), RecipeComponent(..))
 import Util.Measurement (showMeasurement)
+import Util.Recipes (showCostPerServing)
 
 type State =
     { recipe :: Maybe Recipe
@@ -69,7 +78,7 @@ update state msg = case msg of
 view :: State -> DispatchMsgFn Message -> ReactElement
 view { recipe } dispatch =
     case recipe of
-        Just (Recipe r) ->
+        Just recipe'@(Recipe r) ->
             layout
                 [ container
                     { component: "div"
@@ -96,6 +105,55 @@ view { recipe } dispatch =
                                 , align: "center"
                                 }
                                 $ fromMaybe " " r.description
+                            , grid {}
+                                [ gridItem
+                                    { xs: 1
+                                    , sm: 3
+                                    }
+                                    ""
+                                , gridItem
+                                    { xs: 10
+                                    , sm: 6
+                                    }
+                                    [ list {}
+                                        [ listItem {}
+                                            [ listItemAvatar {}
+                                                [ avatar {}
+                                                    [ attachMoneyIcon
+                                                    ]
+                                                ]
+                                            , listItemText
+                                                { primary: showCostPerServing "N/A" recipe'
+                                                , secondary: "Cost per serving"
+                                                }
+                                            ]
+                                        , divider { variant: "inset" }
+                                        , listItem {}
+                                            [ listItemAvatar {}
+                                                [ avatar {}
+                                                    [ restaurantIcon
+                                                    ]
+                                                ]
+                                            , listItemText
+                                                { primary: maybe "N/A" show r.servings
+                                                , secondary: "Servings"
+                                                }
+                                            ]
+                                        , divider { variant: "inset" }
+                                        , listItem {}
+                                            [ listItemAvatar {}
+                                                [ avatar {}
+                                                    [ alarmIcon
+                                                    ]
+                                                ]
+                                            , listItemText
+                                                { primary: "N/A"
+                                                , secondary: "Prep time"
+                                                }
+                                            ]
+                                        ]
+                                    ]
+                                ]
                             ]
                         , gridItem
                             { xs: 12
