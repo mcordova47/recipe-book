@@ -8,7 +8,6 @@
     "build-production": "spago build && parcel build index.html",
     "bundle-ps": "spago bundle-module --to ./output/bundle.js",
     "clean": "rm -rf .cache .spago .psci_modules node_modules output dist",
-    "postinstall": "spago install",
     "start": "npm run bundle-ps && concurrently \"spago bundle-module --to ./output/bundle.js --watch\" \"parcel index.html\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
