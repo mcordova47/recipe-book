@@ -27,6 +27,7 @@ RecipeEntity sql=recipes
     description Text Maybe
     servings Int Maybe
     image Text Maybe
+    cookMinutes Int Maybe
     UniqueRecipeRecipeComponent recipeComponent
     deriving Show
 RecipeIngredientEntity sql=recipe_ingredients

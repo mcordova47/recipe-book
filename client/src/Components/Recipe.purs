@@ -33,7 +33,7 @@ import Styleguide.Surfaces.Paper (paper)
 import Types.AppM (AppM)
 import Types.Recipe (FoodId(..), Ingredient(..), IngredientAmount(..), Recipe(..), RecipeComponent(..))
 import Util.Measurement (showMeasurement)
-import Util.Recipes (showCostPerServing)
+import Util.Recipes (DurationType(..), recipeDuration, showCostPerServing)
 
 type State =
     { recipe :: Maybe Recipe
@@ -146,10 +146,7 @@ view { recipe } dispatch =
                                                     [ alarmIcon
                                                     ]
                                                 ]
-                                            , listItemText
-                                                { primary: "N/A"
-                                                , secondary: "Prep time"
-                                                }
+                                            , cookTimeText recipe'
                                             ]
                                         ]
                                     ]
@@ -240,3 +237,13 @@ view { recipe } dispatch =
                 text name
             RecipeComp (Recipe { id: FoodId id', name }) ->
                 linkTo (R.Recipe id') name
+        cookTimeText r =
+            listItemText
+                { primary: maybe "N/A" (show <<< _.duration) cookTime
+                , secondary: maybe "Minutes" (cookTimeLabel <<< _.durationType) cookTime
+                }
+            where
+                cookTime = recipeDuration r
+                cookTimeLabel durType = case durType of
+                    DMinutes -> "Minutes"
+                    DHours -> "Hours"

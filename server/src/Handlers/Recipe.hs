@@ -107,6 +107,7 @@ listRecipeComponents = do
                 , description = recipeEntityDescription r
                 , servings = recipeEntityServings r
                 , image = recipeEntityImage r
+                , cookMinutes = recipeEntityCookMinutes r
                 , cupsToLbs = recipeComponentEntityCupsToLbs rc
                 }
             )

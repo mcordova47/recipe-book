@@ -1,11 +1,18 @@
-module Util.Recipes (calculateCost, costPerServing, showCostPerServing) where
+module Util.Recipes
+    ( RecipeDuration(..)
+    , DurationType(..)
+    , calculateCost
+    , costPerServing
+    , recipeDuration
+    , showCostPerServing
+    ) where
 
 import Prelude
 
 import Data.Foldable (foldl)
 import Data.Formatter.Number (Formatter(..), format)
 import Data.Int as Int
-import Data.Maybe (Maybe, fromMaybe, maybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
 
 import Types.Recipe
     ( Ingredient(..)
@@ -53,3 +60,28 @@ usdFormatter =
         , abbreviations: false
         , sign: false
         }
+
+type RecipeDuration =
+    { duration :: Int
+    , durationType :: DurationType
+    }
+
+data DurationType
+    = DHours
+    | DMinutes
+
+recipeDuration :: Recipe -> Maybe RecipeDuration
+recipeDuration r = case r of
+    Recipe { cookMinutes: Just minutes }
+        | minutes <= 90 ->
+            Just
+                { duration: minutes
+                , durationType: DMinutes
+                }
+        | otherwise ->
+            Just
+                { duration: Int.round (Int.toNumber minutes / 60.0)
+                , durationType: DMinutes
+                }
+    _ ->
+        Nothing
