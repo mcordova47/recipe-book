@@ -81,7 +81,7 @@ recipeDuration r = case r of
         | otherwise ->
             Just
                 { duration: Int.round (Int.toNumber minutes / 60.0)
-                , durationType: DMinutes
+                , durationType: DHours
                 }
     _ ->
         Nothing
