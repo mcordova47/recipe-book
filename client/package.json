@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "build": "npm run bundle-ps && parcel build index.html",
-    "build-production": "spago build && parcel build index.html",
-    "bundle-ps": "spago bundle-module --to ./output/bundle.js",
+    "build-production": "./node_modules/.bin/spago build && parcel build index.html",
+    "bundle-ps": "./node_modules/.bin/spago bundle-module --to ./output/bundle.js",
     "clean": "rm -rf .cache .spago .psci_modules node_modules output dist",
-    "start": "npm run bundle-ps && concurrently \"spago bundle-module --to ./output/bundle.js --watch\" \"parcel index.html\"",
+    "postinstall": "./node_modules/.bin/spago install",
+    "start": "npm run bundle-ps && concurrently \"./node_modules/.bin/spago bundle-module --to ./output/bundle.js --watch\" \"parcel index.html\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
