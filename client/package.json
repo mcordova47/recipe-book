@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm run bundle-ps && parcel build index.html",
-    "build-production": "./node_modules/.bin/spago build && parcel build index.html",
+    "build": "npm run bundle-ps && parcel build index.html --public-url ./",
+    "build-production": "./node_modules/.bin/spago build && parcel build index.html --public-url ./",
     "bundle-ps": "./node_modules/.bin/spago bundle-module --to ./output/bundle.js",
     "clean": "rm -rf .cache .spago .psci_modules node_modules output dist",
     "postinstall": "./node_modules/.bin/spago install",
