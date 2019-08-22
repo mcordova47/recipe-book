@@ -9,7 +9,7 @@ CREATE TABLE recipe_components (
 CREATE TABLE ingredients (
     id serial PRIMARY KEY,
     recipe_component integer NOT NULL REFERENCES recipe_components(id) UNIQUE,
-    unit_cost money NOT NULL
+    unit_cost numeric NOT NULL
 );
 
 CREATE TABLE recipes (

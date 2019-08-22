@@ -2,24 +2,41 @@ module Network.Auth (login, signup) where
 
 import Prelude
 
-import Control.Monad.Aff (Aff, attempt)
-import Data.Argonaut.Generic.Aeson (decodeJson, encodeJson)
-import Data.Bifunctor (bimap)
-import Data.Either (Either)
-import Network.HTTP.Affjax (AJAX, post)
+import Affjax (post, printResponseFormatError)
+import Affjax.RequestBody as RequestBody
+import Affjax.ResponseFormat as ResponseFormat
+import Control.Monad.Reader.Class (asks)
+import Data.Argonaut (decodeJson, encodeJson)
+import Data.Bifunctor (lmap)
+import Data.Either (Either(..))
+import Effect.Aff (attempt)
+import Effect.Aff.Class (liftAff)
+
+import Types.AppM (AppM)
 import Types.Auth (AuthToken, LoginReq, SignupReq)
 
-login :: forall e. String -> LoginReq -> Aff ( ajax :: AJAX | e ) (Either String AuthToken)
-login baseUrl req = do
+login :: LoginReq -> AppM (Either String AuthToken)
+login req = do
     let body = encodeJson req
-    res <- attempt $ post (baseUrl <> "auth/login") body
-    let token = bimap show _.response res >>= decodeJson
-    pure token
+    baseUrl <- asks _.apiUrl
+    eitherRes <- liftAff $ attempt $ post ResponseFormat.json (baseUrl <> "auth/login") (RequestBody.json body)
+    case eitherRes of
+        Right { body: Right body' } ->
+            pure $ lmap show $ decodeJson body'
+        Right { body: Left err } ->
+            pure $ Left $ printResponseFormatError err
+        Left err ->
+            pure $ Left $ show err
 
-signup :: forall e. String -> SignupReq -> Aff ( ajax :: AJAX | e ) (Either String AuthToken)
-signup baseUrl req = do
+signup :: SignupReq -> AppM (Either String AuthToken)
+signup req = do
     let body = encodeJson req
-    let request = post (baseUrl <> "auth/signup") body
-    res <- attempt request
-    let token = bimap show _.response res >>= decodeJson
-    pure token
+    baseUrl <- asks _.apiUrl
+    eitherRes <- liftAff $ attempt $ post ResponseFormat.json (baseUrl <> "auth/signup") (RequestBody.json body)
+    case eitherRes of
+        Right { body: Right body' } ->
+            pure $ lmap show $ decodeJson body'
+        Right { body: Left err } ->
+            pure $ Left $ printResponseFormatError err
+        Left err ->
+            pure $ Left $ show err
