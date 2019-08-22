@@ -73,7 +73,7 @@ update state msg = case msg of
 
 signUp :: SignupReq -> AppM Message
 signUp req = do
-    res <- signup "http://localhost:8081/api/" req
+    res <- signup req
     case res of
         Right (AuthToken (Token { getToken })) -> do
             liftEffect $ LocalStorage.setItem KAuthToken getToken

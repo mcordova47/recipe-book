@@ -5,20 +5,24 @@ import Prelude
 import Affjax (defaultRequest, printResponseFormatError, request)
 import Affjax.RequestHeader (RequestHeader(..))
 import Affjax.ResponseFormat as ResponseFormat
+import Control.Monad.Reader.Class (asks)
 import Data.Argonaut (decodeJson)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
-import Effect.Aff (Aff, attempt)
+import Effect.Aff (attempt)
+import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
 
+import Types.AppM (AppM)
 import Types.Recipe (Recipe)
 import Util.LocalStorage as LocalStorage
 import Util.LocalStorage (Key(KAuthToken))
 
-listRecipes :: String -> Aff (Either String (Array Recipe))
-listRecipes baseUrl = do
+listRecipes :: AppM (Either String (Array Recipe))
+listRecipes = do
     jwt <- liftEffect $ LocalStorage.getItem KAuthToken
-    eitherRes <- attempt $ request defaultRequest
+    baseUrl <- asks _.apiUrl
+    eitherRes <- liftAff $ attempt $ request defaultRequest
         { url = baseUrl <> "recipes"
         , headers = [RequestHeader "Authorization" jwt]
         , responseFormat = ResponseFormat.json

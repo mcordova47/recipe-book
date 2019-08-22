@@ -34,7 +34,7 @@ def =
 
 initialCmd :: AppM Message
 initialCmd = do
-    recipes <- listRecipes "http://localhost:8081/api/"
+    recipes <- listRecipes
     case recipes of
         Right rs ->
             pure $ LoadRecipes rs

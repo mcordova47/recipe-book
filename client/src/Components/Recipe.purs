@@ -52,7 +52,7 @@ def recipeId =
 
 initialCmd :: FoodId -> AppM Message
 initialCmd recipeId = do
-    recipes <- listRecipes "http://localhost:8081/api/"
+    recipes <- listRecipes
     case recipes of
         Right rs ->
             pure $ LoadRecipe $ find ((==) recipeId <<< recipeId') rs

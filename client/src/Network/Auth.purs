@@ -5,17 +5,21 @@ import Prelude
 import Affjax (post, printResponseFormatError)
 import Affjax.RequestBody as RequestBody
 import Affjax.ResponseFormat as ResponseFormat
+import Control.Monad.Reader.Class (asks)
 import Data.Argonaut (decodeJson, encodeJson)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
-import Effect.Aff (Aff, attempt)
+import Effect.Aff (attempt)
+import Effect.Aff.Class (liftAff)
 
+import Types.AppM (AppM)
 import Types.Auth (AuthToken, LoginReq, SignupReq)
 
-login :: String -> LoginReq -> Aff (Either String AuthToken)
-login baseUrl req = do
+login :: LoginReq -> AppM (Either String AuthToken)
+login req = do
     let body = encodeJson req
-    eitherRes <- attempt $ post ResponseFormat.json (baseUrl <> "auth/login") (RequestBody.json body)
+    baseUrl <- asks _.apiUrl
+    eitherRes <- liftAff $ attempt $ post ResponseFormat.json (baseUrl <> "auth/login") (RequestBody.json body)
     case eitherRes of
         Right { body: Right body' } ->
             pure $ lmap show $ decodeJson body'
@@ -24,10 +28,11 @@ login baseUrl req = do
         Left err ->
             pure $ Left $ show err
 
-signup :: String -> SignupReq -> Aff (Either String AuthToken)
-signup baseUrl req = do
+signup :: SignupReq -> AppM (Either String AuthToken)
+signup req = do
     let body = encodeJson req
-    eitherRes <- attempt $ post ResponseFormat.json (baseUrl <> "auth/signup") (RequestBody.json body)
+    baseUrl <- asks _.apiUrl
+    eitherRes <- liftAff $ attempt $ post ResponseFormat.json (baseUrl <> "auth/signup") (RequestBody.json body)
     case eitherRes of
         Right { body: Right body' } ->
             pure $ lmap show $ decodeJson body'

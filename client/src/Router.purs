@@ -3,34 +3,37 @@ module Router (runRouter) where
 import Prelude
 
 import Effect (Effect)
-import Effect.Aff (Aff)
-import Elmish (ComponentDef, boot)
+import Elmish (ComponentDef, boot, nat)
 
 import Components.Auth.SignIn as SignIn
 import Components.Auth.SignUp as SignUp
 import Components.Recipes as Recipes
 import Components.Recipe as Recipe
 import Routing (Route(..), onRouteChange)
+import Types.AppM (AppM, Context, runAppM)
 import Types.Recipe (FoodId(..))
 
-runRouter :: Effect Unit
-runRouter =
-    onRouteChange route
+runRouter :: Context -> Effect Unit
+runRouter ctx =
+    onRouteChange (route ctx)
 
-route :: Route -> Effect Unit
-route route' =
+route :: Context -> Route -> Effect Unit
+route ctx route' =
     case route' of
         SignIn ->
-            mountComponent SignIn.def
+            mountComponent ctx SignIn.def
         SignUp ->
-            mountComponent SignUp.def
+            mountComponent ctx SignUp.def
         Recipes ->
-            mountComponent Recipes.def
+            mountComponent ctx Recipes.def
         Recipe recipeId ->
-            mountComponent (Recipe.def $ FoodId recipeId)
+            mountComponent ctx (Recipe.def $ FoodId recipeId)
         NotFound ->
-            mountComponent SignIn.def
+            mountComponent ctx SignIn.def
 
-mountComponent :: forall state msg. ComponentDef Aff state msg -> Effect Unit
-mountComponent def =
-    boot { domElementId: "app", def }
+mountComponent :: forall state msg. Context -> ComponentDef AppM state msg -> Effect Unit
+mountComponent ctx def =
+    boot
+        { domElementId: "app"
+        , def: nat (runAppM ctx) def
+        }

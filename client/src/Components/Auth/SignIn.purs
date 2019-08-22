@@ -68,7 +68,7 @@ update state msg = case msg of
 
 signIn :: LoginReq -> AppM Message
 signIn req = do
-    res <- login "http://localhost:8081/api/" req
+    res <- login req
     case res of
         Right (AuthToken (Token { getToken })) -> do
             liftEffect $ LocalStorage.setItem KAuthToken getToken
