@@ -9,11 +9,11 @@ const useStyles = (margin) => makeStyles(theme => ({
   },
 }))()
 
-export const Button = ({ fullWidth, color, margin, onClick, size, variant, children }) => {
+export const Button = ({ fullWidth, color, margin, onClick, size, variant, children, type }) => {
   const className = margin ? useStyles(margin).button : undefined
   return (
     <CoreButton
-      type="button"
+      type={type}
       fullWidth={fullWidth}
       variant="contained"
       color={color}
@@ -34,4 +34,8 @@ Button.propTypes = {
   size: PropTypes.string,
   variant: PropTypes.string,
   children: PropTypes.node.isRequired,
+}
+
+Button.defaultProps = {
+  type: 'button',
 }

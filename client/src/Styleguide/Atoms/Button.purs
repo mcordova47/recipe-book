@@ -14,6 +14,7 @@ type OptButtonProps r =
     , margin :: Array Int
     , size :: String
     , variant :: String
+    , type :: String
     | r
     )
 

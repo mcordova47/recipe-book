@@ -12,7 +12,11 @@ const useStyles = makeStyles(theme => ({
 export const Form = ({ children }) => {
   const className = useStyles().form
   return (
-    <form className={className} noValidate>
+    <form
+      className={className}
+      onSubmit={e => e.preventDefault()}
+      noValidate
+    >
       {children}
     </form>
   )

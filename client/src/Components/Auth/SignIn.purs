@@ -17,7 +17,6 @@ import Network.Auth (login)
 import Routing (Route(Recipes, SignUp), setRoute)
 import Styleguide.Atoms.Avatar (avatar)
 import Styleguide.Atoms.Button (button)
-import Styleguide.Atoms.Form (form)
 import Styleguide.Atoms.Input (input)
 import Styleguide.Atoms.Link (linkTo)
 import Styleguide.Atoms.Typography (typography)
@@ -25,6 +24,7 @@ import Styleguide.Icons.Lock (lockOutlinedIcon)
 import Styleguide.Layout.Container (container)
 import Styleguide.Layout.Grid (grid, gridItem)
 import Styleguide.Layout.Paper (paper)
+import Styleguide.Organisms.Form (form)
 import Styleguide.Theme (theme)
 import Types.AppM (AppM)
 import Types.Auth (AuthToken(..), LoginReq(..))
@@ -121,6 +121,7 @@ view { username, password } dispatch =
                         , color: "primary"
                         , margin: [3, 0, 2]
                         , variant: "contained"
+                        , type: "submit"
                         }
                         "Sign In"
                     , grid

@@ -1,4 +1,4 @@
-module Styleguide.Atoms.Form (form) where
+module Styleguide.Organisms.Form (form) where
 
 import Prelude
 
