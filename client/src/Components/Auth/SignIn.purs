@@ -3,6 +3,9 @@ module Components.Auth.SignIn (Message, def) where
 import Prelude
 
 import Data.Either (Either(..))
+import Data.Time.Duration (Milliseconds(..))
+import Effect.Aff (delay)
+import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
 import Elmish
     ( ComponentDef
@@ -15,16 +18,15 @@ import Elmish
 import JWT (Token(..))
 import Network.Auth (login)
 import Routing (Route(Recipes, SignUp), setRoute)
-import Styleguide.Atoms.Avatar (avatar)
 import Styleguide.Atoms.Button (button)
 import Styleguide.Atoms.Input (input)
 import Styleguide.Atoms.Link (linkTo)
 import Styleguide.Atoms.Typography (typography)
-import Styleguide.Icons.Lock (lockOutlinedIcon)
 import Styleguide.Layout.Container (container)
 import Styleguide.Layout.Grid (grid, gridItem)
 import Styleguide.Layout.Paper (paper)
 import Styleguide.Organisms.Form (form)
+import Styleguide.Organisms.LoginProgress (Progress(..), loginProgress)
 import Styleguide.Theme (theme)
 import Types.AppM (AppM)
 import Types.Auth (AuthToken(..), LoginReq(..))
@@ -34,12 +36,15 @@ import Util.LocalStorage (Key(KAuthToken))
 type State =
     { username :: String
     , password :: String
+    , loginState :: Progress
     }
 
 data Message
     = ChangeUsername String
     | ChangePassword String
     | Submit
+    | SignIn AuthToken
+    | SignInFailed
     | NoOp
 
 def :: ComponentDef AppM Message State
@@ -53,6 +58,7 @@ initialState :: State
 initialState =
     { username: ""
     , password: ""
+    , loginState: NotStarted
     }
 
 update :: State -> Message -> Transition AppM Message State
@@ -62,7 +68,18 @@ update state msg = case msg of
     ChangePassword password ->
         pure state { password = password }
     Submit ->
-        Transition state [signIn $ LoginReq state]
+        Transition state { loginState = Loading } [signIn $ LoginReq { username: state.username, password: state.password }]
+    SignIn (AuthToken (Token { getToken })) ->
+        Transition
+            state { loginState = Done }
+            [ do
+                liftEffect $ LocalStorage.setItem KAuthToken getToken
+                liftAff $ delay $ Milliseconds 400.0
+                liftEffect $ setRoute Recipes
+                pure NoOp
+            ]
+    SignInFailed ->
+        pure state { loginState = NotStarted }
     NoOp ->
         pure state
 
@@ -70,24 +87,20 @@ signIn :: LoginReq -> AppM Message
 signIn req = do
     res <- login req
     case res of
-        Right (AuthToken (Token { getToken })) -> do
-            liftEffect $ LocalStorage.setItem KAuthToken getToken
-            liftEffect $ setRoute Recipes
+        Right token ->
+            pure $ SignIn token
         Left _ ->
-            pure unit
-    pure NoOp
+            pure SignInFailed
 
 view :: State -> DispatchMsgFn Message -> ReactElement
-view { username, password } dispatch =
+view { username, password, loginState } dispatch =
     theme {}
         [ container
             { component: "main"
             , maxWidth: "xs"
             }
             [ paper {}
-                [ avatar {}
-                    [ lockOutlinedIcon
-                    ]
+                [ loginProgress loginState
                 , typography
                     { component: "h1"
                     , variant: "h5"

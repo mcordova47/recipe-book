@@ -1,4 +1,4 @@
-module Styleguide.Icons.Lock (lockOutlinedIcon) where
+module Styleguide.Icons.Lock (lockOpenIcon, lockOutlinedIcon) where
 
 import Prelude
 
@@ -10,3 +10,9 @@ lockOutlinedIcon =
     createElement' lockOutlinedIcon_ {}
 
 foreign import lockOutlinedIcon_ :: ImportedReactComponent
+
+lockOpenIcon :: ReactElement
+lockOpenIcon =
+    createElement' lockOpenIcon_ {}
+
+foreign import lockOpenIcon_ :: ImportedReactComponent
