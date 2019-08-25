@@ -6,7 +6,7 @@ import Data.Maybe (fromMaybe)
 import Elmish (JsCallback0, ReactElement)
 
 import Styleguide.Atoms.Typography (typography)
-import Styleguide.Icons.Photo (photoOutlinedIcon)
+import Styleguide.Icons.RestaurantMenu (restaurantMenuIcon)
 import Styleguide.Layout.Card (card)
 import Styleguide.Layout.Container (container)
 import Types.Recipe (Recipe(..))
@@ -50,7 +50,7 @@ recipeCard { recipe: r@(Recipe { name, description, servings, image }), viewReci
             container
                 { component: "div"
                 }
-                [ photoOutlinedIcon { fontSize: "large", color: "action" }
+                [ restaurantMenuIcon { fontSize: "large", color: "action" }
                 ]
         , imageHeight: 250.0
         }

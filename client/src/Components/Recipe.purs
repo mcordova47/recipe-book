@@ -25,7 +25,7 @@ import Styleguide.Atoms.Typography (typography)
 import Styleguide.Icons.Alarm (alarmIcon)
 import Styleguide.Icons.AttachMoney (attachMoneyIcon)
 import Styleguide.Icons.Restaurant (restaurantIcon)
-import Styleguide.Icons.Photo (photoOutlinedIcon)
+import Styleguide.Icons.RestaurantMenu (restaurantMenuIcon)
 import Styleguide.Layout.Card (cardImage)
 import Styleguide.Layout.Container (container)
 import Styleguide.Layout.Grid (grid, gridItem)
@@ -168,7 +168,7 @@ view { recipe } dispatch =
                                         container
                                             { component: "div"
                                             }
-                                            [ photoOutlinedIcon { fontSize: "large", color: "action" }
+                                            [ restaurantMenuIcon { fontSize: "large", color: "action" }
                                             ]
                                     , height: 300.0
                                     }
