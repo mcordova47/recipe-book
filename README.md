@@ -52,27 +52,36 @@ Dev build with hot module reloading
 
 ## Production
 
-The front end is hosted on netlify.  Builds are deployed on each commit to master.
+~~The front end is hosted on netlify.  Builds are deployed on each commit to master.~~
 
-Experiencing problems with netlify, so the ad-hoc way for now is using github pages (https://mcordova47.github.io/recipe-book):
+I'm currently experiencing problems with netlify, so the ad-hoc way for now is using github pages (https://mcordova47.github.io/recipe-book):
 
 ```console
 git push --delete origin gh-pages
+git branch -D gh-pages
 git checkout -b gh-pages
 cd client
 npm run build-production
 cd ..
+git add -f client/dist
+git commit
 git subtree push --prefix client/dist origin gh-pages
 ```
 
-The server is hosted on heroku
+The server is hosted on heroku. To deploy:
 
-    $ git subtree push --prefix server heroku master
+```console
+git subtree push --prefix server heroku master
+```
 
 If this fails, may need to:
 
-    $ git push heroku `git subtree split --prefix website master`:master --force
+```console
+git push heroku `git subtree split --prefix website master`:master --force
+```
 
-Migrate production
+To migrate production:
 
-    $ migrate -path migrations -database $(heroku config:get DATABASE_URL --app recipebook-api) up
+```console
+migrate -path migrations -database $(heroku config:get DATABASE_URL --app recipebook-api) up
+```
