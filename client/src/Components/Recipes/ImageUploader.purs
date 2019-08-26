@@ -53,7 +53,6 @@ view props =
                 fileUpload
                     { id: "upload-new-photo"
                     , accept: "image/*"
-                    , capture: "environment"
                     , onChange: props.onChange
                     , button:
                         [ iconButton
