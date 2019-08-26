@@ -54,21 +54,23 @@ Card.propTypes = {
   imageHeight: PropTypes.number,
 }
 
-export const CardImage = ({ image, title, placeholder, height }) =>
+export const CardImage = ({ image, title, placeholder, height, onMouseEnter, onMouseLeave }) =>
   image
     ? (
       <CardMedia
         image={image}
         title={title}
         style={{ height }}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       />
     ) : placeholder ? (
-      <ThemedImagePlaceholder height={height}>
+      <ThemedImagePlaceholder height={height} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
         {placeholder}
       </ThemedImagePlaceholder>
     ) : null
 
-const ImagePlaceholder = ({ children, theme, height }) =>
+const ImagePlaceholder = ({ children, theme, height, onMouseEnter, onMouseLeave }) =>
   <div
     style={{
       height,
@@ -78,6 +80,8 @@ const ImagePlaceholder = ({ children, theme, height }) =>
       alignItems: 'center',
       textAlign: 'center',
     }}
+    onMouseEnter={onMouseEnter}
+    onMouseLeave={onMouseLeave}
   >
     {children}
   </div>

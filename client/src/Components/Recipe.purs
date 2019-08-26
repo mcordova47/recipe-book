@@ -2,16 +2,20 @@ module Components.Recipe (Message, def) where
 
 import Prelude
 
+import Data.Bifunctor (bimap)
 import Data.Either (Either(..))
+import Data.Functor.Contravariant ((>#<))
 import Data.Foldable (find)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Newtype (unwrap)
 import Data.String.Utils (lines)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (logShow)
-import Elmish (ComponentDef, DispatchMsgFn, ReactElement, Transition(..))
+import Elmish (ComponentDef, DispatchMsgFn, ReactElement, Transition, handle)
 import Elmish.React.DOM (fragment, text)
 
 import Components.Layout (layout)
+import Components.Recipes.ImageUploader as ImageUploader
 import Network.Recipes (listRecipes)
 import Routing as R
 import Styleguide.Atoms.Avatar (avatar)
@@ -25,27 +29,32 @@ import Styleguide.Atoms.Typography (typography)
 import Styleguide.Icons.Alarm (alarmIcon)
 import Styleguide.Icons.AttachMoney (attachMoneyIcon)
 import Styleguide.Icons.Restaurant (restaurantIcon)
-import Styleguide.Icons.RestaurantMenu (restaurantMenuIcon)
-import Styleguide.Layout.Card (cardImage)
 import Styleguide.Layout.Container (container)
 import Styleguide.Layout.Grid (grid, gridItem)
 import Styleguide.Surfaces.Paper (paper)
 import Types.AppM (AppM)
 import Types.Recipe (FoodId(..), Ingredient(..), IngredientAmount(..), Recipe(..), RecipeComponent(..))
+import Util.Component ((<:>))
 import Util.Measurement (showMeasurement)
 import Util.Recipes (DurationType(..), recipeDuration, showCostPerServing)
 
 type State =
     { recipe :: Maybe Recipe
+    , uploader :: ImageUploader.State
     }
 
 data Message
     = NoOp
     | LoadRecipe (Maybe Recipe)
+    | UploaderMsg ImageUploader.Message
+    | ChangeImage String
 
 def :: FoodId -> ComponentDef AppM Message State
 def recipeId =
-    { init: Transition initialState [initialCmd recipeId]
+    { init:
+        initialCmd recipeId
+        <:>
+        bimap UploaderMsg { recipe: Nothing, uploader: _ } ImageUploader.init
     , update
     , view
     }
@@ -63,20 +72,24 @@ initialCmd recipeId = do
         recipeId' (Recipe r) =
             r.id
 
-initialState :: State
-initialState =
-    { recipe: Nothing
-    }
-
 update :: State -> Message -> Transition AppM Message State
 update state msg = case msg of
     NoOp ->
         pure state
     LoadRecipe recipe ->
         pure state { recipe = recipe }
+    UploaderMsg msg' ->
+        bimap
+            UploaderMsg
+            state { uploader = _ }
+            (ImageUploader.update state.uploader msg')
+    ChangeImage image | Just (Recipe recipe) <- state.recipe ->
+        pure state { recipe = Just $ Recipe recipe { image = Just image } }
+    ChangeImage _ ->
+        pure state
 
 view :: State -> DispatchMsgFn Message -> ReactElement
-view { recipe } dispatch =
+view { recipe, uploader } dispatch =
     case recipe of
         Just recipe'@(Recipe r) ->
             layout
@@ -161,17 +174,7 @@ view { recipe } dispatch =
                                 , elevation: 0
                                 , overflow: "hidden"
                                 }
-                                [ cardImage
-                                    { image: fromMaybe "" r.image
-                                    , title: r.name
-                                    , placeholder:
-                                        container
-                                            { component: "div"
-                                            }
-                                            [ restaurantMenuIcon { fontSize: "large", color: "action" }
-                                            ]
-                                    , height: 300.0
-                                    }
+                                [ ImageUploader.view uploaderProps uploader $ dispatch >#< UploaderMsg
                                 ]
                             ]
                     , gridItem
@@ -247,3 +250,9 @@ view { recipe } dispatch =
                 cookTimeLabel durType = case durType of
                     DMinutes -> "Minutes"
                     DHours -> "Hours"
+        uploaderProps =
+            { image: (_.image <<< unwrap) =<< recipe
+            , title: maybe "" (_.name <<< unwrap) recipe
+            , readOnly: false
+            , onChange: handle dispatch ChangeImage
+            }

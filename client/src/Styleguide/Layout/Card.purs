@@ -32,6 +32,8 @@ type OptCardImageProps r =
     , title :: String
     , placeholder :: ReactElement
     , height :: Number
+    , onMouseEnter :: JsCallback0
+    , onMouseLeave :: JsCallback0
     | r
     )
 

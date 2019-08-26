@@ -1,0 +1,34 @@
+import React from 'react'
+import { makeStyles } from '@material-ui/core/styles'
+
+const useStyles = makeStyles(() => ({
+  input: {
+    display: 'none',
+  },
+}))
+
+export const FileUpload = ({ id, button, multiple, accept, onChange }) => {
+  const classes = useStyles()
+  return (
+    <>
+      <input
+          accept={accept}
+          className={classes.input}
+          id={id}
+          multiple={multiple}
+          type="file"
+          onChange={e => {
+            const reader = new FileReader()
+            reader.onload = e => onChange(e.target.result)
+            const file = e.target.files && e.target.files[0]
+            if (file) {
+              reader.readAsDataURL(file)
+            }
+          }}
+        />
+        <label htmlFor={id}>
+          {button}
+        </label>
+    </>
+  )
+}
