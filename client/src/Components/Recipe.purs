@@ -2,16 +2,14 @@ module Components.Recipe (Message, def) where
 
 import Prelude
 
-import Data.Bifunctor (bimap)
 import Data.Either (Either(..))
-import Data.Functor.Contravariant ((>#<))
 import Data.Foldable (find)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Newtype (unwrap)
 import Data.String.Utils (lines)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (logShow)
-import Elmish (ComponentDef, DispatchMsgFn, ReactElement, Transition, handle)
+import Elmish (ComponentDef, DispatchMsgFn, ReactElement, Transition(..), handle)
 import Elmish.React.DOM (fragment, text)
 
 import Components.Layout (layout)
@@ -34,27 +32,21 @@ import Styleguide.Layout.Grid (grid, gridItem)
 import Styleguide.Surfaces.Paper (paper)
 import Types.AppM (AppM)
 import Types.Recipe (FoodId(..), Ingredient(..), IngredientAmount(..), Recipe(..), RecipeComponent(..))
-import Util.Component ((<:>))
 import Util.Measurement (showMeasurement)
 import Util.Recipes (DurationType(..), recipeDuration, showCostPerServing)
 
 type State =
     { recipe :: Maybe Recipe
-    , uploader :: ImageUploader.State
     }
 
 data Message
     = NoOp
     | LoadRecipe (Maybe Recipe)
-    | UploaderMsg ImageUploader.Message
     | ChangeImage String
 
 def :: FoodId -> ComponentDef AppM Message State
 def recipeId =
-    { init:
-        initialCmd recipeId
-        <:>
-        bimap UploaderMsg { recipe: Nothing, uploader: _ } ImageUploader.init
+    { init: Transition { recipe: Nothing } [initialCmd recipeId]
     , update
     , view
     }
@@ -78,18 +70,13 @@ update state msg = case msg of
         pure state
     LoadRecipe recipe ->
         pure state { recipe = recipe }
-    UploaderMsg msg' ->
-        bimap
-            UploaderMsg
-            state { uploader = _ }
-            (ImageUploader.update state.uploader msg')
     ChangeImage image | Just (Recipe recipe) <- state.recipe ->
         pure state { recipe = Just $ Recipe recipe { image = Just image } }
     ChangeImage _ ->
         pure state
 
 view :: State -> DispatchMsgFn Message -> ReactElement
-view { recipe, uploader } dispatch =
+view { recipe } dispatch =
     case recipe of
         Just recipe'@(Recipe r) ->
             layout
@@ -174,7 +161,12 @@ view { recipe, uploader } dispatch =
                                 , elevation: 0
                                 , overflow: "hidden"
                                 }
-                                [ ImageUploader.view uploaderProps uploader $ dispatch >#< UploaderMsg
+                                [ ImageUploader.view
+                                    { image: (_.image <<< unwrap) =<< recipe
+                                    , title: maybe "" (_.name <<< unwrap) recipe
+                                    , readOnly: false
+                                    , onChange: handle dispatch ChangeImage
+                                    }
                                 ]
                             ]
                     , gridItem
@@ -250,9 +242,3 @@ view { recipe, uploader } dispatch =
                 cookTimeLabel durType = case durType of
                     DMinutes -> "Minutes"
                     DHours -> "Hours"
-        uploaderProps =
-            { image: (_.image <<< unwrap) =<< recipe
-            , title: maybe "" (_.name <<< unwrap) recipe
-            , readOnly: false
-            , onChange: handle dispatch ChangeImage
-            }

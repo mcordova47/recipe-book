@@ -18,9 +18,14 @@ export const FileUpload = ({ id, button, multiple, accept, onChange }) => {
           multiple={multiple}
           type="file"
           onChange={e => {
+            console.log(e)
             const reader = new FileReader()
-            reader.onload = e => onChange(e.target.result)
+            reader.onload = e => {
+              console.log(e)
+              onChange(e.target.result)
+            }
             const file = e.target.files && e.target.files[0]
+            console.log(file)
             if (file) {
               reader.readAsDataURL(file)
             }
