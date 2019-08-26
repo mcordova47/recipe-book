@@ -7,7 +7,7 @@ const useStyles = makeStyles(() => ({
   },
 }))
 
-export const FileUpload = ({ id, button, multiple, accept, onChange }) => {
+export const FileUpload = ({ id, button, multiple, accept, capture, onChange }) => {
   const classes = useStyles()
   return (
     <>
@@ -17,6 +17,7 @@ export const FileUpload = ({ id, button, multiple, accept, onChange }) => {
           id={id}
           multiple={multiple}
           type="file"
+          capture={capture}
           onChange={e => {
             console.log(e)
             const reader = new FileReader()

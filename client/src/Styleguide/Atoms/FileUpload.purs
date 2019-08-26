@@ -17,6 +17,7 @@ type FileUploadProps children r =
 
 type OptFileUploadProps r =
     ( multiple :: Boolean
+    , capture :: String
     | r
     )
 
