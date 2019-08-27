@@ -1,7 +1,5 @@
 module Styleguide.Organisms.Form (form) where
 
-import Prelude
-
 import Elmish (createElement)
 import Elmish.React.Import (EmptyProps, ImportedReactComponent, ImportedReactComponentConstructorWithContent)
 

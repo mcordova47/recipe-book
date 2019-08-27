@@ -25,6 +25,8 @@
   "dependencies": {
     "@material-ui/core": "^4.2.0",
     "@material-ui/icons": "^4.2.1",
+    "exif-js": "^2.3.0",
+    "exif-orient": "0.0.5",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
   },
