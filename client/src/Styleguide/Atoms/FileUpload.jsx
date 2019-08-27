@@ -9,7 +9,7 @@ const useStyles = makeStyles(() => ({
   },
 }))
 
-// TODO: Properly orient image (https://github.com/buunguyen/exif-orient)
+// TODO: Show progress indicator while re-orienting image
 export const FileUpload = ({ id, button, multiple, accept, capture, onChange }) => {
   const classes = useStyles()
   return (
